@@ -51,9 +51,11 @@ mandatory, the rest are optional.
 | image_name       |  Name for image  |  OS name  |
 
 
-1. Use [vars/content_iso.yml](vars/content_iso.yml) to add OS versions.
-2. Adjust [templates/cfg-rhel_8.j2](templates/cfg-rhel_8.j2) to add
-   support for different partitioning layouts.
+1. Use [vars/content_iso.yml](vars/content_iso.yml) to add support
+   for additional OS versions.
+2. Adjust installer configuration files such as
+   [templates/cfg-rhel_8.j2](templates/cfg-rhel_8.j2)
+   to add support for different partitioning layouts.
 3. The value is passed as-is to the installer
    [OpenSCAP](https://www.open-scap.org/) module.
 
