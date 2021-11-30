@@ -1,0 +1,9 @@
+---
+ipv6_disable: "{{ disable_ipv6|bool|int | default(0, true) }}"
+boot_parameters: net.ifnames.prefix=net ipv6.disable={{ ipv6_disable }} quiet systemd.show_status=yes
+hostname: localhost.localdomain
+ntp_servers: time.cloudflare.com
+timezone: Europe/Helsinki
+keyboard: fi
+
+sysprep_script: sysprep-rhel_8

@@ -1,0 +1,65 @@
+{
+  "builders": [
+    {
+      "type": "vsphere-iso",
+
+      "vcenter_server": "{{ vsphere_server }}",
+      "username": "{{ vcenter_username | replace('\\', '\\\\') }}",
+      "password": "{{ vcenter_password }}",
+      "insecure_connection": {{ vcenter_insecure_connection }},
+      "datacenter": "{{ vcenter_datacenter }}",
+
+      "folder": "{{ vcenter_folder }}",
+      "cluster": "{{ vcenter_cluster }}",
+      "resource_pool": "{{ vcenter_resource_pool }}",
+      "datastore": "{{ vcenter_datastore }}",
+      "convert_to_template": true,
+
+      "vm_name": "{{ vm_name }}",
+
+      "CPUs": {{ vm_cpus }},
+      "RAM": {{ vm_memory }},
+      "RAM_reserve_all": true,
+      "guest_os_type": "{{ vm_guest_os_type }}",
+      "firmware": "bios",
+
+      "disk_controller_type": "pvscsi",
+      "storage": [
+        {
+          "disk_size": "{{ vm_disk_size }}",
+          "disk_thin_provisioned": true
+        }
+      ],
+
+      "network_adapters": [
+        {
+          "network": "{{ vsphere_network }}",
+          "network_card": "vmxnet3"
+        }
+      ],
+
+      "iso_url": "{{ iso[packer_target].url }}",
+      "iso_checksum": "{{ iso[packer_target].checksum }}",
+
+      "cd_files": [ "inst.cfg" ],
+      "cd_label": "inst.cfg",
+
+      "boot_wait": "15s",
+      "boot_command": [
+        "<up><wait><tab><wait>ip=dhcp inst.ks=hd:/dev/sr1:inst.cfg inst.geoloc=0 inst.nosave=all {{ boot_parameters }}<enter><wait>"
+      ],
+
+      "ssh_username": "root",
+      "ssh_password": "{{ root_pw_cleartext }}",
+      "ssh_timeout": "15m"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "script": "inst-sysprep",
+      "remote_path": "/root/inst-sysprep",
+      "expect_disconnect": true
+    }
+  ]
+}

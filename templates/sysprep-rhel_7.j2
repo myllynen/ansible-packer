@@ -1,0 +1,44 @@
+#!/bin/sh
+
+# Allow the initial boot activity to settle
+/bin/sleep 60
+
+rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+
+#if [ $(rpm -q kernel | wc -l) -gt 1 ]; then
+#  package-cleanup --oldkernels --count=1 -y || :
+#fi
+
+# Services
+systemctl disable remote-fs.target
+systemctl disable systemd-readahead-collect.service systemd-readahead-drop.service systemd-readahead-replay.service
+rpm -q NetworkManager > /dev/null 2>&1 || systemctl enable network.service
+
+# Watchdog
+sed -i -e 's,^#RuntimeWatchdogSec=0,RuntimeWatchdogSec=60s,' /etc/systemd/system.conf
+
+systemctl stop rsyslog.service
+
+# Remove machine identification and state
+for netdev in $(nmcli -t dev | cut -d: -f1); do
+  sed -i -e 's,^UUID=.*,#UUID=,' /etc/sysconfig/network-scripts/ifcfg-$netdev
+done
+truncate -s 0 /etc/machine-id /etc/resolv.conf
+/bin/rm -rf /etc/systemd/network/7* /etc/udev/rules.d/7* /etc/ssh/ssh_host_*
+/bin/rm -rf /var/lib/systemd/random-seed
+
+# Clear caches, files, and logs
+/bin/rm -rf /root/* /tmp/* /var/tmp/*
+/bin/rm -rf /etc/*- /etc/*.bak /etc/*~ /etc/sysconfig/*~
+/bin/rm -rf /var/cache/dnf/* /var/cache/yum/*
+/bin/rm -rf /var/lib/dnf/* /var/lib/yum/repos/* /var/lib/yum/yumdb/*
+/bin/rm -rf /var/log/*debug /var/log/anaconda /var/log/dmesg*
+/bin/rm -rf /var/log/grubby /var/log/grubby_prune_debug
+truncate -s 0 /var/log/audit/audit.log /var/log/messages /var/log/secure
+truncate -s 0 /var/log/btmp /var/log/wtmp /var/log/lastlog
+
+# Update initramfs
+dracut -f
+
+# Ensure everything is written to the disk
+sync ; echo 3 > /proc/sys/vm/drop_caches ;

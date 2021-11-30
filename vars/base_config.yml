@@ -1,0 +1,7 @@
+---
+base_target: "{{ packer_target.split('_')[0] }}"
+base_version: "{{ packer_target.split('_')[1] }}"
+full_version: "{{ packer_target.split('_')[1:] | join('_') }}"
+target_config: "{{ base_target + '_' + base_version }}"
+target_fullname: "{{ base_target + '_' + full_version }}\
+                  {{ '' if security_profile is not defined else '_' + security_profile }}"

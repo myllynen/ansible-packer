@@ -1,0 +1,8 @@
+---
+boot_parameters: net.ifnames.prefix=net quiet
+hostname: localhost.localdomain
+ntp_servers: time.cloudflare.com
+timezone: Europe/Helsinki
+keyboard: fi
+
+sysprep_script: sysprep-centos

@@ -1,0 +1,49 @@
+---
+- name: Build image with Packer
+  hosts: localhost
+  connection: local
+  vars_files:
+    - vars/base_config.yml
+    - vars/content_iso.yml
+    - vars/target_{{ target_config }}.yml
+    - vars/builder_{{ packer_builder }}.yml
+    - vars/os_passwords.yml
+  tasks:
+    - name: Create temporary work directory
+      tempfile:
+        state: directory
+        suffix: _packer_build_{{ packer_builder }}_{{ target_fullname }}
+      register: tempdir
+
+    - name: Create Packer build file
+      template:
+        src: templates/build-{{ packer_builder }}.json.j2
+        dest: "{{ tempdir.path }}/build.json"
+
+    - name: Create installer configuration file
+      template:
+        src: templates/cfg-{{ target_config }}.j2
+        dest: "{{ tempdir.path }}/inst.cfg"
+
+    - name: Create Packer provisioner script
+      template:
+        src: templates/{{ sysprep_script }}.j2
+        dest: "{{ tempdir.path }}/inst-sysprep"
+
+    - name: Run Packer to build target image
+      command:
+        cmd: packer.io build -color=false build.json
+        chdir: "{{ tempdir.path }}"
+      register: packer_result
+      failed_when:
+        - packer_result.rc != 0
+        - "'already exists, you can use -force flag to destroy it' not in packer_result.stdout"
+
+    - name: Display Packer command output
+      debug:
+        var: packer_result.stdout
+
+    - name: Remove temporary work directory
+      file:
+        path: "{{ tempdir.path }}"
+        state: absent

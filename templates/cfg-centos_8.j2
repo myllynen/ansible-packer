@@ -1,0 +1,58 @@
+# CentOS 8 base image kickstart file
+
+cmdline
+zerombr
+clearpart --all --initlabel --disklabel gpt
+bootloader --timeout 1 --append "{{ boot_parameters }}"
+#reqpart
+#part / --fstype xfs --asprimary --size 1024 --grow
+autopart
+selinux --enforcing
+authselect --useshadow --passalgo sha512
+rootpw --iscrypted {{ root_pw_encrypted }}
+network --device net0 --bootproto dhcp --onboot yes --hostname {{ hostname }}
+firewall --enabled --service ssh
+firstboot --disabled
+lang en_US.UTF-8
+timezone --ntpservers {{ ntp_servers }} --utc {{ timezone }}
+keyboard {{ keyboard }}
+services --enabled tuned
+reboot
+
+%packages
+
+@Core
+bash-completion
+bzip2
+chrony
+man-pages
+nano
+openssh-clients
+policycoreutils-python-utils
+prefixdevname
+psmisc
+python3
+python3-libselinux
+setools-console
+tar
+tuned
+#unzip
+yum-utils
+
+-a*firmware*
+-biosdevname
+-dracut-config-rescue
+-i*firmware*
+-lib*firmware*
+-NetworkManager-team
+-NetworkManager-tui
+-parted
+-plymouth
+-sqlite
+-sssd*
+%end
+
+%post
+sed -i -e 's,^AllowZoneDrifting=yes,AllowZoneDrifting=no,' /etc/firewalld/firewalld.conf
+sed -i -e 's,^PermitRootLogin no,PermitRootLogin yes,' /etc/ssh/sshd_config
+%end

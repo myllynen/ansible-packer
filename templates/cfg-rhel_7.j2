@@ -1,0 +1,117 @@
+# RHEL 7 base image kickstart file
+
+install
+cmdline
+zerombr
+clearpart --all --initlabel
+
+{% if boot_pw_encrypted == '' %}
+bootloader --timeout 1 --append "{{ boot_parameters }}"
+{% else %}
+bootloader --timeout 1 --append "{{ boot_parameters }}" --iscrypted --password {{ boot_pw_encrypted }}
+{% endif %}
+
+{% if partitioning is defined and partitioning == 'auto' %}
+autopart
+{% elif partitioning is defined and partitioning == 'single' %}
+reqpart
+part /     --fstype xfs --asprimary --size 1024 --grow
+{% else %}
+reqpart
+part /boot --fstype xfs --asprimary --size 1024
+part pv.01              --asprimary --size 1024 --grow
+volgroup vg_rhel pv.01
+logvol swap           --vgname vg_rhel --fstype swap --size 2048  --name lv_swap
+logvol /              --vgname vg_rhel --fstype xfs  --size 4096  --name lv_root
+logvol /home          --vgname vg_rhel --fstype xfs  --size 1024  --name lv_home
+logvol /tmp           --vgname vg_rhel --fstype xfs  --size 1024  --name lv_tmp
+logvol /var           --vgname vg_rhel --fstype xfs  --size 4096  --name lv_var
+logvol /var/log       --vgname vg_rhel --fstype xfs  --size 2048  --name lv_var_log
+logvol /var/log/audit --vgname vg_rhel --fstype xfs  --size 1024  --name lv_var_log_audit
+logvol /var/tmp       --vgname vg_rhel --fstype xfs  --size 1024  --name lv_var_tmp
+{% endif %}
+
+selinux --enforcing
+auth --useshadow --passalgo sha512
+rootpw --iscrypted {{ root_pw_encrypted }}
+
+{% if ipv6_disable|bool|int == 0 %}
+network --bootproto dhcp --onboot yes --hostname {{ hostname }}
+{% else %}
+network --bootproto dhcp --onboot yes --hostname {{ hostname }} --noipv6
+{% endif %}
+
+firewall --enabled --service ssh
+firstboot --disabled
+lang en_US.UTF-8
+timezone --ntpservers {{ ntp_servers }} --utc {{ timezone }}
+keyboard {{ keyboard }}
+services --enabled tuned
+reboot
+
+{% if security_profile is defined %}
+%addon org_fedora_oscap
+content-type = scap-security-guide
+profile = xccdf_org.ssgproject.content_profile_{{ security_profile }}
+%end
+{% endif %}
+
+%packages
+
+@Core
+bash-completion
+bzip2
+chrony
+libselinux-python
+man-pages
+nano
+openssh-clients
+policycoreutils-python
+psmisc
+setools-console
+tar
+tuned
+#unzip
+virt-what
+yum-utils
+
+{% if packer_builder == 'qemu' %}
+qemu-guest-agent
+{% endif %}
+{% if packer_builder == 'vmware' %}
+open-vm-tools
+{% endif %}
+
+{% if security_profile is defined %}
+aide
+openscap
+openscap-scanner
+scap-security-guide
+{% endif %}
+
+-biosdevname
+-btrfs-progs
+-dracut-config-rescue
+-*firmware*
+-NetworkManager-team
+-NetworkManager-tui
+-parted
+-plymouth
+-*rhn*
+-sssd*
+%end
+
+%post
+sed -i -e 's,^AllowZoneDrifting=yes,AllowZoneDrifting=no,' /etc/firewalld/firewalld.conf
+sed -i -e 's,^#UseDNS yes,UseDNS no,' /etc/ssh/sshd_config
+sed -i -e 's,^PermitRootLogin no,PermitRootLogin yes,' /etc/ssh/sshd_config
+%end
+
+{% if ipv6_disable|bool|int == 1 %}
+%post
+sed -i -e '/^::1/d' /etc/hosts
+sed -i -e 's,^OPTIONS=",OPTIONS="-4 ,g' -e 's, ",",' /etc/sysconfig/chronyd
+sed -i -e 's,^inet_protocols = all,inet_protocols = ipv4,' /etc/postfix/main.cf
+sed -i -e 's,^IPv6_rpfilter=yes,IPv6_rpfilter=no,' /etc/firewalld/firewalld.conf
+%end
+{% endif %}
