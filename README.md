@@ -11,6 +11,7 @@ Simple Ansible setup to build RHEL images with Packer.
 # Build latest RHEL 8 image on Qemu with all defaults
 ansible-playbook packer.yml \
   -e packer_builder=qemu -e packer_target=rhel_8
+
 # Build RHEL 8.5 image on vSphere with customizations
 ansible-playbook packer.yml \
   -e packer_builder=vmware -e packer_target=rhel_8 \
