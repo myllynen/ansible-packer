@@ -1,5 +1,5 @@
 ---
-ipv6_disable: "{{ disable_ipv6|bool|int | default(0, true) }}"
+ipv6_disable: "{{ disable_ipv6 | default(0, true) | bool | int }}"
 boot_parameters: ipv6.disable={{ ipv6_disable }} quiet systemd.show_status=yes
 hostname: localhost.localdomain
 ntp_servers: time.cloudflare.com
