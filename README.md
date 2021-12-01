@@ -14,7 +14,7 @@ ansible-playbook packer.yml \
 
 # Build RHEL 8.5 image on vSphere with customizations
 ansible-playbook packer.yml \
-  -e packer_builder=vmware -e packer_target=rhel_8 \
+  -e packer_builder=vmware -e packer_target=rhel_8_5 \
   -e boot_password=foobar -e root_password=foobar \
   -e partitioning=auto -e disable_ipv6=true \
   -e security_profile=cis_server_l1 \
