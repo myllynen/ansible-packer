@@ -75,13 +75,6 @@ tuned
 virt-what
 yum-utils
 
-{% if packer_builder == 'qemu' %}
-qemu-guest-agent
-{% endif %}
-{% if packer_builder == 'vmware' %}
-open-vm-tools
-{% endif %}
-
 {% if security_profile is defined %}
 aide
 openscap

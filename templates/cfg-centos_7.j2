@@ -38,13 +38,6 @@ tuned
 #unzip
 yum-utils
 
-{% if packer_builder == 'qemu' %}
-qemu-guest-agent
-{% endif %}
-{% if packer_builder == 'vmware' %}
-open-vm-tools
-{% endif %}
-
 -biosdevname
 -btrfs-progs
 -dracut-config-rescue
