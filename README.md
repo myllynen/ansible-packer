@@ -24,8 +24,9 @@ ansible-playbook packer.yml \
 ## Introduction
 
 A simple [Ansible](https://www.ansible.com/) setup to allow quick
-building of RHEL (and other) images with
-[Packer](https://www.packer.io/) using either
+building of
+[RHEL](https://www.redhat.com/en/technologies/linux-platforms/enterprise-linux).
+(and other) images with [Packer](https://www.packer.io/) using either
 [Qemu](https://www.packer.io/docs/builders/qemu) or
 [VMware vSphere](https://www.packer.io/docs/builders/vsphere/vsphere-iso)
 as builders.
@@ -66,10 +67,7 @@ mandatory, the rest are optional.
 4. The value is passed as-is to the installer
    [OpenSCAP](https://www.open-scap.org/) module.
 
-NB. Mostly tested with
-[RHEL](https://www.redhat.com/en/technologies/linux-platforms/enterprise-linux).
-Some [CentOS](https://www.centos.org/) versions seem to fail if using
-certain partition layouts or applying available updates during build.
+NB. CentOS/RHEL 7 fail if initramfs is updated during installation.
 
 ## License
 
