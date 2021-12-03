@@ -5,4 +5,4 @@ vm_name: "{{ image_name | default(target_fullname + '_base.qcow2', true) }}"
 
 vm_cpus: 2
 vm_memory: 4096
-vm_disk_size: "{{ disk_size | default(20480) }}"
+vm_disk_size: "{{ disk_size | default(30720) }}"
