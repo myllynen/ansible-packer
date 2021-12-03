@@ -20,14 +20,14 @@ reqpart
 part /boot --fstype xfs --asprimary --size 1024
 part pv.01              --asprimary --size 1024 --grow
 volgroup vg_rhel pv.01
-logvol swap           --vgname vg_rhel --fstype swap --size 2048  --name lv_swap
-logvol /              --vgname vg_rhel --fstype xfs  --size 4096  --name lv_root
-logvol /home          --vgname vg_rhel --fstype xfs  --size 1024  --name lv_home
-logvol /tmp           --vgname vg_rhel --fstype xfs  --size 1024  --name lv_tmp
-logvol /var           --vgname vg_rhel --fstype xfs  --size 4096  --name lv_var
+logvol swap           --vgname vg_rhel --fstype swap --size 4096  --name lv_swap
+logvol /              --vgname vg_rhel --fstype xfs  --size 6144  --name lv_root
+logvol /home          --vgname vg_rhel --fstype xfs  --size 2048  --name lv_home
+logvol /tmp           --vgname vg_rhel --fstype xfs  --size 2048  --name lv_tmp
+logvol /var           --vgname vg_rhel --fstype xfs  --size 8192  --name lv_var
 logvol /var/log       --vgname vg_rhel --fstype xfs  --size 2048  --name lv_var_log
 logvol /var/log/audit --vgname vg_rhel --fstype xfs  --size 1024  --name lv_var_log_audit
-logvol /var/tmp       --vgname vg_rhel --fstype xfs  --size 1024  --name lv_var_tmp
+logvol /var/tmp       --vgname vg_rhel --fstype xfs  --size 2048  --name lv_var_tmp
 {% endif %}
 
 selinux --enforcing
@@ -45,7 +45,7 @@ firstboot --disabled
 lang en_US.UTF-8
 timezone --ntpservers {{ ntp_servers }} --utc {{ timezone }}
 keyboard {{ keyboard }}
-services --enabled tuned,systemd-resolved
+services --enabled tuned
 reboot
 
 {% if security_profile is defined %}
@@ -70,6 +70,7 @@ psmisc
 python3
 python3-libselinux
 setools-console
+#sos
 tar
 tuned
 #unzip
