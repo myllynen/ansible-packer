@@ -1,13 +1,9 @@
 #!/bin/sh
 
-# Allow the initial boot activity to settle
-/bin/sleep 60
+# Create kdump initramfs later
+systemctl stop kdump.service
 
 rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
-
-#if [ $(rpm -q kernel | wc -l) -gt 1 ]; then
-#  package-cleanup --oldkernels --count=1 -y || :
-#fi
 
 # Services
 systemctl disable remote-fs.target
@@ -21,7 +17,8 @@ systemctl stop rsyslog.service
 
 # Remove machine identification and state
 for netdev in $(nmcli -t dev | cut -d: -f1); do
-  sed -i -e 's,^UUID=.*,#UUID=,' /etc/sysconfig/network-scripts/ifcfg-$netdev
+  netuuid=$(uuidgen)
+  sed -i -e "s,^UUID=.*,UUID=$netuuid," /etc/sysconfig/network-scripts/ifcfg-$netdev
 done
 truncate -s 0 /etc/machine-id /etc/resolv.conf
 /bin/rm -rf /etc/systemd/network/7* /etc/udev/rules.d/7* /etc/ssh/ssh_host_*
@@ -38,7 +35,8 @@ truncate -s 0 /var/log/audit/audit.log /var/log/messages /var/log/secure
 truncate -s 0 /var/log/btmp /var/log/wtmp /var/log/lastlog
 
 # Update initramfs
-dracut -f
+#dracut -f --regenerate-all
+#kdumpctl rebuild
 
 # Ensure everything is written to the disk
 sync ; echo 3 > /proc/sys/vm/drop_caches ;
