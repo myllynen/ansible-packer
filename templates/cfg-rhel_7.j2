@@ -24,10 +24,10 @@ volgroup vg_rhel pv.01
 logvol swap           --vgname vg_rhel --fstype swap --size 4096  --name lv_swap
 logvol /              --vgname vg_rhel --fstype xfs  --size 6144  --name lv_root
 logvol /home          --vgname vg_rhel --fstype xfs  --size 2048  --name lv_home
-logvol /tmp           --vgname vg_rhel --fstype xfs  --size 1024  --name lv_tmp
-logvol /var           --vgname vg_rhel --fstype xfs  --size 4096  --name lv_var
+logvol /tmp           --vgname vg_rhel --fstype xfs  --size 2048  --name lv_tmp
+logvol /var           --vgname vg_rhel --fstype xfs  --size 8192  --name lv_var
 logvol /var/log       --vgname vg_rhel --fstype xfs  --size 2048  --name lv_var_log
-logvol /var/log/audit --vgname vg_rhel --fstype xfs  --size 1024  --name lv_var_log_audit
+logvol /var/log/audit --vgname vg_rhel --fstype xfs  --size 2048  --name lv_var_log_audit
 logvol /var/tmp       --vgname vg_rhel --fstype xfs  --size 2048  --name lv_var_tmp
 {% endif %}
 
