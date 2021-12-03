@@ -8,10 +8,6 @@ iso:
     url: file:///VirtualMachines/boot/rhel-server-7.9-x86_64-dvd.iso
     checksum: sha256:19d653ce2f04f202e79773a0cbeda82070e7527557e814ebbce658773fbe8191
 
-  rhel_8:
-    url: file:///VirtualMachines/boot/rhel-8.5-x86_64-dvd.iso
-    checksum: sha256:1f78e705cd1d8897a05afa060f77d81ed81ac141c2465d4763c0382aa96cadd0
-
   rhel_8_4:
     url: file:///VirtualMachines/boot/rhel-8.4-x86_64-dvd.iso
     checksum: sha256:48f955712454c32718dcde858dea5aca574376a1d7a4b0ed6908ac0b85597811
@@ -19,3 +15,11 @@ iso:
   rhel_8_5:
     url: file:///VirtualMachines/boot/rhel-8.5-x86_64-dvd.iso
     checksum: sha256:1f78e705cd1d8897a05afa060f77d81ed81ac141c2465d4763c0382aa96cadd0
+
+  rhel_8:
+    url: file:///VirtualMachines/boot/rhel-8.5-x86_64-dvd.iso
+    checksum: sha256:1f78e705cd1d8897a05afa060f77d81ed81ac141c2465d4763c0382aa96cadd0
+
+  rhel_9:
+    url: file:///VirtualMachines/boot/rhel-baseos-9.0-beta-0-x86_64-dvd.iso
+    checksum: sha256:23e6d31e12a22b6d56f00889ea7dc465360ea84e3b7d7854e4c627ecd3160473

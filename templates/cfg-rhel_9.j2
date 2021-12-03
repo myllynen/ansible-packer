@@ -1,0 +1,114 @@
+# RHEL 9 base image kickstart file
+
+cmdline
+zerombr
+clearpart --all --initlabel --disklabel gpt
+
+{% if boot_pw_encrypted == '' %}
+bootloader --timeout 1 --append "{{ boot_parameters }}"
+{% else %}
+bootloader --timeout 1 --append "{{ boot_parameters }}" --iscrypted --password {{ boot_pw_encrypted }}
+{% endif %}
+
+{% if partitioning is defined and partitioning == 'auto' %}
+autopart
+{% elif partitioning is defined and partitioning == 'single' %}
+reqpart
+part /     --fstype xfs --asprimary --size 1024 --grow
+{% else %}
+reqpart
+part /boot --fstype xfs --asprimary --size 1024
+part pv.01              --asprimary --size 1024 --grow
+volgroup vg_rhel pv.01
+logvol swap           --vgname vg_rhel --fstype swap --size 4096  --name lv_swap
+logvol /              --vgname vg_rhel --fstype xfs  --size 6144  --name lv_root
+logvol /home          --vgname vg_rhel --fstype xfs  --size 1024  --name lv_home
+logvol /tmp           --vgname vg_rhel --fstype xfs  --size 2048  --name lv_tmp
+logvol /var           --vgname vg_rhel --fstype xfs  --size 8192  --name lv_var
+logvol /var/log       --vgname vg_rhel --fstype xfs  --size 2048  --name lv_var_log
+logvol /var/log/audit --vgname vg_rhel --fstype xfs  --size 2048  --name lv_var_log_audit
+logvol /var/tmp       --vgname vg_rhel --fstype xfs  --size 2048  --name lv_var_tmp
+{% endif %}
+
+selinux --enforcing
+authselect --useshadow --passalgo sha512
+rootpw --iscrypted {{ root_pw_encrypted }}
+
+{% if ipv6_disable|bool|int == 0 %}
+network --device net0 --bootproto dhcp --onboot yes --hostname {{ hostname }}
+{% else %}
+network --device net0 --bootproto dhcp --onboot yes --hostname {{ hostname }} --noipv6
+{% endif %}
+
+firewall --enabled --service ssh
+firstboot --disabled
+lang en_US.UTF-8
+timezone --utc {{ timezone }}
+{% for ntp_server in ntp_servers.split(',') %}
+timesource --ntp-server {{ ntp_server }}
+{% endfor %}
+keyboard {{ keyboard }}
+services --enabled tuned
+reboot
+
+{% if security_profile is defined %}
+%addon com_redhat_oscap
+content-type = scap-security-guide
+profile = xccdf_org.ssgproject.content_profile_{{ security_profile }}
+%end
+{% endif %}
+
+%packages
+
+@Core
+bash-completion
+bzip2
+# TBR
+kbd-legacy
+man-pages
+nano
+policycoreutils-python-utils
+python3-libselinux
+setools-console
+#sos
+tar
+tuned
+#unzip
+yum-utils
+
+{% if security_profile is defined %}
+aide
+openscap
+openscap-scanner
+scap-security-guide
+{% endif %}
+
+-a*firmware*
+-dracut-config-rescue
+-i*firmware*
+-lib*firmware*
+-NetworkManager-team
+-NetworkManager-tui
+-parted
+-plymouth
+-sssd*
+%end
+
+%post
+grub2-editenv - unset menu_auto_hide
+sed -i -e 's,^#PermitRootLogin prohibit-password,PermitRootLogin yes,' /etc/ssh/sshd_config
+%end
+
+{% if security_profile is defined %}
+%post
+sed -i -e 's,^PermitRootLogin no,PermitRootLogin yes,' /etc/ssh/sshd_config.d/*hardening.conf
+%end
+{% endif %}
+
+{% if ipv6_disable|bool|int == 1 %}
+%post
+sed -i -e '/^::1/d' /etc/hosts
+sed -i -e 's,^OPTIONS=",OPTIONS="-4 ,g' -e 's, ",",' /etc/sysconfig/chronyd
+sed -i -e 's,^IPv6_rpfilter=yes,IPv6_rpfilter=no,' /etc/firewalld/firewalld.conf
+%end
+{% endif %}
