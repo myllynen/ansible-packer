@@ -1,9 +1,5 @@
 ---
 iso:
-  centos_7:
-    url: file:///VirtualMachines/boot/CentOS-7-x86_64-DVD-2009.iso
-    checksum: sha256:e33d7b1ea7a9e2f38c8f693215dd85254c3a4fe446f93f563279715b68d07987
-
   centos_8:
     url: file:///VirtualMachines/boot/CentOS-8.5.2111-x86_64-dvd1.iso
     checksum: sha256:3b795863001461d4f670b0dedd02d25296b6d64683faceb8f2b60c53ac5ebb3e
