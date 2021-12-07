@@ -4,6 +4,10 @@ iso:
     url: file:///VirtualMachines/boot/CentOS-8.5.2111-x86_64-dvd1.iso
     checksum: sha256:3b795863001461d4f670b0dedd02d25296b6d64683faceb8f2b60c53ac5ebb3e
 
+  centos_9:
+    url: file:///VirtualMachines/boot/CentOS-Stream-9-latest-x86_64-dvd1.iso
+    checksum: sha256:5af0d4535a13e8b1c5129df85f6e8c853f0a82f77d8614d4f91187bc7aa94d52
+
   rhel_7:
     url: file:///VirtualMachines/boot/rhel-server-7.9-x86_64-dvd.iso
     checksum: sha256:19d653ce2f04f202e79773a0cbeda82070e7527557e814ebbce658773fbe8191
