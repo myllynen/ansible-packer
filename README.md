@@ -69,6 +69,11 @@ mandatory, the rest are optional.
 
 NB. CentOS/RHEL 7 fail if initramfs is updated during installation.
 
+## See Also
+
+See also
+[https://github.com/myllynen/rhel-image](https://github.com/myllynen/rhel-image).
+
 ## License
 
 GPLv2+
