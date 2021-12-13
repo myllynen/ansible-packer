@@ -1,0 +1,14 @@
+---
+galaxy_info:
+  role_name: ansible-packer
+  author: Marko Myllynen
+  description: Simple Ansible setup to build RHEL images with Packer.
+  company: Red Hat
+  license: MIT
+  min_ansible_version: 2.9
+  platforms:
+    - name: EL
+      versions:
+        - 7
+        - 8
+        - 9
