@@ -13,12 +13,22 @@ bootloader --timeout 1 --append "{{ boot_parameters }}" --iscrypted --password {
 {% if partitioning is defined and partitioning == 'auto' %}
 autopart
 {% elif partitioning is defined and partitioning == 'single' %}
+{% if boot_bios_uefi|bool|int == 0 %}
 reqpart
-part /     --fstype xfs --asprimary --size 1024 --grow
 {% else %}
+part biosboot  --fstype biosboot --size 1
+part /boot/efi --fstype efi      --size 63
+{% endif %}
+part /         --fstype xfs      --size 1024 --grow
+{% else %}
+{% if boot_bios_uefi|bool|int == 0 %}
 reqpart
-part /boot --fstype xfs --asprimary --size 1024
-part pv.01              --asprimary --size 1024 --grow
+{% else %}
+part biosboot  --fstype biosboot --size 1
+part /boot/efi --fstype efi      --size 63
+{% endif %}
+part /boot --fstype xfs          --size 1024
+part pv.01                       --size 1024 --grow
 volgroup vg_rhel pv.01
 logvol swap           --vgname vg_rhel --fstype swap --size 4096  --name lv_swap
 logvol /              --vgname vg_rhel --fstype xfs  --size 6144  --name lv_root
@@ -78,6 +88,16 @@ tuned
 #unzip
 yum-utils
 
+{% if boot_bios_uefi|bool|int == 1 %}
+efibootmgr
+-flashrom
+grub2-efi-x64
+grub2-pc
+-mdadm
+#parted
+shim-x64
+{% endif %}
+
 {% if security_profile is defined %}
 aide
 openscap
@@ -101,6 +121,17 @@ scap-security-guide
 grub2-editenv - unset menu_auto_hide
 sed -i -e 's,^#PermitRootLogin prohibit-password,PermitRootLogin yes,' /etc/ssh/sshd_config
 %end
+
+{% if boot_bios_uefi|bool|int == 1 %}
+%post
+rm -f /boot/efi/EFI/redhat/grub.cfg.rpmsave
+if [ -d /sys/firmware/efi ]; then
+  test -b /dev/vda && disk=/dev/vda || disk=/dev/sda
+  rpm -q grub2-pc > /dev/null 2>&1 && grub2-install --target=i386-pc $disk || :
+  #rpm -q parted > /dev/null 2>&1 && parted $disk disk_set pmbr_boot off || :
+fi
+%end
+{% endif %}
 
 {% if security_profile is defined %}
 %post

@@ -5,7 +5,7 @@ zerombr
 clearpart --all --initlabel --disklabel gpt
 bootloader --timeout 1 --append "{{ boot_parameters }}"
 #reqpart
-#part / --fstype xfs --asprimary --size 1024 --grow
+#part / --fstype xfs --size 1024 --grow
 autopart
 selinux --enforcing
 authselect --useshadow --passalgo sha512

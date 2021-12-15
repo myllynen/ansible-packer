@@ -16,8 +16,9 @@ ansible-playbook packer.yml \
 ansible-playbook packer.yml \
   -e packer_builder=vmware -e packer_target=rhel_8_5 \
   -e boot_password=foobar -e root_password=foobar \
-  -e partitioning=auto -e disable_ipv6=true \
+  -e bios_uefi_boot=true -e partitioning=auto \
   -e security_profile=cis_server_l1 \
+  -e disable_ipv6=true \
   -e image_name=test_image
 ```
 
@@ -51,9 +52,10 @@ mandatory, the rest are optional.
 | packer_output    |      Path        |   See 2)  |
 | boot_password    |  Bootloader pw   |   Unset   |
 | root_password    |  root password   |   foobar  |
-| partitioning     |  See 3) below    |   See 3)  |
+| bios_uefi\_boot  |  true or false   |   See 3)  |
+| partitioning     |  See 4) below    |   See 4)  |
 | disable_ipv6     |  true or false   |   false   |
-| security_profile |  See 4) below    |   Unset   |
+| security_profile |  See 5) below    |   Unset   |
 | image_name       |  Name for image  |  OS name  |
 
 1. Use [vars/content_iso.yml](vars/content_iso.yml) to add support
@@ -61,10 +63,12 @@ mandatory, the rest are optional.
 2. See [vars/builder_qemu.yml](vars/builder_qemu.yml) and
    [vars/builder_vmware.yml](vars/builder_vmware.yml) for default
    output values.
-3. Adjust installer configuration files such as
+3. Create BIOS/UEFI bootable image, otherwise support only the
+   platform mode used for building the image
+4. Adjust installer configuration files such as
    [templates/cfg-rhel_8.j2](templates/cfg-rhel_8.j2)
    to add support for different partitioning layouts.
-4. The value is passed as-is to the installer
+5. The value is passed as-is to the installer
    [OpenSCAP](https://www.open-scap.org/) module.
 
 NB. CentOS/RHEL 7 fail if initramfs is updated during installation.
