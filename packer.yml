@@ -2,6 +2,9 @@
 - name: Build image with Packer
   hosts: localhost
   connection: local
+  vars:
+    - do_cleanup: false
+    - use_force: false
   vars_files:
     - vars/base_config.yml
     - vars/content_iso.yml
@@ -9,6 +12,29 @@
     - vars/builder_{{ packer_builder }}.yml
     - vars/os_passwords.yml
   tasks:
+    - name: Find old outputs
+      find:
+        paths: "{{ ['/tmp', output_directory | default('/tmp/.nothing') | dirname] | unique }}"
+        file_type: any
+        patterns:
+          - 'ansible*_packer_build_*'
+          - 'packer-log*'
+          - 'packer*.iso'
+          - 'packer_to_cdrom*'
+          - "{{ output_directory | default('/tmp/.nothing') | basename }}"
+        recurse: false
+      register: old_outputs
+      when: do_cleanup | bool
+
+    - name: Remove old outputs
+      file:
+        path: "{{ item.path }}"
+        state: absent
+      loop: "{{ old_outputs.files }}"
+      loop_control:
+        label: "{{ item.path }}"
+      when: do_cleanup | bool
+
     - name: Create temporary work directory
       tempfile:
         state: directory
@@ -32,12 +58,10 @@
 
     - name: Run Packer to build target image
       command:
-        cmd: packer.io build -color=false build.json
+        cmd: packer.io build -color=false {{ '-force' if use_force | bool }} build.json
         chdir: "{{ tempdir.path }}"
       register: packer_result
-      failed_when:
-        - packer_result.rc != 0
-        - "'already exists, you can use -force flag to destroy it' not in packer_result.stdout"
+      failed_when: "'successful build' not in packer_result.stdout"
 
     - name: Display Packer command output
       debug:

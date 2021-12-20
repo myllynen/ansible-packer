@@ -71,6 +71,10 @@ mandatory, the rest are optional.
 5. The value is passed as-is to the installer
    [OpenSCAP](https://www.open-scap.org/) module.
 
+Additionally, using `-e do_cleanup=true` will delete anything left
+behind on the build host by earlier builds. Using `-e use_force=true`
+adds the `-force` parameter to Packer command line.
+
 NB. CentOS/RHEL 7 fail if initramfs is updated during installation.
 
 ## See Also
