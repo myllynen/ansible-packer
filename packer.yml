@@ -58,7 +58,7 @@
 
     - name: Run Packer to build target image
       command:
-        cmd: packer.io build -color=false {{ '-force' if use_force | bool }} build.json
+        cmd: packer.io build -color=false {{ '-force' if use_force | bool else '' }} build.json
         chdir: "{{ tempdir.path }}"
       register: packer_result
       failed_when: "'successful build' not in packer_result.stdout"
