@@ -64,7 +64,7 @@ mandatory, the rest are optional.
    [vars/builder_vmware.yml](vars/builder_vmware.yml) for default
    output values.
 3. Create BIOS/UEFI bootable image, otherwise support only the
-   platform mode used for building the image
+   platform mode used for building the image.
 4. Adjust installer configuration files such as
    [templates/cfg-rhel_8.j2](templates/cfg-rhel_8.j2)
    to add support for different partitioning layouts.
@@ -75,7 +75,7 @@ Additionally, using `-e do_cleanup=true` will delete anything left
 behind on the build host by earlier builds. Using `-e use_force=true`
 adds the `-force` parameter to Packer command line.
 
-NB. CentOS/RHEL 7 fail if initramfs is updated during installation.
+NB. CentOS/RHEL 7 fails to boot if initramfs is updated during build.
 
 ## See Also
 
