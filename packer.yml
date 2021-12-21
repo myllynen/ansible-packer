@@ -60,6 +60,8 @@
       command:
         cmd: packer.io build -color=false {{ '-force' if use_force | bool else '' }} build.json
         chdir: "{{ tempdir.path }}"
+      environment:
+        CHECKPOINT_DISABLE: 1
       register: packer_result
       failed_when: "'successful build' not in packer_result.stdout"
 
