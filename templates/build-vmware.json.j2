@@ -6,7 +6,7 @@
       "vcenter_server": "{{ vsphere_server }}",
       "username": "{{ vcenter_username | replace('\\', '\\\\') }}",
       "password": "{{ vcenter_password }}",
-      "insecure_connection": {{ vcenter_insecure_connection }},
+      "insecure_connection": "{{ vcenter_insecure_connection }}",
       "datacenter": "{{ vcenter_datacenter }}",
 
       "folder": "{{ vcenter_folder }}",
