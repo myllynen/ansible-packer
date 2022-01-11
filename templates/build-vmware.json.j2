@@ -7,17 +7,21 @@
       "username": "{{ vcenter_username | replace('\\', '\\\\') }}",
       "password": "{{ vcenter_password }}",
       "insecure_connection": "{{ vcenter_insecure_connection }}",
+
       "datacenter": "{{ vcenter_datacenter }}",
+
+      "folder": "{{ vcenter_folder }}",
 
 {% if vcenter_host is defined %}
       "host": "{{ vcenter_host }}",
 {% endif %}
-      "folder": "{{ vcenter_folder }}",
 {% if vcenter_cluster is defined %}
       "cluster": "{{ vcenter_cluster }}",
 {% endif %}
+
       "resource_pool": "{{ vcenter_resource_pool }}",
       "datastore": "{{ vcenter_datastore }}",
+
       "convert_to_template": true,
 
       "vm_name": "{{ vm_name }}",
