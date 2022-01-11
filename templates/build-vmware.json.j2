@@ -19,7 +19,9 @@
       "cluster": "{{ vcenter_cluster }}",
 {% endif %}
 
+{% if vcenter_resource_pool is defined %}
       "resource_pool": "{{ vcenter_resource_pool }}",
+{% endif %}
       "datastore": "{{ vcenter_datastore }}",
 
       "convert_to_template": true,

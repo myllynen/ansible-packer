@@ -10,10 +10,10 @@ vcenter_datacenter: DC1
 vcenter_folder: "{{ packer_output | default('linux/linux-templates') }}"
 
 # https://www.packer.io/docs/builders/vsphere/vsphere-iso#working-with-clusters-and-hosts
-vcenter_host: vcenter.example.com
-#vcenter_cluster: 
+#vcenter_host: vcenter-host1.example.com
+vcenter_cluster: DC1-C1
 
-vcenter_resource_pool: DC1-C1-Common
+#vcenter_resource_pool: DC1-C1-Common
 vcenter_datastore: DC1-C1-C1-3P01-LUN00123
 
 vsphere_network: NET2-DC1-C1-vC1-VLAN123
