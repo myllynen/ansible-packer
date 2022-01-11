@@ -1,4 +1,5 @@
 ---
+# https://www.packer.io/docs/builders/qemu
 output_directory: "{{ packer_output | default('/tmp/packer_images') }}"
 
 vm_name: "{{ image_name | default(target_fullname + '_base.qcow2', true) }}"
