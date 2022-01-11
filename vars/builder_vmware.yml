@@ -1,12 +1,15 @@
 ---
+# https://www.packer.io/docs/builders/vsphere/vsphere-iso
 vsphere_server: "{{ vcenter_credentials.hostname }}"
 vcenter_username: "{{ vcenter_credentials.username }}"
 vcenter_password: "{{ vcenter_credentials.password }}"
 vcenter_insecure_connection: true
 vcenter_datacenter: DC1
 
+# https://www.packer.io/docs/builders/vsphere/vsphere-iso#working-with-clusters-and-hosts
+vcenter_host: vcenter.example.com
 vcenter_folder: "{{ packer_output | default('linux/linux-templates') }}"
-vcenter_cluster: DC1-C1
+#vcenter_cluster: 
 vcenter_resource_pool: DC1-C1-Common
 vcenter_datastore: DC1-C1-C1-3P01-LUN00123
 
