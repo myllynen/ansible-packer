@@ -6,7 +6,7 @@ systemctl disable --now kdump.service
 # Update to latest packages
 yum -y update
 
-systemctl stop rsyslog.service
+systemctl stop auditd.service rsyslog.service
 
 # Remove machine identification and state
 truncate -s 0 /etc/machine-id /etc/resolv.conf

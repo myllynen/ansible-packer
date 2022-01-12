@@ -13,7 +13,7 @@ rpm -q NetworkManager > /dev/null 2>&1 || systemctl enable network.service
 # Watchdog
 sed -i -e 's,^#RuntimeWatchdogSec=0,RuntimeWatchdogSec=60s,' /etc/systemd/system.conf
 
-systemctl stop rsyslog.service
+systemctl stop auditd.service rsyslog.service
 
 # Remove machine identification and state
 for netdev in $(nmcli -t dev | cut -d: -f1 | grep -v lo); do
