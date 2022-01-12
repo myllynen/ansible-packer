@@ -3,6 +3,7 @@
 # Create kdump initramfs later
 systemctl stop kdump.service
 
+# Import Red Hat RPM GPG key
 rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
 
 # Services
@@ -11,6 +12,7 @@ systemctl disable dnf-makecache.timer nis-domainname.service remote-fs.target
 # Watchdog
 sed -i -e 's,^#RuntimeWatchdogSec=0,RuntimeWatchdogSec=60s,' /etc/systemd/system.conf
 
+# Disable logging while erasing logs
 systemctl stop auditd.service rsyslog.service
 
 # Remove machine identification and state

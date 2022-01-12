@@ -6,6 +6,7 @@ systemctl disable --now kdump.service
 # Update to latest packages
 yum -y update
 
+# Disable logging while erasing logs
 systemctl stop auditd.service rsyslog.service
 
 # Remove machine identification and state
