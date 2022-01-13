@@ -52,5 +52,6 @@ yum-utils
 
 %post
 grub2-editenv - unset menu_auto_hide
+echo "blacklist floppy" > /etc/modprobe.d/blacklist-floppy.conf
 sed -i -e 's,^#PermitRootLogin prohibit-password,PermitRootLogin yes,' /etc/ssh/sshd_config
 %end
