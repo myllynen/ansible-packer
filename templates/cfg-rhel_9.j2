@@ -120,6 +120,8 @@ scap-security-guide
 %post
 grub2-editenv - unset menu_auto_hide
 sed -i -e 's,^#PermitRootLogin prohibit-password,PermitRootLogin yes,' /etc/ssh/sshd_config
+sed -i -e '/cockpit/d' /etc/firewalld/zones/public.xml
+rm -f /etc/firewalld/zones/public.xml.old
 %end
 
 {% if boot_bios_uefi|bool|int == 1 %}
@@ -144,5 +146,6 @@ sed -i -e 's,^PermitRootLogin no,PermitRootLogin yes,' /etc/ssh/sshd_config.d/*h
 sed -i -e '/^::1/d' /etc/hosts
 sed -i -e 's,^OPTIONS=",OPTIONS="-4 ,g' -e 's, ",",' /etc/sysconfig/chronyd
 sed -i -e 's,^IPv6_rpfilter=yes,IPv6_rpfilter=no,' /etc/firewalld/firewalld.conf
+sed -i -e '/dhcpv6-client/d' /etc/firewalld/zones/public.xml
 %end
 {% endif %}
