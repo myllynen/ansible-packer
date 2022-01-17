@@ -71,9 +71,14 @@ mandatory, the rest are optional.
 5. The value is passed as-is to the installer
    [OpenSCAP](https://www.open-scap.org/) module.
 
+In case providing cleartext passwords on the command line (which makes
+them visible e.g. in process listing by
+[ps(1)](https://man7.org/linux/man-pages/man1/ps.1.html)
+is not appropriate vaulted password variables can be used as well.
+
 Additionally, using `-e do_cleanup=true` will delete anything left
 behind on the build host by earlier builds. Using `-e use_force=true`
-adds the `-force` parameter to Packer command line.
+adds the `-force` parameter to the Packer command line.
 
 NB. CentOS/RHEL 7 fails to boot if initramfs is updated during build.
 
