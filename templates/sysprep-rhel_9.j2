@@ -6,6 +6,15 @@ systemctl stop kdump.service
 # Import Red Hat RPM GPG key
 rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
 
+# Update to latest packages
+#curl -ksS ...
+#yum -y update
+#yum -y install katello-host-tools katello-host-tools-tracer
+#subscription-manager unregister
+#subscription-manager clean
+#rm -f /etc/rhsm/syspurpose/*.json /var/lib/rhsm/cache/* \
+#  /var/lib/rhsm/facts/*.json /var/lib/rhsm/repo*/*.repo /var/lib/rhsm/*_name
+
 {% if create_admin is defined and create_admin|bool|int == 1 %}
 # Create admin group and user
 groupadd -g 4444 admin
