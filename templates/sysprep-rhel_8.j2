@@ -6,6 +6,25 @@ systemctl stop kdump.service
 # Import Red Hat RPM GPG key
 rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
 
+{% if create_admin is defined and create_admin|bool|int == 1 %}
+# Create admin group and user
+groupadd -g 4444 admin
+useradd -c "Admin User" -g 4444 -G wheel -m -u 4444 admin
+mkdir -m 0700 /home/admin/.ssh
+echo "ssh-rsa ..." > /home/admin/.ssh/authorized_keys
+chown 4444:4444 /home/admin/.ssh /home/admin/.ssh/authorized_keys
+chmod 0600 /home/admin/.ssh/authorized_keys
+echo '%wheel ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/wheel
+chmod 0440 /etc/sudoers.d/wheel
+restorecon -R /home/admin/.ssh /etc/sudoers.d/wheel
+
+{% if disable_root is defined and disable_root|bool|int == 1 %}
+# Lock root account and disable remote login
+passwd -l root
+sed -i -e 's,^PermitRootLogin yes,PermitRootLogin no,' /etc/ssh/sshd_config
+{% endif %}
+{% endif %}
+
 # Services
 systemctl disable dnf-makecache.timer loadmodules.service nis-domainname.service remote-fs.target
 rpm -q NetworkManager > /dev/null 2>&1 || systemctl enable network.service
