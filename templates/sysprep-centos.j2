@@ -7,7 +7,7 @@ systemctl disable --now kdump.service
 yum -y update
 
 # Disable logging while erasing logs
-systemctl stop auditd.service rsyslog.service
+systemctl stop rsyslog.service
 
 # Remove machine identification and state
 truncate -s 0 /etc/machine-id /etc/resolv.conf
