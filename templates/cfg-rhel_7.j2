@@ -87,6 +87,10 @@ openscap-scanner
 scap-security-guide
 {% endif %}
 
+{% if packer_builder == 'vmware' %}
+perl
+{%endif %}
+
 -biosdevname
 -btrfs-progs
 -dracut-config-rescue

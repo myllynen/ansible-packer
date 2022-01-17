@@ -38,6 +38,10 @@ tuned
 vim-enhanced
 yum-utils
 
+{% if packer_builder == 'vmware' %}
+perl
+{%endif %}
+
 -a*firmware*
 -dracut-config-rescue
 -i*firmware*
