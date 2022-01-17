@@ -12,7 +12,7 @@ rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
 #yum -y install katello-host-tools katello-host-tools-tracer
 #subscription-manager unregister
 #subscription-manager clean
-#rm -f /etc/rhsm/syspurpose/*.json /var/lib/rhsm/cache/* \
+#rm -f /etc/rhsm/syspurpose/syspurpose.json /var/lib/rhsm/cache/* \
 #  /var/lib/rhsm/facts/*.json /var/lib/rhsm/repo*/*.repo /var/lib/rhsm/*_name
 
 {% if create_admin is defined and create_admin|bool|int == 1 %}
