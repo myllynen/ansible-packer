@@ -73,7 +73,7 @@ mandatory, the rest are optional.
 
 In case providing cleartext passwords on the command line (which makes
 them visible e.g. in process listing by
-[ps(1)](https://man7.org/linux/man-pages/man1/ps.1.html)
+[ps(1)](https://man7.org/linux/man-pages/man1/ps.1.html))
 is not appropriate vaulted password variables can be used as well.
 
 Additionally, using `-e do_cleanup=true` will delete anything left
