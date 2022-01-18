@@ -47,8 +47,8 @@ systemctl stop rsyslog.service
 
 # Remove machine identification and state
 for netdev in $(nmcli -t dev | cut -d: -f1 | grep -v lo); do
-  netuuid=$(uuidgen)
-  sed -i -e "s,^UUID=.*,UUID=$netuuid," /etc/sysconfig/network-scripts/ifcfg-$netdev
+  sed -i -e '/HWADDR=/d' /etc/sysconfig/network-scripts/ifcfg-$netdev
+  sed -i -e '/UUID=/d' /etc/sysconfig/network-scripts/ifcfg-$netdev
 done
 truncate -s 0 /etc/machine-id /etc/resolv.conf
 /bin/rm -rf /etc/systemd/network/7* /etc/udev/rules.d/7* /etc/ssh/ssh_host_*

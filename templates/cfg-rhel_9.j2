@@ -150,6 +150,9 @@ sed -i -e 's,^PermitRootLogin no,PermitRootLogin yes,' /etc/ssh/sshd_config.d/*h
 
 {% if ipv6_disable|bool|int == 1 %}
 %post
+for netconf in $(ls -1 /etc/NetworkManager/system-connections/*.nmconnection); do
+  sed -i -e '/^\[ipv6\]$/,/^\[/ s/method=.*/method=disabled/' $netconf
+done
 sed -i -e '/^::1/d' /etc/hosts
 sed -i -e 's,^OPTIONS=",OPTIONS="-4 ,g' -e 's, ",",' /etc/sysconfig/chronyd
 sed -i -e 's,^IPv6_rpfilter=yes,IPv6_rpfilter=no,' /etc/firewalld/firewalld.conf
