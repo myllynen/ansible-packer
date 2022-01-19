@@ -61,6 +61,8 @@ mandatory, the rest are optional.
 | partitioning     |  See 4) below    |   See 4)  |
 | disable_ipv6     |  true or false   |   false   |
 | security_profile |  See 5) below    |   Unset   |
+| create_admin     |  See 6) below    |   Unset   |
+| disable_root     |  See 7) below    |   Unset   |
 | image_name       |  Name for image  |  OS name  |
 
 1. Use [vars/content_iso.yml](vars/content_iso.yml) to add support
@@ -75,6 +77,12 @@ mandatory, the rest are optional.
    to add support for different partitioning layouts.
 5. The value is passed as-is to the installer
    [OpenSCAP](https://www.open-scap.org/) module.
+6. Create local admin user on the VM for Ansible etc,
+   [templates/sysprep-rhel_8.j2](templates/sysprep-rhel_8.j2) must be
+   adjusted for local environment, at least SSH key and user details.
+7. Completely disable root account. Caution needed. Requires that
+   _create\_admin_ is also used. See
+   [templates/sysprep-rhel_8.j2](templates/sysprep-rhel_8.j2).
 
 In case providing cleartext passwords on the command line (which makes
 them visible e.g. in process listing by
