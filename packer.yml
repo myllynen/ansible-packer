@@ -3,7 +3,7 @@
   hosts: localhost
   connection: local
   vars:
-    - do_cleanup: false
+    - do_cleanup: true
     - use_force: false
   vars_files:
     - vars/base_config.yml
