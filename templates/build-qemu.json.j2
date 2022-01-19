@@ -1,4 +1,8 @@
 {
+  "variables": {
+    "ssh_password": "{% raw %}{{env `SSH_PASSWORD`}}{% endraw %}"
+  },
+  "sensitive-variables": ["ssh_password"],
   "builders": [
     {
       "type": "qemu",
@@ -32,7 +36,7 @@
       ],
 
       "ssh_username": "root",
-      "ssh_password": "{{ root_pw_cleartext }}",
+      "ssh_password": "{% raw %}{{user `ssh_password`}}{% endraw %}",
       "ssh_timeout": "15m"
     }
   ],

@@ -1,11 +1,16 @@
 {
+  "variables": {
+    "ssh_password": "{% raw %}{{env `SSH_PASSWORD`}}{% endraw %}",
+    "vcenter_password": "{% raw %}{{env `VCENTER_PASSWORD`}}{% endraw %}"
+  },
+  "sensitive-variables": ["ssh_password", "vcenter_password"],
   "builders": [
     {
       "type": "vsphere-iso",
 
       "vcenter_server": "{{ vsphere_server }}",
       "username": "{{ vcenter_username | replace('\\', '\\\\') }}",
-      "password": "{{ vcenter_password }}",
+      "password": "{% raw %}{{user `vcenter_password`}}{% endraw %}",
       "insecure_connection": "{{ vcenter_insecure_connection }}",
 
       "datacenter": "{{ vcenter_datacenter }}",
@@ -61,7 +66,7 @@
       ],
 
       "ssh_username": "root",
-      "ssh_password": "{{ root_pw_cleartext }}",
+      "ssh_password": "{% raw %}{{user `ssh_password`}}{% endraw %}",
       "ssh_timeout": "15m"
     }
   ],

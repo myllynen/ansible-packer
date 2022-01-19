@@ -62,6 +62,8 @@
         chdir: "{{ tempdir.path }}"
       environment:
         CHECKPOINT_DISABLE: 1
+        SSH_PASSWORD: "{{ root_pw_cleartext }}"
+        VCENTER_PASSWORD: "{{ vcenter_password | default(omit) }}"
       register: packer_result
       failed_when: "'successful build' not in packer_result.stdout"
 
