@@ -8,7 +8,7 @@ Simple Ansible setup to build RHEL images with Packer.
 ## Quick Usage Example
 
 To build an image install [Packer](https://www.packer.io/), ensure
-Packer is available as _packer.io_ command is (create a sym link if
+Packer is available as _packer.io_ command (create a sym link if
 needed), then clone this repo and run the playbook as shown below:
 
 ```
