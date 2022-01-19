@@ -28,11 +28,13 @@ chmod 0440 /etc/sudoers.d/wheel
 restorecon -R /home/admin/.ssh /etc/sudoers.d/wheel
 
 {% if disable_root is defined and disable_root|bool|int == 1 %}
-# Lock root account and disable remote login
+# Lock root account - caution needed
 passwd -l root
-sed -i -e 's,^PermitRootLogin yes,PermitRootLogin no,' /etc/ssh/sshd_config
 {% endif %}
 {% endif %}
+
+# Configure root SSH access
+sed -i -e 's,^PermitRootLogin yes,PermitRootLogin {{ ssh_permit_root }},' /etc/ssh/sshd_config
 
 # Services
 systemctl disable remote-fs.target

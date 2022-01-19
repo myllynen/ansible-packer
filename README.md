@@ -7,6 +7,10 @@ Simple Ansible setup to build RHEL images with Packer.
 
 ## Quick Usage Example
 
+To build an image install [Packer](https://www.packer.io/), ensure
+Packer is available as _packer.io_ command is (create a sym link if
+needed), then clone this repo and run the playbook as shown below:
+
 ```
 # Build latest RHEL 8 image on Qemu with all defaults
 ansible-playbook packer.yml \
@@ -38,8 +42,9 @@ suitable split of configuration files and templates. Review the files
 under [vars/](vars/) and [templates/](templates/) to see how to
 customize or add support for new builders and operating systems.
 
-These templates leave _root_ SSH login permitted! In most environments
-this should be changed after initial development and testing phase.
+These templates do not save cleartext passwords on disk at any point.
+_root_ SSH login with password is permitted while running the
+provisioner script but then set as per the target configuration.
 
 The following table shows currently supported user-provided variables.
 The first two paramaters, _packer\_builder_ and _packer\_target_ are
