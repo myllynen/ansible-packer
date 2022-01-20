@@ -13,15 +13,14 @@
     - vars/os_passwords.yml
   tasks:
     - name: Find old outputs
+      vars:
+        sys_temp: "{{ lookup('env', 'TMPDIR') | default('/tmp', true) }}"
       find:
-        paths: "{{ ['/tmp', output_directory | default('/tmp/.nothing') | dirname] | unique }}"
+        paths: "{{ [sys_temp, output_directory | default(sys_temp + '/.nothing') | dirname] | unique }}"
         file_type: any
         patterns:
           - 'ansible*_packer_build_*'
-          - 'packer-log*'
-          - 'packer*.iso'
-          - 'packer_to_cdrom*'
-          - "{{ output_directory | default('/tmp/.nothing') | basename }}"
+          - "{{ output_directory | default(sys_temp + '/.nothing') | basename }}"
         recurse: false
       register: old_outputs
       when: do_cleanup | bool
@@ -62,6 +61,7 @@
         chdir: "{{ tempdir.path }}"
       environment:
         CHECKPOINT_DISABLE: 1
+        TMPDIR: "{{ tempdir.path }}"
         SSH_PASSWORD: "{{ root_pw_cleartext }}"
         VCENTER_PASSWORD: "{{ vcenter_password | default(omit) }}"
       register: packer_result
