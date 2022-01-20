@@ -60,6 +60,7 @@
         cmd: packer.io build -color=false {{ '-force' if use_force | bool else '' }} build.json
         chdir: "{{ tempdir.path }}"
       environment:
+        PACKER_LOG: 1
         CHECKPOINT_DISABLE: 1
         TMPDIR: "{{ tempdir.path }}"
         SSH_PASSWORD: "{{ root_pw_cleartext }}"
