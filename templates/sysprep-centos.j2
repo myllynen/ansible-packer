@@ -18,11 +18,13 @@ truncate -s 0 /etc/machine-id /etc/resolv.conf
 /bin/rm -rf /var/lib/systemd/random-seed
 
 # Clear caches, files, and logs
-/bin/rm -rf /root/* /tmp/* /var/tmp/*
+/bin/rm -rf /root/* /tmp/* /tmp/.[a-zA-Z]* /var/tmp/*
 /bin/rm -rf /etc/*- /etc/*.bak /etc/*~ /etc/sysconfig/*~
 /bin/rm -rf /var/cache/dnf/* /var/cache/yum/*
 /bin/rm -rf /var/lib/dnf/* /var/lib/yum/repos/* /var/lib/yum/yumdb/*
+/bin/rm -rf /var/lib/NetworkManager/* /var/lib/unbound/*.key
 /bin/rm -rf /var/log/*debug /var/log/anaconda /var/log/dmesg*
+truncate -s 0 /var/log/cron /var/log/rhsm/rhsmcertd.log /var/log/tuned/tuned.log
 truncate -s 0 /var/log/audit/audit.log /var/log/messages /var/log/secure
 truncate -s 0 /var/log/btmp /var/log/wtmp /var/log/lastlog
 
