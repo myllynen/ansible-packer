@@ -93,8 +93,6 @@ Additionally, using `-e do_cleanup=true` will delete anything left
 behind on the build host by earlier builds. Using `-e use_force=true`
 adds the `-force` parameter to the Packer command line.
 
-NB. CentOS/RHEL 7 fails to boot if initramfs is updated during build.
-
 ## See Also
 
 See also
