@@ -9,7 +9,7 @@ yum -y update
 # Configure root SSH access
 sed -i -e 's,^PermitRootLogin yes,PermitRootLogin {{ ssh_permit_root }},' /etc/ssh/sshd_config
 
-# Disable logging while erasing logs
+# Stop logging while erasing logs
 systemctl stop rsyslog.service
 
 # Remove machine identification and state

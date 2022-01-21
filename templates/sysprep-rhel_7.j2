@@ -44,7 +44,7 @@ rpm -q NetworkManager > /dev/null 2>&1 || systemctl enable network.service
 # Watchdog
 sed -i -e 's,^#RuntimeWatchdogSec=0,RuntimeWatchdogSec=60s,' /etc/systemd/system.conf
 
-# Disable logging while erasing logs
+# Stop logging while erasing logs
 systemctl stop rsyslog.service
 
 # Remove machine identification and state

@@ -27,7 +27,7 @@ reqpart
 part biosboot  --fstype biosboot --size 1
 part /boot/efi --fstype efi      --size 63
 {% endif %}
-part /boot --fstype xfs          --size 1024
+part /boot     --fstype xfs      --size 1024
 part pv.01                       --size 1024 --grow
 volgroup vg_rhel pv.01
 logvol swap           --vgname vg_rhel --fstype swap --size 4096  --name lv_swap
