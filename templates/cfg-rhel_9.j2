@@ -123,7 +123,7 @@ perl
 -sssd*
 %end
 
-%post
+%post --erroronfail
 grub2-editenv - unset menu_auto_hide
 echo "blacklist floppy" > /etc/modprobe.d/blacklist-floppy.conf
 sed -Ei -e 's,^(#|)PermitRootLogin .*,PermitRootLogin yes,' /etc/ssh/sshd_config
@@ -132,7 +132,7 @@ rm -f /etc/firewalld/zones/public.xml.old
 %end
 
 {% if boot_bios_uefi|bool|int == 1 %}
-%post
+%post --erroronfail
 rm -f /boot/efi/EFI/redhat/grub.cfg.rpmsave
 if [ -d /sys/firmware/efi ]; then
   test -b /dev/vda && disk=/dev/vda || disk=/dev/sda
@@ -143,13 +143,13 @@ fi
 {% endif %}
 
 {% if security_profile is defined %}
-%post
+%post --erroronfail
 mv /etc/ssh/sshd_config.d/*hardening.conf /root > /dev/null 2>&1 || :
 %end
 {% endif %}
 
 {% if ipv6_disable|bool|int == 1 %}
-%post
+%post --erroronfail
 for netconf in $(ls -1 /etc/NetworkManager/system-connections/*.nmconnection); do
   sed -i -e '/^\[ipv6\]$/,/^\[/ s/method=.*/method=disabled/' $netconf
 done

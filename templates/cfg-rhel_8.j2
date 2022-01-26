@@ -123,7 +123,7 @@ perl
 -sssd*
 %end
 
-%post
+%post --erroronfail
 echo "blacklist floppy" > /etc/modprobe.d/blacklist-floppy.conf
 sed -i -e 's,^AllowZoneDrifting=yes,AllowZoneDrifting=no,' /etc/firewalld/firewalld.conf
 sed -Ei -e 's,^(#|)PermitRootLogin .*,PermitRootLogin yes,' /etc/ssh/sshd_config
@@ -132,7 +132,7 @@ rm -f /etc/firewalld/zones/public.xml.old
 %end
 
 {% if boot_bios_uefi|bool|int == 1 %}
-%post
+%post --erroronfail
 for grubcfg in /boot/grub2/grub.cfg /boot/efi/EFI/redhat/grub.cfg; do
   grub2-mkconfig -o $grubcfg
   sed -i -n '1,/BEGIN.*uefi.*/p;/END.*uefi.*/,$p' $grubcfg
@@ -146,7 +146,7 @@ fi
 {% endif %}
 
 {% if ipv6_disable|bool|int == 1 %}
-%post
+%post --erroronfail
 for netconf in $(ls -1 /etc/sysconfig/network-scripts/ifcfg-* | grep -v ifcfg-lo); do
   sed -i -e 's,^IPV6INIT=yes,IPV6INIT=no,' $netconf
 done

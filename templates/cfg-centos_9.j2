@@ -54,7 +54,7 @@ perl
 -sssd*
 %end
 
-%post
+%post --erroronfail
 grub2-editenv - unset menu_auto_hide
 echo "blacklist floppy" > /etc/modprobe.d/blacklist-floppy.conf
 sed -Ei -e 's,^(#|)PermitRootLogin .*,PermitRootLogin yes,' /etc/ssh/sshd_config

@@ -104,7 +104,7 @@ perl
 -sssd*
 %end
 
-%post
+%post --erroronfail
 echo "blacklist floppy" > /etc/modprobe.d/blacklist-floppy.conf
 sed -i -e 's,^AllowZoneDrifting=yes,AllowZoneDrifting=no,' /etc/firewalld/firewalld.conf
 sed -Ei -e 's,^(#|)PermitRootLogin .*,PermitRootLogin yes,' /etc/ssh/sshd_config
@@ -114,7 +114,7 @@ rm -f /etc/firewalld/zones/public.xml.old
 %end
 
 {% if ipv6_disable|bool|int == 1 %}
-%post
+%post --erroronfail
 sed -i -e '/^::1/d' /etc/hosts
 sed -i -e 's,^OPTIONS=",OPTIONS="-4 ,g' -e 's, ",",' /etc/sysconfig/chronyd
 sed -i -e 's,^inet_protocols = all,inet_protocols = ipv4,' /etc/postfix/main.cf
