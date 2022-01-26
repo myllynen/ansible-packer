@@ -50,11 +50,6 @@
         src: templates/cfg-{{ target_config }}.j2
         dest: "{{ tempdir.path }}/inst.cfg"
 
-    - name: Create Packer provisioner script
-      template:
-        src: templates/{{ sysprep_script }}.j2
-        dest: "{{ tempdir.path }}/inst-sysprep"
-
     - name: Run Packer to build target image
       command:
         cmd: packer.io build -color=false {{ '-force' if use_force | bool else '' }} build.json

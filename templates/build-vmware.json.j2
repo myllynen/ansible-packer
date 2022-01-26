@@ -1,9 +1,8 @@
 {
   "variables": {
-    "ssh_password": "{% raw %}{{env `SSH_PASSWORD`}}{% endraw %}",
     "vcenter_password": "{% raw %}{{env `VCENTER_PASSWORD`}}{% endraw %}"
   },
-  "sensitive-variables": ["ssh_password", "vcenter_password"],
+  "sensitive-variables": ["vcenter_password"],
   "builders": [
     {
       "type": "vsphere-iso",
@@ -57,7 +56,7 @@
       "iso_url": "{{ iso[packer_target].url }}",
       "iso_checksum": "{{ iso[packer_target].checksum }}",
 
-      "cd_files": [ "inst.cfg" ],
+      "cd_files": ["inst.cfg"],
       "cd_label": "inst.cfg",
       "remove_cdrom": true,
 
@@ -66,16 +65,8 @@
         "<up><wait><tab><wait> ip=dhcp inst.ks=hd:/dev/sr1:inst.cfg inst.geoloc=0 inst.nosave=all {{ boot_parameters }}<enter><wait>"
       ],
 
-      "ssh_username": "root",
-      "ssh_password": "{% raw %}{{user `ssh_password`}}{% endraw %}",
-      "ssh_timeout": "15m"
-    }
-  ],
-  "provisioners": [
-    {
-      "type": "shell",
-      "script": "inst-sysprep",
-      "remote_path": "/root/inst-sysprep"
+      "communicator": "none",
+      "shutdown_timeout": "15m"
     }
   ]
 }

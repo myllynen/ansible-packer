@@ -9,5 +9,3 @@ timezone: Europe/Helsinki
 keyboard: fi
 
 ssh_permit_root: "prohibit-password"
-
-sysprep_script: sysprep-rhel_9

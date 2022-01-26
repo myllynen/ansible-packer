@@ -17,10 +17,9 @@ lang en_US.UTF-8
 timezone --ntpservers {{ ntp_servers }} --utc {{ timezone }}
 keyboard {{ keyboard }}
 services --enabled tuned
-reboot
+poweroff
 
 %packages
-
 @Core
 bash-completion
 bzip2
@@ -58,5 +57,38 @@ perl
 %post --erroronfail
 echo "blacklist floppy" > /etc/modprobe.d/blacklist-floppy.conf
 sed -i -e 's,^AllowZoneDrifting=yes,AllowZoneDrifting=no,' /etc/firewalld/firewalld.conf
-sed -Ei -e 's,^(#|)PermitRootLogin .*,PermitRootLogin yes,' /etc/ssh/sshd_config
+%end
+
+
+%post --erroronfail
+# kdump is mostly unhelpful with CentOS
+systemctl disable kdump.service
+
+# Update to latest packages
+yum -y update
+
+# Configure root SSH access
+sed -Ei -e 's,^(#|)PermitRootLogin .*,PermitRootLogin {{ ssh_permit_root }},' /etc/ssh/sshd_config
+
+# Remove machine identification and state
+truncate -s 0 /etc/machine-id /etc/resolv.conf
+/bin/rm -rf /etc/systemd/network/7* /etc/udev/rules.d/7* /etc/ssh/ssh_host_*
+/bin/rm -rf /var/lib/systemd/random-seed
+
+# Clear caches, files, and logs
+/bin/rm -rf /root/* /tmp/* /tmp/.[a-zA-Z]* /var/tmp/*
+/bin/rm -rf /etc/*- /etc/*.bak /etc/*~ /etc/sysconfig/*~
+/bin/rm -rf /var/cache/dnf/* /var/cache/yum/*
+/bin/rm -rf /var/lib/dnf/* /var/lib/yum/repos/* /var/lib/yum/yumdb/*
+/bin/rm -rf /var/lib/NetworkManager/* /var/lib/unbound/*.key
+/bin/rm -rf /var/log/*debug /var/log/anaconda /var/log/dmesg*
+truncate -s 0 /var/log/cron /var/log/tuned/tuned.log
+truncate -s 0 /var/log/audit/audit.log /var/log/messages /var/log/secure
+truncate -s 0 /var/log/btmp /var/log/wtmp /var/log/lastlog
+
+# Update initramfs
+dracut -f --regenerate-all
+
+# Ensure everything is written to the disk
+sync ; echo 3 > /proc/sys/vm/drop_caches ;
 %end

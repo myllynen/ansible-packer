@@ -43,8 +43,6 @@ under [vars/](vars/) and [templates/](templates/) to see how to
 customize or add support for new builders and operating systems.
 
 These templates do not save cleartext passwords on disk at any point.
-_root_ SSH login with password is permitted while running the
-provisioner script but then set as per the target configuration.
 
 The following table shows currently supported user-provided variables.
 The first two paramaters, _packer\_builder_ and _packer\_target_ are
@@ -78,11 +76,11 @@ mandatory, the rest are optional.
 5. The value is passed as-is to the installer
    [OpenSCAP](https://www.open-scap.org/) module.
 6. Create local admin user on the VM for Ansible etc,
-   [templates/sysprep-rhel_8.j2](templates/sysprep-rhel_8.j2) must be
+   [templates/cfg-rhel_8.j2](templates/cfg-rhel_8.j2) must be
    adjusted for local environment, at least SSH key and user details.
 7. Completely disable root account. Caution needed. Requires that
    _create\_admin_ is also used. See
-   [templates/sysprep-rhel_8.j2](templates/sysprep-rhel_8.j2).
+   [templates/cfg-rhel_8.j2](templates/cfg-rhel_8.j2).
 
 In case providing cleartext passwords on the command line (which makes
 them visible e.g. in process listing by
