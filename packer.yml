@@ -10,7 +10,7 @@
     - vars/content_iso.yml
     - vars/target_{{ target_config }}.yml
     - vars/builder_{{ packer_builder }}.yml
-    - vars/os_passwords.yml
+    - vars/os_credentials.yml
   tasks:
     - name: Find old outputs
       vars:
