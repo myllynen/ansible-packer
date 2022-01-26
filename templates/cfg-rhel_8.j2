@@ -141,6 +141,7 @@ if [ -d /sys/firmware/efi ]; then
   test -b /dev/vda && disk=/dev/vda || disk=/dev/sda
   rpm -q grub2-pc > /dev/null 2>&1 && grub2-install --target=i386-pc $disk || :
   #rpm -q parted > /dev/null 2>&1 && parted $disk disk_set pmbr_boot off || :
+fi
 %end
 {% endif %}
 
