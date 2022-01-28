@@ -52,7 +52,7 @@ network --device net0 --bootproto dhcp --onboot yes --hostname {{ hostname }} --
 
 firewall --enabled --service ssh
 firstboot --disabled
-lang en_US.UTF-8
+lang C.UTF-8
 timezone --utc {{ timezone }}
 {% for ntp_server in ntp_servers.split(',') %}
 timesource --ntp-server {{ ntp_server }}
@@ -73,6 +73,7 @@ bash-completion
 bzip2
 #cloud-init
 #cloud-utils-growpart
+glibc-minimal-langpack
 #insights-client
 # TBR
 kbd-legacy
@@ -111,7 +112,10 @@ perl-File-Temp
 
 -a*firmware*
 -dracut-config-rescue
+-gawk-all-langpacks
+-glibc-gconv-extra
 -i*firmware*
+-langpacks-*
 -lib*firmware*
 -NetworkManager-team
 -NetworkManager-tui
