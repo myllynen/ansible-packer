@@ -38,10 +38,12 @@ selinux --{{ selinux }}
 auth --useshadow --passalgo sha512
 rootpw --iscrypted {{ root_pw_encrypted }}
 
+{% if not network_setup_skip | bool %}
 {% if not disable_ipv6 | bool %}
 network --bootproto dhcp --onboot yes --hostname {{ hostname }}
 {% else %}
 network --bootproto dhcp --onboot yes --hostname {{ hostname }} --noipv6
+{% endif %}
 {% endif %}
 
 firewall --enabled --service ssh

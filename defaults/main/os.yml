@@ -16,6 +16,7 @@ selinux: enforcing
 
 serial_console_setup: false
 kdump_update_disable: false
+network_setup_skip: false
 
 hostname: localhost
 ntp_servers: time.cloudflare.com
