@@ -5,10 +5,11 @@ cmdline
 zerombr
 clearpart --all --initlabel
 
+{% set boot_parameters_full = console_boot_string + boot_parameters + ipv6_boot_string %}
 {% if boot_pw_encrypted == '' %}
-bootloader --timeout 1 --append "{{ boot_parameters }}"
+bootloader --timeout 1 --append "{{ boot_parameters_full }}"
 {% else %}
-bootloader --timeout 1 --append "{{ boot_parameters }}" --iscrypted --password {{ boot_pw_encrypted }}
+bootloader --timeout 1 --append "{{ boot_parameters_full }}" --iscrypted --password {{ boot_pw_encrypted }}
 {% endif %}
 
 {% if partitioning is defined and partitioning == 'auto' %}
@@ -16,6 +17,8 @@ autopart
 {% elif partitioning is defined and partitioning == 'single' %}
 reqpart
 part /     --fstype xfs --asprimary --size 1024 --grow
+{% elif partitioning is defined and partitioning == 'custom' %}
+{{ custom_partitioning }}
 {% else %}
 reqpart
 part /boot --fstype xfs --asprimary --size 1024
@@ -31,11 +34,11 @@ logvol /var/log/audit --vgname vg_rhel --fstype xfs  --size 2048  --name lv_var_
 logvol /var/tmp       --vgname vg_rhel --fstype xfs  --size 2048  --name lv_var_tmp
 {% endif %}
 
-selinux --enforcing
+selinux --{{ selinux }}
 auth --useshadow --passalgo sha512
 rootpw --iscrypted {{ root_pw_encrypted }}
 
-{% if ipv6_disable|bool|int == 0 %}
+{% if not disable_ipv6 | bool %}
 network --bootproto dhcp --onboot yes --hostname {{ hostname }}
 {% else %}
 network --bootproto dhcp --onboot yes --hostname {{ hostname }} --noipv6
@@ -102,6 +105,10 @@ perl-File-Temp
 -rhc
 -*rhn*
 -sssd*
+
+{% if custom_packages is defined %}
+{{ custom_packages }}
+{% endif %}
 %end
 
 %post --erroronfail
@@ -112,7 +119,13 @@ sed -i -e '/cockpit/d' /etc/firewalld/zones/public.xml
 rm -f /etc/firewalld/zones/public.xml.old
 %end
 
-{% if ipv6_disable|bool|int == 1 %}
+{% if serial_console_setup | bool %}
+%post --erroronfail
+systemctl enable serial-getty@ttyS0.service
+%end
+{% endif %}
+
+{% if disable_ipv6 | bool %}
 %post --erroronfail
 sed -i -e '/^::1/d' /etc/hosts
 sed -i -e 's,^OPTIONS=",OPTIONS="-4 ,g' -e 's, ",",' /etc/sysconfig/chronyd
@@ -149,26 +162,42 @@ rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
 #rm -f /etc/rhsm/syspurpose/syspurpose.json /var/lib/rhsm/cache/* \
 #  /var/lib/rhsm/facts/*.json /var/lib/rhsm/repo*/*.repo /var/lib/rhsm/*_name
 
-{% if create_admin is defined and create_admin|bool|int == 1 %}
+{% if create_admin | bool %}
 # Create admin group and user
-groupadd -g 4444 admin
-useradd -c "Admin User" -g 4444 -G wheel -m -u 4444 admin
-mkdir -m 0700 /home/admin/.ssh
-echo "ssh-rsa ..." > /home/admin/.ssh/authorized_keys
-chown 4444:4444 /home/admin/.ssh /home/admin/.ssh/authorized_keys
-chmod 0600 /home/admin/.ssh/authorized_keys
-echo '%wheel ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/wheel
-chmod 0440 /etc/sudoers.d/wheel
-restorecon -R /home/admin/.ssh /etc/sudoers.d/wheel
+groupadd -g {{ admin_user.gid }} {{ admin_user.group }}
+useradd -c "{{ admin_user.gecos }}" -d {{ admin_user.home }} -g {{ admin_user.gid }} -G {{ admin_user.groups }} -m -u {{ admin_user.uid }} {{ admin_user.name }}
+{% if admin_user.ssh_key is defined %}
+mkdir -m 0700 /home/{{ admin_user.name }}/.ssh
+echo "{{ admin_user.ssh_key }}" > /home/{{ admin_user.name }}/.ssh/authorized_keys
+chmod 0600 /home/{{ admin_user.name }}/.ssh/authorized_keys
+chown -R 4444:4444 /home/{{ admin_user.name }}/.ssh
+restorecon -R /home/{{ admin_user.name }}/.ssh
+{% endif %}
+{% if admin_user.passwordless_sudo is defined and admin_user.passwordless_sudo | bool %}
+{% if admin_user.groups is not defined or 'wheel' not in admin_user.groups %}
+usermod -a -G wheel {{ admin_user.name }}
+{% endif %}
+echo '%wheel ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/{{ admin_user.name }}
+chmod 0440 /etc/sudoers.d/{{ admin_user.name }}
+restorecon /etc/sudoers.d/{{ admin_user.name }}
+{% endif %}
 
-{% if disable_root is defined and disable_root|bool|int == 1 %}
+{% if not root_permit_local | bool %}
+{% if root_permit_override_security_policy | bool %}
 # Lock root account - caution needed
 passwd -l root
 {% endif %}
 {% endif %}
+{% endif %}
 
 # Configure root SSH access
-sed -Ei -e 's,^(#|)PermitRootLogin .*,PermitRootLogin {{ ssh_permit_root }},' /etc/ssh/sshd_config
+{% if security_policy is not defined or
+  (security_policy is defined and root_permit_override_security_policy | bool) %}
+sed -Ei -e 's,^(#|)PermitRootLogin .*,PermitRootLogin {{ root_permit_ssh }},' /etc/ssh/sshd_config
+for sshd_conf in $(/bin/ls -1 /etc/ssh/sshd_config.d/*.conf 2>/dev/null); do
+  sed -i -e 's,^PermitRootLogin .*,PermitRootLogin {{ root_permit_ssh }},' $sshd_conf
+done
+{% endif %}
 
 # Services
 systemctl disable remote-fs.target
@@ -203,12 +232,18 @@ truncate -s 0 /var/log/btmp /var/log/wtmp /var/log/lastlog
 # Update initramfs
 dracut -f --regenerate-all
 
+{% if not kdump_update_disable | bool %}
 # Create kdump initramfs for the newest kernel
 kver_latest=$(rpm -q --qf "%{version}-%{release}.%{arch}\n" kernel | sort -V | tail -n 1)
 sed -i -e "s,^KDUMP_KERNELVER=.*,KDUMP_KERNELVER=$kver_latest," /etc/sysconfig/kdump
 kdumpctl rebuild
 sed -i -e 's,^KDUMP_KERNELVER=.*,KDUMP_KERNELVER="",' /etc/sysconfig/kdump
+{% endif %}
 
 # Ensure everything is written to the disk
 sync ; echo 3 > /proc/sys/vm/drop_caches ;
 %end
+
+{% if custom_section is defined %}
+{{ custom_section }}
+{% endif %}

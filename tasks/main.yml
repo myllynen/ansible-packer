@@ -1,0 +1,59 @@
+---
+- name: Find old outputs
+  vars:
+    sys_temp: "{{ lookup('env', 'TMPDIR') | default('/tmp', true) }}"
+  find:
+    paths: "{{ [sys_temp, output_directory | default(sys_temp + '/.nothing') | dirname] | unique }}"
+    file_type: any
+    patterns:
+      - 'ansible*_packer_build_*'
+      - "{{ output_directory | default(sys_temp + '/.nothing') | basename }}"
+    recurse: false
+  register: old_outputs
+  when: do_cleanup | bool
+
+- name: Remove old outputs
+  file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ old_outputs.files }}"
+  loop_control:
+    label: "{{ item.path }}"
+  when: do_cleanup | bool
+
+- name: Create temporary work directory
+  tempfile:
+    state: directory
+    suffix: _packer_build_{{ packer_builder }}_{{ target_fullname }}
+  register: tempdir
+
+- name: Create Packer build file
+  template:
+    src: templates/build-{{ packer_builder }}.json.j2
+    dest: "{{ tempdir.path }}/build.json"
+
+- name: Create installer configuration file
+  template:
+    src: templates/cfg-{{ target_config }}.j2
+    dest: "{{ tempdir.path }}/inst.cfg"
+
+- name: Run Packer to build target image
+  command:
+    cmd: "{{ packer_binary }} build -color=false {{ '-force' if use_force | bool else '' }} build.json"
+    chdir: "{{ tempdir.path }}"
+  environment:
+    PACKER_LOG: 1
+    CHECKPOINT_DISABLE: 1
+    TMPDIR: "{{ tempdir.path }}"
+    VCENTER_PASSWORD: "{{ vcenter_credentials.vcenter_password | default(omit) }}"
+  register: packer_result
+  failed_when: "'successful build' not in packer_result.stdout"
+
+- name: Display Packer command output
+  debug:
+    var: packer_result.stdout
+
+- name: Remove temporary work directory
+  file:
+    path: "{{ tempdir.path }}"
+    state: absent

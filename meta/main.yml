@@ -1,11 +1,11 @@
-# SPDX-FileCopyrightText: 2021 Marko Myllynen <myllynen@redhat.com>
+# SPDX-FileCopyrightText: 2022 Marko Myllynen <myllynen@redhat.com>
 #
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 ---
 galaxy_info:
   author: Marko Myllynen <myllynen@redhat.com>
-  description: Simple Ansible setup to build RHEL images with Packer.
+  description: Ansible role for building OS images with Packer.
   company: Red Hat, Inc.
 
   issue_tracker_url: https://github.com/myllynen/ansible-packer/issues

@@ -1,0 +1,58 @@
+---
+# https://www.packer.io/plugins/builders/qemu#boot-configuration
+boot_command: <up><wait><tab><wait> ip=dhcp inst.ks=hd:/dev/sr1:inst.cfg inst.geoloc=0 inst.nosave=all
+
+boot_parameters: net.ifnames.prefix=net quiet systemd.show_status=yes
+
+boot_password:
+#root_password:
+
+bios_uefi_boot: false
+# auto/custom/default/single
+#partitioning:
+disable_ipv6: false
+selinux: enforcing
+#security_profile:
+
+serial_console_setup: false
+kdump_update_disable: false
+
+hostname: localhost
+ntp_servers: time.cloudflare.com
+timezone: UTC
+keyboard: us
+
+create_admin: false
+#admin_user:
+#  uid: 4444
+#  gid: 4444
+#  name: admin
+#  group: admin
+#  groups: wheel
+#  gecos: Admin User
+#  ssh_key: ssh-rsa ... admin@image
+#  passwordless_sudo: false
+
+root_permit_local: true
+root_permit_ssh: "prohibit-password"
+root_permit_override_security_policy: false
+#root_ssh_key: "ssh-rsa ... root@image"
+
+#custom_partitioning: |
+#  reqpart
+#  part /boot    --fstype xfs      --size 1024 --grow
+#  part /        --fstype xfs      --size 1024 --grow
+#  part swap     --fstype swap     --size 2048
+
+#custom_packages: |
+#  cloud-init
+#  cloud-utils-growpart
+#  insights-client
+#  rhc
+#  sos
+#  unzip
+
+#custom_section: |
+#  %post --erroronfail
+#  touch /.unconfigured
+#  %end

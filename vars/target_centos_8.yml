@@ -1,9 +1,0 @@
----
-boot_parameters: net.ifnames.prefix=net quiet
-
-hostname: localhost
-ntp_servers: time.cloudflare.com
-timezone: Europe/Helsinki
-keyboard: fi
-
-ssh_permit_root: "prohibit-password"

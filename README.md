@@ -3,95 +3,212 @@
 [![License: GPLv2](https://img.shields.io/badge/license-GPLv2-brightgreen.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
 [![License: GPLv3](https://img.shields.io/badge/license-GPLv3-brightgreen.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-Simple Ansible setup to build RHEL images with Packer.
+Ansible role for building OS images with Packer.
 
 ## Quick Usage Example
 
-To build an image install [Packer](https://www.packer.io/), then clone
-this repo and run the playbook as shown below. The playbook expects
-Packer to be available as _packer.io_, define _packer\_binary_ to
-change the executable name.
+This role builds custom operating system images with
+[Packer](https://www.packer.io/).
+
+To build an image install Packer on a build host, install this role, and
+run a playbook as shown below.
+
+After [installing Packer](https://www.packer.io/downloads), install this
+role:
 
 ```
-# Build latest RHEL 8 image on Qemu with all defaults
-ansible-playbook packer.yml \
-  -e packer_builder=qemu -e packer_target=rhel_8
+mkdir roles
+cat << EOF > roles/requirements.yml
+---
+roles:
+  - src: https://github.com/myllynen/ansible-packer.git
+    type: git
+    version: master
+EOF
+ansible-galaxy role install -p roles -r roles/requirements.yml
+```
 
-# Build RHEL 8.5 image on vSphere with customizations
-ansible-playbook packer.yml \
+Then, create a [playbook](./packer.yml) to use this role.
+
+This is a basic playbook for building an image with Qemu:
+
+```
+---
+- name: Build image with Packer on Qemu
+  hosts: all
+  vars:
+    packer_binary: packer.io
+    packer_builder: qemu
+    packer_target: rhel_8
+    disk_size: 8192
+
+    root_password: "{{ image_password }}"
+    partitioning: auto
+
+    hostname: localhost
+    ntp_servers: time.cloudflare.com
+    timezone: Europe/Helsinki
+    keyboard: fi
+
+    # Builder: qemu
+    # https://www.packer.io/docs/builders/qemu
+    qemu_binary: /usr/libexec/qemu-kvm
+    output_directory: /tmp/packer_images
+
+    #
+    # OS installer configuration
+    #
+    iso:
+      rhel_8:
+        url: file:///VirtualMachines/boot/rhel-8.5-x86_64-dvd.iso
+        checksum: sha256:1f78e705cd1d8897a05afa060f77d81ed81ac141c2465d4763c0382aa96cadd0
+
+  roles:
+    - ansible-packer
+```
+
+This is a more complete playbook for building an image with VMware
+vSphere:
+
+```
+---
+- name: Build image with Packer on VMware vSphere
+  hosts: all
+  vars:
+    #
+    # Base configuration
+    #
+    packer_binary: /usr/local/sbin/packer.io
+    packer_builder: vmware
+    packer_target: rhel_8_5
+    image_name: rhel8-template
+    disk_size: 30720
+
+    do_cleanup: true
+    use_force: true
+
+    #
+    # OS configuration
+    #
+    boot_password: "{{ image_password }}"
+    root_password: "{{ image_password }}"
+    partitioning: auto
+    disable_ipv6: true
+    #security_profile: cis_server_l1
+    boot_parameters: net.ifnames.prefix=net quiet systemd.show_status=yes
+
+    hostname: localhost
+    ntp_servers: time.cloudflare.com
+    timezone: Europe/Helsinki
+    keyboard: fi
+
+    create_admin: true
+    admin_user:
+      uid: 4444
+      gid: 4444
+      name: admin
+      group: admin
+      groups: wheel
+      home: /home/admin
+      gecos: Admin User
+      ssh_key: "ssh-rsa ... admin@image"
+      passwordless_sudo: true
+
+    root_permit_local: true
+    root_permit_ssh: "no"
+
+    custom_packages: |
+      cloud-init
+      cloud-utils-growpart
+
+    # Builder: vmware
+    # https://www.packer.io/docs/builders/vsphere/vsphere-iso
+    #vcenter_credentials:
+    #  vcenter_server: vcenter.example.com
+    #  vcenter_username: vcuser
+    #  vcenter_password: vcpass
+    vcenter_insecure_connection: false
+    vcenter_datacenter: DC1
+    vcenter_folder: Linux/templates
+    vcenter_cluster: DC1-C1
+    vcenter_datastore: DC1-C1-LUN-1
+    vcenter_network: DC1-C1-VLAN-123
+    vcenter_convert_to_template: true
+
+    #
+    # OS installer configuration
+    #
+    iso:
+      rhel_8_5:
+        url: file:///VirtualMachines/boot/rhel-8.5-x86_64-dvd.iso
+        checksum: sha256:1f78e705cd1d8897a05afa060f77d81ed81ac141c2465d4763c0382aa96cadd0
+
+  roles:
+    - ansible-packer
+```
+
+See the example [playbook](./packer.yml) for more complete example and
+[defaults/main](defaults/main) for all the supported variables.
+
+Finally, build image on a build host:
+
+```
+# Build latest RHEL 8 image with playbook defaults
+ansible-playbook -c local -i localhost, packer.yml \
+  -e packer_target=rhel_8
+
+# Build RHEL 8.5 image on VMware vSphere with customizations
+ansible-playbook -i 192.168.122.123, -u builder packer.yml \
   -e packer_builder=vmware -e packer_target=rhel_8_5 \
-  -e boot_password=foobar -e root_password=foobar \
-  -e bios_uefi_boot=true -e partitioning=auto \
-  -e security_profile=cis_server_l1 \
-  -e disable_ipv6=true \
+  -e bios_uefi_boot=true -e partitioning=single \
+  -e disable_ipv6=true -e security_profile=cis_server_l1 \
   -e image_name=test_image
 ```
 
-## Introduction
+## Role Description
 
-A simple [Ansible](https://www.ansible.com/) setup to allow quick
-building of
-[RHEL](https://www.redhat.com/en/technologies/linux-platforms/enterprise-linux).
-(and other) images with [Packer](https://www.packer.io/) using either
+[Ansible](https://www.ansible.com/) role to allow quick building of
+[RHEL](https://www.redhat.com/en/technologies/linux-platforms/enterprise-linux)
+and other images with [Packer](https://www.packer.io/) using either
 [Qemu](https://www.packer.io/docs/builders/qemu) or
 [VMware vSphere](https://www.packer.io/docs/builders/vsphere/vsphere-iso)
 as builders.
 
-Adding support for other builders and operating systems as well as
-further customization and parametrization of images is made easy by the
-suitable split of configuration files and templates. Review the files
-under [vars/](vars/) and [templates/](templates/) to see how to
-customize or add support for new builders and operating systems.
-
 These templates do not save cleartext passwords on disk at any point.
 
-The following table shows currently supported user-provided variables.
-The first two paramaters, _packer\_builder_ and _packer\_target_ are
-mandatory, the rest are optional.
+Three paramaters, _packer\_builder_, _packer\_target_ and
+_root\_password_ are mandatory, the rest are optional. See
+[defaults/main](defaults/main) for all the supported variables.
 
-| Variable         |  Allowed Values  |  Default  |
-|:-----------------|:----------------:|:---------:|
-| packer_binary    |      Path        | packer.io |
-| packer_builder   |  qemu, vmware    |   Unset   |
-| packer_target    |  See 1) below    |   Unset   |
-| packer_output    |      Path        |   See 2)  |
-| boot_password    |  Bootloader pw   |   Unset   |
-| root_password    |  root password   |   foobar  |
-| bios_uefi\_boot  |  true or false   |   See 3)  |
-| partitioning     |  See 4) below    |   See 4)  |
-| disable_ipv6     |  true or false   |   false   |
-| security_profile |  See 5) below    |   Unset   |
-| create_admin     |  See 6) below    |   Unset   |
-| disable_root     |  See 7) below    |   Unset   |
-| image_name       |  Name for image  |  OS name  |
+See [defaults/main/content_iso.yml](defaults/main/content_iso.yml) how
+to define OS versions and ISO locations.
 
-1. Use [vars/content_iso.yml](vars/content_iso.yml) to add support
-   for additional OS versions.
-2. See [vars/builder_qemu.yml](vars/builder_qemu.yml) and
-   [vars/builder_vmware.yml](vars/builder_vmware.yml) for default
-   output values.
-3. Create BIOS/UEFI bootable image, otherwise support only the
-   platform mode used for building the image.
-4. Adjust installer configuration files such as
-   [templates/cfg-rhel_8.j2](templates/cfg-rhel_8.j2)
-   to add support for different partitioning layouts.
-5. The value is passed as-is to the installer
-   [OpenSCAP](https://www.open-scap.org/) module.
-6. Create local admin user on the VM for Ansible etc,
-   [templates/cfg-rhel_8.j2](templates/cfg-rhel_8.j2) must be
-   adjusted for local environment, at least SSH key and user details.
-7. Completely disable root account. Caution needed. Requires that
-   _create\_admin_ is also used. See
-   [templates/cfg-rhel_8.j2](templates/cfg-rhel_8.j2).
+See [defaults/main/builder_qemu.yml](defaults/main/builder_qemu.yml) and
+[defaults/main/builder_vmware.yml](defaults/main/builder_vmware.yml) for
+builder related variables and their default values.
 
-In case providing cleartext passwords on the command line (which makes
-them visible e.g. in process listing by
-[ps(1)](https://man7.org/linux/man-pages/man1/ps.1.html))
-is not appropriate vaulted password variables can be used as well.
+Create BIOS/UEFI bootable image setting _bios_uefi\_boot_ to `true`,
+otherwise the image supports only the platform used for building the
+image.
 
-Additionally, using `-e do_cleanup=true` will delete anything left
-behind on the build host by earlier builds. Using `-e use_force=true`
-adds the `-force` parameter to the Packer command line.
+See the provided partitioning alternatives at
+[templates/cfg-rhel_8.j2](templates/cfg-rhel_8.j2), specify
+_custom\_partition_ and set `partitioning: custom` to use custom
+partitioning layout.
+
+The value of _security\_profile_ is passed as-is to the installer
+[OpenSCAP](https://www.open-scap.org/) module.
+
+To create local admin user on the VM for Ansible etc, see
+[defaults/main/os.yml](defaults/main/os.yml) for admin user data
+specification.
+
+Vaulted password variables are supported. Note that the provided CentOS
+templates do not support all the variables as the latest RHEL templates.
+
+Additionally, `-e do_cleanup=true` will delete anything left behind on
+the build host by earlier builds. Using `-e use_force=true` adds the
+`-force` parameter to the Packer command line.
 
 ## See Also
 

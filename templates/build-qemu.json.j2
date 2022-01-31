@@ -3,13 +3,16 @@
     {
       "type": "qemu",
 
-      "accelerator": "kvm",
-      "qemu_binary": "/usr/libexec/qemu-kvm",
+      "accelerator": "{{ qemu_accelerator }}",
+      "qemu_binary": "{{ qemu_binary }}",
       "headless": true,
       "output_directory": "{{ output_directory }}",
 
-      "vm_name": "{{ vm_name }}",
+      "vm_name": "{{ vm_name + '.qcow2' if '.qcow2' not in vm_name else vm_name }}",
 
+{% if vm_firmware is defined %}
+      "firmware": "{{ vm_firmware }}",
+{% endif %}
       "cpus": {{ vm_cpus }},
       "memory": {{ vm_memory }},
       "disk_size": "{{ vm_disk_size }}",
@@ -28,7 +31,7 @@
 
       "boot_wait": "15s",
       "boot_command": [
-        "<up><wait><tab><wait> ip=dhcp inst.ks=hd:/dev/sr1:inst.cfg inst.geoloc=0 inst.nosave=all {{ boot_parameters }}<enter><wait>"
+        "{{ boot_command }} {{ ipv6_boot_string }} {{ boot_parameters }}<enter><wait>"
       ],
 
       "communicator": "none",

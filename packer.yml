@@ -1,72 +1,128 @@
 ---
 - name: Build image with Packer
-  hosts: localhost
-  connection: local
+  hosts: all
   vars:
-    - do_cleanup: true
-    - use_force: false
-  vars_files:
-    - vars/base_config.yml
-    - vars/content_iso.yml
-    - vars/target_{{ target_config }}.yml
-    - vars/builder_{{ packer_builder }}.yml
-    - vars/os_credentials.yml
-  tasks:
-    - name: Find old outputs
-      vars:
-        sys_temp: "{{ lookup('env', 'TMPDIR') | default('/tmp', true) }}"
-      find:
-        paths: "{{ [sys_temp, output_directory | default(sys_temp + '/.nothing') | dirname] | unique }}"
-        file_type: any
-        patterns:
-          - 'ansible*_packer_build_*'
-          - "{{ output_directory | default(sys_temp + '/.nothing') | basename }}"
-        recurse: false
-      register: old_outputs
-      when: do_cleanup | bool
+    #
+    # Base configuration
+    #
+    packer_binary: packer.io
+    packer_builder: qemu
+    packer_target: rhel_8_5
+    image_name: packer_image.qcow2
+    disk_size: 30720
 
-    - name: Remove old outputs
-      file:
-        path: "{{ item.path }}"
-        state: absent
-      loop: "{{ old_outputs.files }}"
-      loop_control:
-        label: "{{ item.path }}"
-      when: do_cleanup | bool
+    do_cleanup: true
+    use_force: false
 
-    - name: Create temporary work directory
-      tempfile:
-        state: directory
-        suffix: _packer_build_{{ packer_builder }}_{{ target_fullname }}
-      register: tempdir
+    #
+    # OS configuration
+    #
+    boot_password: "{{ image_password }}"
+    root_password: "{{ image_password }}"
+    bios_uefi_boot: false
+    # auto/custom/default/single
+    partitioning: auto
+    disable_ipv6: true
+    selinux: enforcing
+    #security_profile: cis_server_l1
+    boot_parameters: net.ifnames.prefix=net quiet systemd.show_status=yes
+    serial_console_setup: true
 
-    - name: Create Packer build file
-      template:
-        src: templates/build-{{ packer_builder }}.json.j2
-        dest: "{{ tempdir.path }}/build.json"
+    hostname: localhost
+    ntp_servers: time.cloudflare.com
+    timezone: Europe/Helsinki
+    keyboard: fi
 
-    - name: Create installer configuration file
-      template:
-        src: templates/cfg-{{ target_config }}.j2
-        dest: "{{ tempdir.path }}/inst.cfg"
+    create_admin: true
+    admin_user:
+      uid: 4444
+      gid: 4444
+      name: admin
+      group: admin
+      groups: wheel
+      home: /home/admin
+      gecos: Admin User
+      #ssh_key: "ssh-rsa ... admin@image"
+      passwordless_sudo: true
 
-    - name: Run Packer to build target image
-      command:
-        cmd: "{{ packer_binary | default('packer.io') }} build -color=false {{ '-force' if use_force | bool else '' }} build.json"
-        chdir: "{{ tempdir.path }}"
-      environment:
-        PACKER_LOG: 1
-        CHECKPOINT_DISABLE: 1
-        TMPDIR: "{{ tempdir.path }}"
-        VCENTER_PASSWORD: "{{ vcenter_password | default(omit) }}"
-      register: packer_result
-      failed_when: "'successful build' not in packer_result.stdout"
+    root_permit_local: true
+    root_permit_ssh: "prohibit-password"
+    root_permit_override_security_policy: false
+    #root_ssh_key: "ssh-rsa ... root@image"
 
-    - name: Display Packer command output
-      debug:
-        var: packer_result.stdout
+    #custom_partitioning: |
+    #  reqpart
+    #  part /boot    --fstype xfs      --size 1024 --grow
+    #  part /        --fstype xfs      --size 1024 --grow
+    #  part swap     --fstype swap     --size 2048
 
-    - name: Remove temporary work directory
-      file:
-        path: "{{ tempdir.path }}"
-        state: absent
+    #custom_packages: |
+    #  cloud-init
+    #  cloud-utils-growpart
+    #  insights-client
+    #  rhc
+    #  sos
+    #  unzip
+    #  zsh
+
+    #custom_section: |
+    #  %post --erroronfail
+    #  touch /.unconfigured
+    #  %end
+
+    #
+    # Builder configurations
+    #
+
+    # Builder: qemu
+    # https://www.packer.io/docs/builders/qemu
+    qemu_binary: /usr/libexec/qemu-kvm
+    output_directory: /tmp/packer_images
+
+    # Builder: vmware
+    # https://www.packer.io/docs/builders/vsphere/vsphere-iso
+    #vcenter_credentials:
+    #  vcenter_server: vcenter.example.com
+    #  vcenter_username: vcuser
+    #  vcenter_password: vcpass
+    vcenter_insecure_connection: true
+    vcenter_datacenter: DC1
+    vcenter_folder: Linux/templates
+    # https://www.packer.io/docs/builders/vsphere/vsphere-iso#working-with-clusters-and-hosts
+    #vcenter_host: vcenter-host1.example.com
+    vcenter_cluster: DC1-C1
+    #vcenter_resource_pool: DC1-RP1
+    vcenter_datastore: DC1-C1-LUN-1
+    vcenter_network: DC1-C1-VLAN-123
+    #vm_guest_os_type: rhel8_64Guest
+    #vm_firmware: bios
+    # https://www.packer.io/plugins/builders/vsphere/vsphere-iso#content-library-import-configuration
+    vcenter_convert_to_template: true
+    #vcenter_content_library:
+    #  library: DC1-CL
+    #  #name: cl-template
+    #  ovf: false
+    #  destroy: true
+
+    #
+    # OS installer configuration
+    #
+    iso:
+      rhel_8:
+        url: file:///VirtualMachines/boot/rhel-8.5-x86_64-dvd.iso
+        checksum: sha256:1f78e705cd1d8897a05afa060f77d81ed81ac141c2465d4763c0382aa96cadd0
+      rhel_8_4:
+        url: file:///VirtualMachines/boot/rhel-8.4-x86_64-dvd.iso
+        checksum: sha256:48f955712454c32718dcde858dea5aca574376a1d7a4b0ed6908ac0b85597811
+      rhel_8_5:
+        url: file:///VirtualMachines/boot/rhel-8.5-x86_64-dvd.iso
+        checksum: sha256:1f78e705cd1d8897a05afa060f77d81ed81ac141c2465d4763c0382aa96cadd0
+      rhel_9:
+        url: file:///VirtualMachines/boot/rhel-baseos-9.0-beta-0-x86_64-dvd.iso
+        checksum: sha256:23e6d31e12a22b6d56f00889ea7dc465360ea84e3b7d7854e4c627ecd3160473
+
+    # boot_command will be appended by ' {{ boot_parameters }}<enter><wait>'
+    boot_command: <up><wait><tab><wait> ip=dhcp inst.ks=hd:/dev/sr1:inst.cfg inst.geoloc=0 inst.nosave=all
+
+  roles:
+    - ansible-packer
