@@ -7,9 +7,10 @@ Simple Ansible setup to build RHEL images with Packer.
 
 ## Quick Usage Example
 
-To build an image install [Packer](https://www.packer.io/), ensure
-Packer is available as _packer.io_ command (create a sym link if
-needed), then clone this repo and run the playbook as shown below:
+To build an image install [Packer](https://www.packer.io/), then clone
+this repo and run the playbook as shown below. The playbook expects
+Packer to be available as _packer.io_, define _packer\_binary_ to
+change the executable name.
 
 ```
 # Build latest RHEL 8 image on Qemu with all defaults
@@ -50,6 +51,7 @@ mandatory, the rest are optional.
 
 | Variable         |  Allowed Values  |  Default  |
 |:-----------------|:----------------:|:---------:|
+| packer_binary    |      Path        | packer.io |
 | packer_builder   |  qemu, vmware    |   Unset   |
 | packer_target    |  See 1) below    |   Unset   |
 | packer_output    |      Path        |   See 2)  |

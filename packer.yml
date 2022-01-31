@@ -52,13 +52,12 @@
 
     - name: Run Packer to build target image
       command:
-        cmd: packer.io build -color=false {{ '-force' if use_force | bool else '' }} build.json
+        cmd: "{{ packer_binary | default('packer.io') }} build -color=false {{ '-force' if use_force | bool else '' }} build.json"
         chdir: "{{ tempdir.path }}"
       environment:
         PACKER_LOG: 1
         CHECKPOINT_DISABLE: 1
         TMPDIR: "{{ tempdir.path }}"
-        SSH_PASSWORD: "{{ root_pw_cleartext }}"
         VCENTER_PASSWORD: "{{ vcenter_password | default(omit) }}"
       register: packer_result
       failed_when: "'successful build' not in packer_result.stdout"
