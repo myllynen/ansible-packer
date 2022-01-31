@@ -172,7 +172,7 @@ useradd -c "{{ admin_user.gecos }}" -d {{ admin_user.home }} -g {{ admin_user.gi
 mkdir -m 0700 /home/{{ admin_user.name }}/.ssh
 echo "{{ admin_user.ssh_key }}" > /home/{{ admin_user.name }}/.ssh/authorized_keys
 chmod 0600 /home/{{ admin_user.name }}/.ssh/authorized_keys
-chown -R 4444:4444 /home/{{ admin_user.name }}/.ssh
+chown -R {{ admin_user.uid }}:{{ admin_user.gid }} /home/{{ admin_user.name }}/.ssh
 restorecon -R /home/{{ admin_user.name }}/.ssh
 {% endif %}
 {% if admin_user.passwordless_sudo is defined and admin_user.passwordless_sudo | bool %}
