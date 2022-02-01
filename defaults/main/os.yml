@@ -16,7 +16,10 @@ selinux: enforcing
 
 serial_console_setup: false
 kdump_update_disable: false
+# Do not run installer network configuration to setup DHCP
 network_setup_skip: false
+# Remove static network configuration setup by installer
+network_setup_purge: true
 
 hostname: localhost
 ntp_servers: time.cloudflare.com
