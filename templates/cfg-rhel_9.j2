@@ -255,7 +255,7 @@ for netdev in $(nmcli -t dev | cut -d: -f1 | grep -v lo); do
   sed -i -e '/dhcp-/d' /etc/NetworkManager/system-connections/$netdev.nmconnection
   sed -i -e '/origin/d' /etc/NetworkManager/system-connections/$netdev.nmconnection
   sed -i -e '/timestamp/d' /etc/NetworkManager/system-connections/$netdev.nmconnection
-{% network_setup_purge | bool %}
+{% if network_setup_purge | bool %}
 {% endif %}
 done
 truncate -s 0 /etc/machine-id /etc/resolv.conf

@@ -254,7 +254,7 @@ for netdev in $(nmcli -t dev | cut -d: -f1 | grep -v lo); do
   sed -i -e '/UUID=/d' /etc/sysconfig/network-scripts/ifcfg-$netdev
   sed -i -e '/DHCP_/d' /etc/sysconfig/network-scripts/ifcfg-$netdev
   sed -i -e '/__/d' /etc/sysconfig/network-scripts/ifcfg-$netdev
-{% network_setup_purge | bool %}
+{% if network_setup_purge | bool %}
   sed -i -e '/IPADDR/d' /etc/sysconfig/network-scripts/ifcfg-$netdev
   sed -i -e '/PREFIX/d' /etc/sysconfig/network-scripts/ifcfg-$netdev
   sed -i -e '/GATEWAY/d' /etc/sysconfig/network-scripts/ifcfg-$netdev
