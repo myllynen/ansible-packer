@@ -193,14 +193,18 @@ restorecon -R /root/.ssh
 # Import Red Hat RPM GPG key
 rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
 
+{% if rh_register_command is defined %}
 # Update to latest packages
-#curl -ksS ...
-#yum -y update
-#yum -y install katello-host-tools katello-host-tools-tracer
-#subscription-manager unregister
-#subscription-manager clean
-#rm -f /etc/rhsm/syspurpose/syspurpose.json /var/lib/rhsm/cache/* \
-#  /var/lib/rhsm/facts/*.json /var/lib/rhsm/repo*/*.repo /var/lib/rhsm/*_name
+{{ rh_register_command }}
+yum -y update
+{% if rh_satellite_tools_install | bool %}
+yum -y install katello-host-tools katello-host-tools-tracer
+{% endif %}
+subscription-manager unregister
+subscription-manager clean
+rm -f /etc/rhsm/syspurpose/syspurpose.json /var/lib/rhsm/cache/* \
+  /var/lib/rhsm/facts/*.json /var/lib/rhsm/repo*/*.repo /var/lib/rhsm/*_name
+{% endif %}
 
 {% if create_admin | bool %}
 # Create admin group and user

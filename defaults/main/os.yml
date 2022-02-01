@@ -8,7 +8,7 @@ boot_password:
 #root_password:
 
 bios_uefi_boot: false
-# auto/custom/default/single
+# One of: auto/custom/default/single
 #partitioning:
 disable_ipv6: false
 selinux: enforcing
@@ -38,6 +38,11 @@ root_permit_local: true
 root_permit_ssh: "prohibit-password"
 root_permit_override_security_policy: false
 #root_ssh_key: "ssh-rsa ... root@image"
+
+# Define to temporarily register and update RHEL
+#rh_register_command:
+# Install Satellite tools when updating packages
+rh_satellite_tools_install: true
 
 #custom_partitioning: |
 #  reqpart
