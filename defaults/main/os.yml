@@ -53,7 +53,12 @@ root_permit_override_security_policy: false
 #  sos
 #  unzip
 
-#custom_section: |
+#custom_section_early: |
+#  %post --erroronfail
+#  cat /etc/resolv.conf > /var/tmp/.inst-resolv-conf
+#  %end
+
+#custom_section_late: |
 #  %post --erroronfail
 #  touch /.unconfigured
 #  %end

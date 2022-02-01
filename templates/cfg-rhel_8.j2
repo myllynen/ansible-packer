@@ -184,6 +184,9 @@ restorecon -R /root/.ssh
 %end
 {% endif %}
 
+{% if custom_section_early is defined %}
+{{ custom_section_early }}
+{% endif %}
 
 %post --erroronfail
 # Import Red Hat RPM GPG key
@@ -279,6 +282,6 @@ sed -i -e 's,^KDUMP_KERNELVER=.*,KDUMP_KERNELVER="",' /etc/sysconfig/kdump
 sync ; echo 3 > /proc/sys/vm/drop_caches ;
 %end
 
-{% if custom_section is defined %}
-{{ custom_section }}
+{% if custom_section_late is defined %}
+{{ custom_section_late }}
 {% endif %}
