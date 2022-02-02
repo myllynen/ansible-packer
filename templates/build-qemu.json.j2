@@ -34,8 +34,19 @@
         "{{ boot_command }} {{ ipv6_boot_string }} {{ boot_parameters }}<enter><wait>"
       ],
 
-      "communicator": "none",
+{% if custom_json_builder is defined %}
+{{ custom_json_builder }}
+{% endif %}
+
+      "communicator": "{{ communicator }}",
       "shutdown_timeout": "15m"
     }
+{% if custom_json_provisioner is not defined %}
   ]
+{% else %}
+  ],
+  "provisioners": [
+{{ custom_json_provisioner }}
+  ]
+{% endif %}
 }

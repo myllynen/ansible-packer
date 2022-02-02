@@ -2,4 +2,5 @@
 # https://www.packer.io/docs/builders/qemu
 qemu_binary: /usr/libexec/qemu-kvm
 qemu_accelerator: kvm
+
 output_directory: /tmp/packer_images

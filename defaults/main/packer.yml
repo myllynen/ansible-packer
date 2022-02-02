@@ -1,4 +1,17 @@
 ---
 do_cleanup: true
 use_force: false
+
 packer_binary: packer.io
+
+communicator: "none"
+
+#custom_json_builder: |
+#      "parameter": value,
+
+#custom_json_provisioner: |
+#    {
+#      "type": "shell",
+#      "script": "inst-sysprep",
+#      "remote_path": "/root/inst-sysprep"
+#    }
