@@ -150,6 +150,12 @@ restorecon -R /root/.ssh
 %end
 {% endif %}
 
+{% if packer_builder == 'vmware' %}
+%post --erroronfail
+vmtoolsd -b /run/vmtoolsd.pid
+%end
+{% endif %}
+
 {% if custom_section_early is defined %}
 {{ custom_section_early }}
 {% endif %}
