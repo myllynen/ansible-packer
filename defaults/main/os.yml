@@ -16,8 +16,8 @@ selinux: enforcing
 
 serial_console_setup: false
 kdump_update_disable: false
-# Do not run installer network configuration to setup DHCP
-network_setup_skip: false
+# Ask installer to setup DHCP networking for the image
+network_setup_dhcp: true
 # Remove static network configuration setup by installer
 network_setup_purge: true
 
