@@ -216,11 +216,11 @@ rm -f /etc/rhsm/syspurpose/syspurpose.json /var/lib/rhsm/cache/* \
 groupadd -g {{ admin_user.gid }} {{ admin_user.group }}
 useradd -c "{{ admin_user.gecos }}" -d {{ admin_user.home }} -g {{ admin_user.gid }} -G {{ admin_user.groups }} -m -u {{ admin_user.uid }} {{ admin_user.name }}
 {% if admin_user.ssh_key is defined %}
-mkdir -m 0700 /home/{{ admin_user.name }}/.ssh
-echo "{{ admin_user.ssh_key }}" > /home/{{ admin_user.name }}/.ssh/authorized_keys
-chmod 0600 /home/{{ admin_user.name }}/.ssh/authorized_keys
-chown -R {{ admin_user.uid }}:{{ admin_user.gid }} /home/{{ admin_user.name }}/.ssh
-restorecon -R /home/{{ admin_user.name }}/.ssh
+mkdir -m 0700 {{ admin_user.home }}/.ssh
+echo "{{ admin_user.ssh_key }}" > {{ admin_user.home }}/.ssh/authorized_keys
+chmod 0600 {{ admin_user.home }}/.ssh/authorized_keys
+chown -R {{ admin_user.uid }}:{{ admin_user.gid }} {{ admin_user.home }}/.ssh
+restorecon -R {{ admin_user.home }}/.ssh
 {% endif %}
 {% if admin_user.passwordless_sudo is defined and admin_user.passwordless_sudo | bool %}
 {% if admin_user.groups is not defined or 'wheel' not in admin_user.groups %}
