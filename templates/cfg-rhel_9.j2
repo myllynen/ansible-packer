@@ -286,11 +286,12 @@ truncate -s 0 /var/log/btmp /var/log/wtmp /var/log/lastlog
 dracut -f --regenerate-all
 
 {% if not kdump_update_disable | bool %}
-# Create kdump initramfs for the newest kernel
-kver_latest=$(rpm -q --qf "%{version}-%{release}.%{arch}\n" kernel | sort -V | tail -n 1)
-sed -i -e "s,^KDUMP_KERNELVER=.*,KDUMP_KERNELVER=$kver_latest," /etc/sysconfig/kdump
-kdumpctl rebuild
-sed -i -e 's,^KDUMP_KERNELVER=.*,KDUMP_KERNELVER="",' /etc/sysconfig/kdump
+# Create kdump initramfs for all kernels
+for kver in $(rpm -q --qf "%{version}-%{release}.%{arch}\n" kernel); do
+  sed -i -e "s,^KDUMP_KERNELVER=.*,KDUMP_KERNELVER=$kver," /etc/sysconfig/kdump
+  kdumpctl rebuild
+  sed -i -e 's,^KDUMP_KERNELVER=.*,KDUMP_KERNELVER="",' /etc/sysconfig/kdump
+done
 {% endif %}
 
 # Ensure everything is written to the disk
