@@ -45,7 +45,7 @@ This is a basic playbook for building an image with Qemu:
     root_password: "{{ image_password }}"
     partitioning: auto
 
-    hostname: localhost
+    hostname: localhost.localdomain
     ntp_servers: time.cloudflare.com
     timezone: Europe/Helsinki
     keyboard: fi
@@ -97,7 +97,7 @@ vSphere:
     #security_profile: cis_server_l1
     boot_parameters: net.ifnames.prefix=net quiet systemd.show_status=yes
 
-    hostname: localhost
+    hostname: localhost.localdomain
     ntp_servers: time.cloudflare.com
     timezone: Europe/Helsinki
     keyboard: fi

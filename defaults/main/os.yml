@@ -21,7 +21,7 @@ network_setup_dhcp: true
 # Remove static network configuration setup by installer
 network_setup_purge: true
 
-hostname: localhost
+hostname: localhost.localdomain
 ntp_servers: time.cloudflare.com
 timezone: UTC
 keyboard: us
