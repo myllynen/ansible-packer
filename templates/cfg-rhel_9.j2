@@ -136,7 +136,7 @@ perl-File-Temp
 {% endif %}
 %end
 
-%post --erroronfail
+%post
 grub2-editenv - unset menu_auto_hide
 echo "blacklist floppy" > /etc/modprobe.d/blacklist-floppy.conf
 sed -i -e '/cockpit/d' /etc/firewalld/zones/public.xml
@@ -144,7 +144,7 @@ rm -f /etc/firewalld/zones/public.xml.old
 %end
 
 {% if bios_uefi_boot | bool %}
-%post --erroronfail
+%post
 rm -f /boot/efi/EFI/redhat/grub.cfg.rpmsave
 if [ -d /sys/firmware/efi ]; then
   test -b /dev/vda && disk=/dev/vda || disk=/dev/sda
@@ -155,13 +155,13 @@ fi
 {% endif %}
 
 {% if serial_console_setup | bool %}
-%post --erroronfail
+%post
 systemctl enable serial-getty@ttyS0.service
 %end
 {% endif %}
 
 {% if disable_ipv6 | bool %}
-%post --erroronfail
+%post
 for netconf in $(ls -1 /etc/NetworkManager/system-connections/*.nmconnection); do
   sed -i -e '/^\[ipv6\]$/,/^\[/ s/method=.*/method=disabled/' $netconf
 done
@@ -177,7 +177,7 @@ fi
 {% endif %}
 
 {% if root_ssh_key is defined %}
-%post --erroronfail
+%post
 mkdir -m 0700 /root/.ssh
 echo "{{ root_ssh_key }}" > /root/.ssh/authorized_keys
 chmod 0600 /root/.ssh/authorized_keys
@@ -201,12 +201,12 @@ rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
 
 {% if rh_register_command is defined %}
 # Update to latest packages
-{{ rh_register_command }}
+{{ rh_register_command }} || exit 1
 yum -y update
 {% if rh_satellite_tools_install | bool %}
-yum -y install katello-host-tools katello-host-tools-tracer
+yum -y install katello-host-tools katello-host-tools-tracer || exit 1
 {% endif %}
-subscription-manager unregister
+subscription-manager unregister || exit 1
 subscription-manager clean
 rm -f /etc/rhsm/syspurpose/syspurpose.json /var/lib/rhsm/cache/* \
   /var/lib/rhsm/facts/*.json /var/lib/rhsm/repo*/*.repo /var/lib/rhsm/*_name

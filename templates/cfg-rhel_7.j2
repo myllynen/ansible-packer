@@ -113,7 +113,7 @@ perl-File-Temp
 {% endif %}
 %end
 
-%post --erroronfail
+%post
 echo "blacklist floppy" > /etc/modprobe.d/blacklist-floppy.conf
 sed -i -e 's,^AllowZoneDrifting=yes,AllowZoneDrifting=no,' /etc/firewalld/firewalld.conf
 sed -i -e 's,^#UseDNS yes,UseDNS no,' /etc/ssh/sshd_config
@@ -122,13 +122,13 @@ rm -f /etc/firewalld/zones/public.xml.old
 %end
 
 {% if serial_console_setup | bool %}
-%post --erroronfail
+%post
 systemctl enable serial-getty@ttyS0.service
 %end
 {% endif %}
 
 {% if disable_ipv6 | bool %}
-%post --erroronfail
+%post
 sed -i -e '/^::1/d' /etc/hosts
 sed -i -e 's,^OPTIONS=",OPTIONS="-4 ,g' -e 's, ",",' /etc/sysconfig/chronyd
 sed -i -e 's,^inet_protocols = all,inet_protocols = ipv4,' /etc/postfix/main.cf
@@ -142,7 +142,7 @@ fi
 {% endif %}
 
 {% if root_ssh_key is defined %}
-%post --erroronfail
+%post
 mkdir -m 0700 /root/.ssh
 echo "{{ root_ssh_key }}" > /root/.ssh/authorized_keys
 chmod 0600 /root/.ssh/authorized_keys
@@ -166,12 +166,12 @@ rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
 
 {% if rh_register_command is defined %}
 # Update to latest packages
-{{ rh_register_command }}
+{{ rh_register_command }} || exit 1
 yum -y update
 {% if rh_satellite_tools_install | bool %}
-yum -y install katello-host-tools katello-host-tools-tracer
+yum -y install katello-host-tools katello-host-tools-tracer || exit 1
 {% endif %}
-subscription-manager unregister
+subscription-manager unregister || exit 1
 subscription-manager clean
 rm -f /etc/rhsm/syspurpose/syspurpose.json /var/lib/rhsm/cache/* \
   /var/lib/rhsm/facts/*.json /var/lib/rhsm/repo*/*.repo /var/lib/rhsm/*_name
