@@ -73,6 +73,7 @@ profile = xccdf_org.ssgproject.content_profile_{{ security_profile }}
 %packages
 @Core
 bash-completion
+bind-utils
 bzip2
 #cloud-init
 #cloud-utils-growpart
@@ -89,7 +90,7 @@ setools-console
 tar
 tuned
 #unzip
-vim-enhanced
+#vim-enhanced
 yum-utils
 
 {% if bios_uefi_boot | bool %}
