@@ -31,11 +31,13 @@
   template:
     src: templates/build-{{ packer_builder }}.json.j2
     dest: "{{ tempdir.path }}/build.json"
+    mode: '0600'
 
 - name: Create installer configuration file
   template:
     src: templates/cfg-{{ target_config }}.j2
     dest: "{{ tempdir.path }}/inst.cfg"
+    mode: '0600'
 
 - name: Run Packer to build target image
   command:
