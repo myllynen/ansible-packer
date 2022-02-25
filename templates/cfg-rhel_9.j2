@@ -4,7 +4,7 @@ cmdline
 zerombr
 clearpart --all --initlabel --disklabel gpt
 
-{% set boot_parameters_full = console_boot_string + boot_parameters + ipv6_boot_string %}
+{% set boot_parameters_full = console_boot_string + boot_parameters %}
 {% if boot_pw_encrypted == '' %}
 bootloader --timeout 1 --append "{{ boot_parameters_full }}"
 {% else %}
@@ -139,7 +139,7 @@ perl-File-Temp
 
 %post
 grub2-editenv - unset menu_auto_hide
-echo "blacklist floppy" > /etc/modprobe.d/blacklist-floppy.conf
+echo "blacklist floppy" > /etc/modprobe.d/floppy-disable.conf
 sed -i -e '/cockpit/d' /etc/firewalld/zones/public.xml
 rm -f /etc/firewalld/zones/public.xml.old
 %end
@@ -163,10 +163,13 @@ systemctl enable serial-getty@ttyS0.service
 
 {% if disable_ipv6 | bool %}
 %post
+echo "net.ipv6.conf.all.disable_ipv6 = 1" > /etc/sysctl.d/50-ipv6.conf
+echo "net.ipv6.conf.default.disable_ipv6 = 1" >> /etc/sysctl.d/50-ipv6.conf
 for netconf in $(ls -1 /etc/NetworkManager/system-connections/*.nmconnection); do
   sed -i -e '/^\[ipv6\]$/,/^\[/ s/method=.*/method=disabled/' $netconf
 done
 sed -i -e '/^::1/d' /etc/hosts
+echo "AddressFamily inet" > /etc/ssh/sshd_config.d/50-ipv6.conf
 sed -i -e 's,^OPTIONS=",OPTIONS="-4 ,g' -e 's, ",",' /etc/sysconfig/chronyd
 sed -i -e 's,^IPv6_rpfilter=yes,IPv6_rpfilter=no,' /etc/firewalld/firewalld.conf
 sed -i -e '/dhcpv6-client/d' /etc/firewalld/zones/public.xml

@@ -5,7 +5,7 @@ cmdline
 zerombr
 clearpart --all --initlabel
 
-{% set boot_parameters_full = console_boot_string + boot_parameters + ipv6_boot_string %}
+{% set boot_parameters_full = console_boot_string + boot_parameters %}
 {% if boot_pw_encrypted == '' %}
 bootloader --timeout 1 --append "{{ boot_parameters_full }}"
 {% else %}
@@ -115,7 +115,7 @@ perl-File-Temp
 %end
 
 %post
-echo "blacklist floppy" > /etc/modprobe.d/blacklist-floppy.conf
+echo "blacklist floppy" > /etc/modprobe.d/floppy-disable.conf
 sed -i -e 's,^AllowZoneDrifting=yes,AllowZoneDrifting=no,' /etc/firewalld/firewalld.conf
 sed -i -e 's,^#UseDNS yes,UseDNS no,' /etc/ssh/sshd_config
 sed -i -e '/cockpit/d' /etc/firewalld/zones/public.xml
@@ -130,8 +130,11 @@ systemctl enable serial-getty@ttyS0.service
 
 {% if disable_ipv6 | bool %}
 %post
+echo "net.ipv6.conf.all.disable_ipv6 = 1" > /etc/sysctl.d/50-ipv6.conf
+echo "net.ipv6.conf.default.disable_ipv6 = 1" >> /etc/sysctl.d/50-ipv6.conf
 sed -i -e '/^::1/d' /etc/hosts
 sed -i -e 's,^OPTIONS=",OPTIONS="-4 ,g' -e 's, ",",' /etc/sysconfig/chronyd
+sed -Ei -e 's,^(#|)AddressFamily .*,AddressFamily inet,' /etc/ssh/sshd_config
 sed -i -e 's,^inet_protocols = all,inet_protocols = ipv4,' /etc/postfix/main.cf
 sed -i -e 's,^IPv6_rpfilter=yes,IPv6_rpfilter=no,' /etc/firewalld/firewalld.conf
 sed -i -e '/dhcpv6-client/d' /etc/firewalld/zones/public.xml

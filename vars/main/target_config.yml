@@ -1,3 +1,2 @@
 ---
-ipv6_boot_string: "{{ ' ipv6.disable=1' if disable_ipv6 | bool else ' ipv6.disable=0' }}"
 console_boot_string: "{{ 'console=tty0 console=ttyS0,115200 ' if serial_console_setup | bool else '' }}"
