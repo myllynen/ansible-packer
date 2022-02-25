@@ -170,12 +170,12 @@ rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
 
 {% if rh_register_command is defined %}
 # Update to latest packages
-{{ rh_register_command }} || exit 1
+{{ rh_register_command }} || sleep 3600
 yum -y update
 {% if rh_satellite_tools_install | bool %}
-yum -y install katello-host-tools katello-host-tools-tracer || exit 1
+yum -y install katello-host-tools katello-host-tools-tracer || sleep 3600
 {% endif %}
-subscription-manager unregister || exit 1
+subscription-manager unregister || sleep 3600
 subscription-manager clean
 rm -f /etc/rhsm/syspurpose/syspurpose.json /var/lib/rhsm/cache/* \
   /var/lib/rhsm/facts/*.json /var/lib/rhsm/repo*/*.repo /var/lib/rhsm/*_name
