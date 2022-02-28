@@ -61,7 +61,7 @@ profile = xccdf_org.ssgproject.content_profile_{{ security_profile }}
 %end
 {% endif %}
 
-%packages
+%packages{% if install_single_lang %} --instLangs en_US{% endif %}{% if install_exclude_docs %} --excludedocs{% endif %}{{''}}
 @Core
 bash-completion
 bind-utils
@@ -73,7 +73,6 @@ chrony
 libselinux-python
 man-pages
 nano
-openssh-clients
 policycoreutils-python
 psmisc
 setools-console
@@ -97,14 +96,17 @@ scap-security-guide
 perl-File-Temp
 {% endif %}
 
+-a*firmware*
 -biosdevname
 -btrfs-progs
 -dracut-config-rescue
--*firmware*
+-i*firmware*
 -NetworkManager-team
 -NetworkManager-tui
 -parted
 -plymouth
+-Red_Hat_Enterprise_Linux-Release_Notes-7-en-US
+-redhat-support-tool
 -rhc
 -*rhn*
 -sssd*
@@ -120,6 +122,12 @@ sed -i -e 's,^AllowZoneDrifting=yes,AllowZoneDrifting=no,' /etc/firewalld/firewa
 sed -i -e 's,^#UseDNS yes,UseDNS no,' /etc/ssh/sshd_config
 sed -i -e '/cockpit/d' /etc/firewalld/zones/public.xml
 rm -f /etc/firewalld/zones/public.xml.old
+{% if install_single_lang %}
+echo "%_install_langs en_US" > /etc/rpm/macros.install-langs-conf
+{% endif %}
+{% if install_exclude_docs %}
+echo "%_excludedocs 1" > /etc/rpm/macros.excludedocs-conf
+{% endif %}
 %end
 
 {% if serial_console_setup | bool %}
@@ -221,7 +229,7 @@ done
 # Services
 systemctl disable remote-fs.target
 systemctl disable systemd-readahead-collect.service systemd-readahead-drop.service systemd-readahead-replay.service
-rpm -q NetworkManager > /dev/null 2>&1 || systemctl enable network.service
+rpm -q NetworkManager > /dev/null 2>&1 && systemctl disable network || systemctl enable network
 
 # Watchdog
 sed -i -e 's,^#RuntimeWatchdogSec=0,RuntimeWatchdogSec=60s,' /etc/systemd/system.conf
@@ -243,13 +251,13 @@ truncate -s 0 /etc/machine-id /etc/resolv.conf
 # Clear caches, files, and logs
 /bin/rm -rf /root/* /tmp/* /tmp/.[a-zA-Z]* /var/tmp/*
 /bin/rm -rf /etc/*- /etc/*.bak /etc/*~ /etc/sysconfig/*~
-/bin/rm -rf /var/cache/dnf/* /var/cache/yum/*
+/bin/rm -rf /var/cache/dnf/* /var/cache/yum/* /var/log/rhsm/*
 /bin/rm -rf /var/lib/dnf/* /var/lib/yum/repos/* /var/lib/yum/yumdb/*
 /bin/rm -rf /var/lib/NetworkManager/* /var/lib/unbound/*.key
 /bin/rm -rf /var/log/*debug /var/log/anaconda /var/log/dmesg*
 /bin/rm -rf /var/log/grubby /var/log/grubby_prune_debug
 /bin/rm -rf /var/lib/cloud/* /var/log/cloud-init*.log
-truncate -s 0 /var/log/cron /var/log/rhsm/rhsmcertd.log /var/log/tuned/tuned.log
+truncate -s 0 /var/log/cron /var/log/tuned/tuned.log
 truncate -s 0 /var/log/audit/audit.log /var/log/messages /var/log/secure
 truncate -s 0 /var/log/btmp /var/log/wtmp /var/log/lastlog
 
