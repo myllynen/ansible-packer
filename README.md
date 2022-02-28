@@ -215,6 +215,9 @@ the build host by earlier builds. Using `-e use_force=true` adds the
 See also
 [https://github.com/myllynen/rhel-image](https://github.com/myllynen/rhel-image).
 
+See also
+[https://github.com/myllynen/rhel-ansible-roles](https://github.com/myllynen/rhel-ansible-roles).
+
 ## License
 
 GPLv2+
