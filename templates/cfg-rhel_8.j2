@@ -176,7 +176,6 @@ for netconf in $(ls -1 /etc/sysconfig/network-scripts/ifcfg-* | grep -v ifcfg-lo
   sed -i -e 's,^IPV6INIT=yes,IPV6INIT=no,' $netconf
 done
 sed -i -e '/^::1/d' /etc/hosts
-sed -i -e 's,^OPTIONS=",OPTIONS="-4 ,g' -e 's, ",",' /etc/sysconfig/chronyd
 sed -Ei -e 's,^(#|)AddressFamily .*,AddressFamily inet,' /etc/ssh/sshd_config
 sed -i -e 's,^IPv6_rpfilter=yes,IPv6_rpfilter=no,' /etc/firewalld/firewalld.conf
 sed -i -e '/dhcpv6-client/d' /etc/firewalld/zones/public.xml
