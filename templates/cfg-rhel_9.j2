@@ -216,7 +216,9 @@ yum -y install katello-host-tools katello-host-tools-tracer || exit 1
 {% endif %}
 subscription-manager unregister || exit 1
 subscription-manager clean
-rm -f /etc/rhsm/syspurpose/syspurpose.json /var/lib/rhsm/cache/* \
+rpm -e $(rpm -qa | grep katello-ca-consumer)
+mv /etc/rhsm/rhsm.conf.kat-backup /etc/rhsm/rhsm.conf           
+rm -f /etc/rhsm/syspurpose/syspurpose.json /etc/rhsm/ca/katello-*-ca.pem /var/lib/rhsm/cache/* \
   /var/lib/rhsm/facts/*.json /var/lib/rhsm/repo*/*.repo /var/lib/rhsm/*_name
 {% endif %}
 
