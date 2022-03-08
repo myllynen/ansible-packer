@@ -114,13 +114,18 @@ scap-security-guide
 perl-File-Temp
 {% endif %}
 
--a*firmware*
--dracut-config-rescue
+{% if install_single_lang %}
 -gawk-all-langpacks
 -glibc-gconv-extra
--i*firmware*
 -langpacks-*
+{% endif %}
+
+-a*firmware*
+-dracut-config-rescue
+-i*firmware*
 -lib*firmware*
+-linux-firmware
+-n*firmware*
 -NetworkManager-team
 -NetworkManager-tui
 -parted
