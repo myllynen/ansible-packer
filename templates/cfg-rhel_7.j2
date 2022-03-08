@@ -61,7 +61,7 @@ profile = xccdf_org.ssgproject.content_profile_{{ security_profile }}
 %end
 {% endif %}
 
-%packages{% if install_single_lang %} --instLangs en_US{% endif %}{% if install_exclude_docs %} --excludedocs{% endif %}{{''}}
+%packages{% if install_single_lang | bool %} --instLangs en_US{% endif %}{% if install_exclude_docs | bool %} --excludedocs{% endif %}{{''}}
 @Core
 bash-completion
 bind-utils
@@ -121,10 +121,10 @@ sed -i -e 's,^AllowZoneDrifting=yes,AllowZoneDrifting=no,' /etc/firewalld/firewa
 sed -i -e 's,^#UseDNS yes,UseDNS no,' /etc/ssh/sshd_config
 sed -i -e '/cockpit/d' /etc/firewalld/zones/public.xml
 rm -f /etc/firewalld/zones/public.xml.old
-{% if install_single_lang %}
+{% if install_single_lang | bool %}
 echo "%_install_langs en_US" > /etc/rpm/macros.install-langs-conf
 {% endif %}
-{% if install_exclude_docs %}
+{% if install_exclude_docs | bool %}
 echo "%_excludedocs 1" > /etc/rpm/macros.excludedocs-conf
 {% endif %}
 %end

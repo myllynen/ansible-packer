@@ -73,7 +73,7 @@ profile = xccdf_org.ssgproject.content_profile_{{ security_profile }}
 %end
 {% endif %}
 
-%packages{% if install_single_lang %} --instLangs en_US{% endif %}{% if install_exclude_docs %} --excludedocs{% endif %}{% if install_exclude_weak_deps %} --exclude-weakdeps{% endif %}{{''}}
+%packages{% if install_single_lang | bool %} --inst-langs en_US{% endif %}{% if install_exclude_docs | bool %} --excludedocs{% endif %}{% if install_exclude_weak_deps | bool %} --exclude-weakdeps{% endif %}{{''}}
 bash-completion
 bind-utils
 bzip2
@@ -114,7 +114,7 @@ scap-security-guide
 perl-File-Temp
 {% endif %}
 
-{% if install_single_lang %}
+{% if install_single_lang | bool %}
 -gawk-all-langpacks
 -glibc-gconv-extra
 -langpacks-*
@@ -143,13 +143,13 @@ perl-File-Temp
 grub2-editenv - unset menu_auto_hide
 sed -i -e '/cockpit/d' /etc/firewalld/zones/public.xml
 rm -f /etc/firewalld/zones/public.xml.old
-{% if install_single_lang %}
+{% if install_single_lang | bool %}
 echo "%_install_langs en_US" > /etc/rpm/macros.install-langs-conf
 {% endif %}
-{% if install_exclude_docs %}
+{% if install_exclude_docs | bool %}
 echo "%_excludedocs 1" > /etc/rpm/macros.excludedocs-conf
 {% endif %}
-{% if install_exclude_weak_deps %}
+{% if install_exclude_weak_deps | bool %}
 echo "install_weak_deps=False" >> /etc/dnf/dnf.conf
 {% endif %}
 %end
