@@ -1,5 +1,5 @@
 ---
-- name: Find old outputs
+- name: Locate old outputs
   vars:
     sys_temp: "{{ lookup('env', 'TMPDIR') | default('/tmp', true) }}"
   find:
@@ -27,33 +27,19 @@
     suffix: _packer_build_{{ packer_builder }}_{{ target_fullname }}
   register: tempdir
 
-- name: Create Packer build file
-  template:
-    src: templates/build-{{ packer_builder }}.json.j2
-    dest: "{{ tempdir.path }}/build.json"
-    mode: '0600'
-
 - name: Create installer configuration file
   template:
     src: templates/cfg-{{ target_config }}.j2
     dest: "{{ tempdir.path }}/inst.cfg"
     mode: '0600'
 
-- name: Run Packer to build target image
-  command:
-    cmd: "{{ packer_binary }} build -color=false {{ '-force' if use_force | bool else '' }} build.json"
-    chdir: "{{ tempdir.path }}"
-  environment:
-    PACKER_LOG: 1
-    CHECKPOINT_DISABLE: 1
-    TMPDIR: "{{ tempdir.path }}"
-    VCENTER_PASSWORD: "{{ vcenter_credentials.vcenter_password | default(omit) }}"
-  register: packer_result
-  failed_when: "'successful build' not in packer_result.stdout"
+- name: Include ISO tasks
+  include_tasks: iso.yml
+  when: packer_builder == 'iso'
 
-- name: Display Packer command output
-  debug:
-    var: packer_result.stdout
+- name: Include Packer tasks
+  include_tasks: packer.yml
+  when: packer_builder != 'iso'
 
 - name: Remove temporary work directory
   file:

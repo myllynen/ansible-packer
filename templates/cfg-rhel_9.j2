@@ -120,12 +120,15 @@ perl-File-Temp
 -langpacks-*
 {% endif %}
 
+{% if packer_builder != 'iso' %}
+#-linux-firmware
+-n*firmware*
+{% endif %}
+
 -a*firmware*
 -dracut-config-rescue
 -i*firmware*
 -lib*firmware*
-#-linux-firmware
--n*firmware*
 -NetworkManager-team
 -NetworkManager-tui
 -parted
@@ -270,6 +273,7 @@ systemctl disable dnf-makecache.timer nis-domainname.service remote-fs.target
 # Watchdog
 sed -i -e 's,^#RuntimeWatchdogSec=0,RuntimeWatchdogSec=60s,' /etc/systemd/system.conf
 
+{% if packer_builder != 'iso' %}
 # Remove machine identification and state
 for netdev in $(nmcli -t dev | cut -d: -f1 | grep -v lo); do
   sed -i -e '/uuid=/d' /etc/NetworkManager/system-connections/$netdev.nmconnection
@@ -296,6 +300,7 @@ truncate -s 0 /etc/machine-id /etc/resolv.conf
 truncate -s 0 /var/log/cron /var/log/tuned/tuned.log
 truncate -s 0 /var/log/audit/audit.log /var/log/messages /var/log/secure
 truncate -s 0 /var/log/btmp /var/log/wtmp /var/log/lastlog
+{% endif %}
 
 # Update initramfs
 dracut -f --regenerate-all

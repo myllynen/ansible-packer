@@ -1,0 +1,12 @@
+---
+# This is not a Packer builder configuration
+
+packer_target_pretty: Custom {{ target_fullname }}
+
+iso_boot_parameters: inst.geoloc=0 ip=dhcp
+
+output_directory: /tmp/iso_images
+
+image_checksum_file: "{{ image_name | default(target_fullname + '.iso', true) + '.sha256' }}"
+
+iso_volume_id: "{{ packer_target | upper | replace('_', '-') + '-0-Custom-' + ansible_facts.architecture }}"

@@ -5,6 +5,8 @@
 
 Ansible role for building OS images with Packer.
 
+Also support creating custom ISO installer images.
+
 ## Quick Usage Example
 
 This role builds custom operating system images with
@@ -12,6 +14,10 @@ This role builds custom operating system images with
 
 To build an image install Packer on a build host, install this role, and
 run a playbook as shown below.
+
+For completeness sake, this role can also be used to create custom ISO
+installer images (without Packer). See the example for creating custom
+ISO near the bottom of this page.
 
 After [installing Packer](https://www.packer.io/downloads), install this
 role:
@@ -165,6 +171,49 @@ ansible-playbook -i 192.168.122.123, -u builder packer.yml \
   -e image_name=test_image
 ```
 
+## Custom ISO Installer Image Creation 
+
+```
+---
+- name: Build custom ISO
+  hosts: all
+  vars:
+    # Using packer_ variables for compatibility,
+    # genisoimage not Packer used to build image
+    packer_builder: iso
+    packer_target: rhel_8_5
+    packer_target_pretty: Custom RHEL 8.5
+    image_name: custom.iso
+
+    root_password: "{{ image_password }}"
+    partitioning: auto
+
+    hostname: localhost.localdomain
+    ntp_servers: time.cloudflare.com
+    timezone: Europe/Helsinki
+    keyboard: fi
+
+    # Builder: ISO (not a Packer builder)
+    iso_boot_parameters: inst.geoloc=0 ip=dhcp
+    output_directory: /tmp/iso_images
+
+    iso:
+      rhel_8_5:
+        url: file:///VirtualMachines/boot/rhel-8.5-x86_64-dvd.iso
+        checksum: sha256:1f78e705cd1d8897a05afa060f77d81ed81ac141c2465d4763c0382aa96cadd0
+
+  roles:
+    - ansible-packer
+```
+
+To build custom ISO:
+
+```
+# Build latest RHEL 8 image with playbook defaults
+ansible-playbook -c local -i localhost, build_iso.yml \
+  -e image_password=foobar
+```
+
 ## Role Description
 
 [Ansible](https://www.ansible.com/) role to allow quick building of
@@ -185,7 +234,9 @@ to define OS versions and ISO locations.
 
 See [defaults/main/builder_qemu.yml](defaults/main/builder_qemu.yml) and
 [defaults/main/builder_vmware.yml](defaults/main/builder_vmware.yml) for
-builder related variables and their default values.
+Packer builder related variables and their default values. ISO related
+variables are in
+[defaults/main/builder_iso.yml](defaults/main/builder_iso.yml).
 
 Create BIOS/UEFI bootable image setting _bios_uefi\_boot_ to `true`,
 otherwise the image supports only the platform used for building the

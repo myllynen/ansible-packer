@@ -1,0 +1,69 @@
+---
+- name: Build custom ISO
+  hosts: all
+  vars:
+    #
+    # Base configuration
+    #
+    # Using packer_ variables for compatibility,
+    # genisoimage not Packer used to build image
+    packer_builder: iso
+    packer_target: rhel_8_5
+    packer_target_pretty: Custom RHEL 8.5
+    image_name: custom.iso
+
+    do_cleanup: false
+    use_force: false
+
+    #
+    # OS configuration
+    #
+    boot_password: "{{ image_password }}"
+    root_password: "{{ image_password }}"
+    # auto/custom/default/single
+    partitioning: auto
+    disable_ipv6: true
+    selinux: enforcing
+    #security_profile: cis_server_l1
+    boot_parameters: net.ifnames.prefix=net quiet systemd.show_status=yes
+
+    hostname: localhost.localdomain
+    ntp_servers: time.cloudflare.com
+    timezone: Europe/Helsinki
+    keyboard: fi
+
+    create_admin: true
+    admin_user:
+      uid: 4444
+      gid: 4444
+      name: admin
+      group: admin
+      groups: wheel
+      home: /home/admin
+      gecos: Admin User
+      #ssh_key: "ssh-rsa ... admin@image"
+      passwordless_sudo: true
+
+    root_permit_local: true
+    root_permit_ssh: "prohibit-password"
+    root_permit_override_security_policy: false
+    #root_ssh_key: "ssh-rsa ... root@image"
+
+    #
+    # Builder configurations
+    #
+
+    # Builder: ISO (not a Packer builder)
+    iso_boot_parameters: inst.geoloc=0 ip=dhcp
+    output_directory: /tmp/iso_images
+
+    #
+    # OS installer configuration
+    #
+    iso:
+      rhel_8:
+        url: file:///VirtualMachines/boot/rhel-8.5-x86_64-dvd.iso
+        checksum: sha256:1f78e705cd1d8897a05afa060f77d81ed81ac141c2465d4763c0382aa96cadd0
+
+  roles:
+    - ansible-packer

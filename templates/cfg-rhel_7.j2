@@ -234,6 +234,7 @@ rpm -q NetworkManager > /dev/null 2>&1 && systemctl disable network || systemctl
 # Watchdog
 sed -i -e 's,^#RuntimeWatchdogSec=0,RuntimeWatchdogSec=60s,' /etc/systemd/system.conf
 
+{% if packer_builder != 'iso' %}
 # Remove machine identification and state
 for netdev in $(nmcli -t dev | cut -d: -f1 | grep -v lo); do
   sed -i -e '/HWADDR=/d' /etc/sysconfig/network-scripts/ifcfg-$netdev
@@ -260,6 +261,7 @@ truncate -s 0 /etc/machine-id /etc/resolv.conf
 truncate -s 0 /var/log/cron /var/log/tuned/tuned.log
 truncate -s 0 /var/log/audit/audit.log /var/log/messages /var/log/secure
 truncate -s 0 /var/log/btmp /var/log/wtmp /var/log/lastlog
+{% endif %}
 
 # Update initramfs
 dracut -f --regenerate-all

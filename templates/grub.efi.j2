@@ -1,0 +1,30 @@
+set default="1"
+
+function load_video {
+  insmod efi_gop
+  insmod efi_uga
+  insmod video_bochs
+  insmod video_cirrus
+  insmod all_video
+}
+
+load_video
+set gfxpayload=keep
+insmod gzio
+insmod part_gpt
+insmod ext2
+
+#set timeout=60
+### END /etc/grub.d/00_header ###
+
+search --no-floppy --set=root -l '{{ iso_volume_id }}'
+
+### BEGIN /etc/grub.d/10_linux ###
+menuentry 'Install {{ packer_target_pretty }}' --class fedora --class gnu-linux --class gnu --class os {
+	linuxefi /images/pxeboot/vmlinuz inst.stage2=hd:LABEL={{ iso_volume_id }} quiet {{ boot_parameters }} inst.ks=cdrom:/inst.cfg {{ iso_boot_parameters }}
+	initrdefi /images/pxeboot/initrd.img
+}
+menuentry 'Test this media & install {{ packer_target_pretty }}' --class fedora --class gnu-linux --class gnu --class os {
+	linuxefi /images/pxeboot/vmlinuz inst.stage2=hd:LABEL={{ iso_volume_id }} quiet rd.live.check {{ boot_parameters }} inst.ks=cdrom:/inst.cfg {{ iso_boot_parameters }}
+	initrdefi /images/pxeboot/initrd.img
+}
