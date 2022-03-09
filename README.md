@@ -173,6 +173,15 @@ ansible-playbook -i 192.168.122.123, -u builder packer.yml \
 
 ## Custom ISO Installer Image Creation 
 
+A custom ISO can be used to perform unattended OS installation based on
+the configuration provided in a playbook. User would then only need to
+provide the correct IP address for the host on the boot prompt if not
+using DHCP. For the RHEL installer (Anaconda) the static network boot
+parameter format is ip=_ip::gateway:netmask:hostname:interface:none_,
+see
+[RHEL documentation](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/performing_an_advanced_rhel_installation/kickstart-and-advanced-boot-options_installing-rhel-as-an-experienced-user#network-boot-options_kickstart-and-advanced-boot-options)
+for more details.
+
 A playbook to build custom ISO is almost identical to the above
 playbooks used to build OS images with Packer:
 
