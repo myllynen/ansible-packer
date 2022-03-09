@@ -17,7 +17,7 @@ run a playbook as shown below.
 
 For completeness sake, this role can also be used to create custom ISO
 installer images (without Packer). See the example for creating custom
-ISO near the bottom of this page.
+ISO later in this page.
 
 After [installing Packer](https://www.packer.io/downloads), install this
 role:
@@ -173,6 +173,9 @@ ansible-playbook -i 192.168.122.123, -u builder packer.yml \
 
 ## Custom ISO Installer Image Creation 
 
+A playbook to build custom ISO is almost identical to the above
+playbooks used to build OS images with Packer:
+
 ```
 ---
 - name: Build custom ISO
@@ -206,7 +209,7 @@ ansible-playbook -i 192.168.122.123, -u builder packer.yml \
     - ansible-packer
 ```
 
-To build custom ISO:
+To build custom ISO on a build host:
 
 ```
 # Build latest RHEL 8 image with playbook defaults
