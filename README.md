@@ -171,7 +171,7 @@ ansible-playbook -i 192.168.122.123, -u builder packer.yml \
   -e image_name=test_image
 ```
 
-## Custom ISO Installer Image Creation 
+## Custom ISO Installer Image Creation
 
 A custom ISO can be used to perform unattended OS installation based on
 the configuration provided in a playbook. User would then only need to
