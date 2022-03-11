@@ -76,7 +76,6 @@ profile = xccdf_org.ssgproject.content_profile_{{ security_profile }}
 %packages{% if install_single_lang | bool %} --inst-langs en_US{% endif %}{% if install_exclude_docs | bool %} --excludedocs{% endif %}{% if install_exclude_weak_deps | bool %} --exclude-weakdeps{% endif %}{{''}}
 bash-completion
 bind-utils
-bzip2
 #cloud-init
 #cloud-utils-growpart
 glibc-minimal-langpack
