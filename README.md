@@ -5,7 +5,7 @@
 
 Ansible role for building OS images with Packer.
 
-Also support creating custom ISO installer images.
+Also supports creating custom ISO installer images.
 
 ## Quick Usage Example
 
