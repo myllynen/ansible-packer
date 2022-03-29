@@ -3,7 +3,7 @@
 
 packer_target_pretty: Custom {{ target_fullname }}
 
-iso_boot_parameters: inst.geoloc=0 ip=dhcp
+iso_boot_parameters: inst.geoloc=0 ip=
 
 output_directory: /tmp/iso_images
 

@@ -47,11 +47,13 @@ selinux --{{ selinux }}
 authselect --useshadow --passalgo sha512
 rootpw --iscrypted {{ root_pw_encrypted }}
 
+{% if packer_builder != 'iso' %}
 {% if network_setup_dhcp | bool %}
 {% if not disable_ipv6 | bool %}
 network --device net0 --bootproto dhcp --onboot yes --hostname {{ hostname }}
 {% else %}
 network --device net0 --bootproto dhcp --onboot yes --hostname {{ hostname }} --noipv6
+{% endif %}
 {% endif %}
 {% endif %}
 
@@ -266,6 +268,14 @@ rpm -q NetworkManager > /dev/null 2>&1 || systemctl enable network.service
 
 # Watchdog
 sed -i -e 's,^#RuntimeWatchdogSec=0,RuntimeWatchdogSec=60s,' /etc/systemd/system.conf
+
+{% if packer_builder == 'iso' %}
+# Clean up permanent network configuration file
+for netdev in $(nmcli -t dev | cut -d: -f1 | grep -v lo); do
+  sed -i -e '/DHCP_/d' /etc/sysconfig/network-scripts/ifcfg-$netdev
+  sed -i -e '/__/d' /etc/sysconfig/network-scripts/ifcfg-$netdev
+done
+{% endif %}
 
 {% if packer_builder != 'iso' %}
 # Remove machine identification and state

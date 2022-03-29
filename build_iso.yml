@@ -27,7 +27,7 @@
     #security_profile: cis_server_l1
     boot_parameters: net.ifnames.prefix=net quiet systemd.show_status=yes
 
-    hostname: localhost.localdomain
+    # hostname not used with ISO, set the ip= boot parameter instead
     ntp_servers: time.cloudflare.com
     timezone: Europe/Helsinki
     keyboard: fi
@@ -54,7 +54,7 @@
     #
 
     # Builder: ISO (not a Packer builder)
-    iso_boot_parameters: inst.geoloc=0 ip=dhcp
+    iso_boot_parameters: inst.geoloc=0 ip=192.168.122.123::192.168.122.1:255.255.255.0:server.example.com:net0:none
     output_directory: /tmp/iso_images
 
     #
