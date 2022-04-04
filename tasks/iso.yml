@@ -33,92 +33,63 @@
     state: directory
   register: iso_build_dir
 
-- name: Create OS ISO mount directory
+- name: Copy OS ISO files to custom ISO build directory
+  command: 7z x -o{{ iso_build_dir.path }} {{ os_iso_path }}
+
+- name: Create custom ISO boot loader files
+  template:
+    src: templates/{{ item.src }}
+    dest: "{{ iso_build_dir.path + '/' + item.dest }}"
+    mode: '0644'
+  loop:
+    - { 'src': 'grub.efi.j2', 'dest': 'EFI/BOOT/grub.cfg' }
+    - { 'src': 'grub.iso.j2', 'dest': 'isolinux/grub.conf' }
+    - { 'src': 'isolinux.cfg.j2', 'dest': 'isolinux/isolinux.cfg' }
+  loop_control:
+    label: "{{ item.dest }}"
+
+- name: Copy installer configuration
+  copy:
+    src: "{{ tempdir.path + '/inst.cfg' }}"
+    dest: "{{ iso_build_dir.path + '/inst.cfg' }}"
+    mode: '0600'
+
+- name: Remove existing custom ISO file
   file:
-    path: "{{ tempdir.path + '/os-iso-mount' }}"
-    state: directory
-  register: os_iso_mount_dir
+    path: "{{ image_path }}"
+    state: absent
+  when: use_force | bool and iso_image.stat.exists
 
-- name: Create custom ISO installer
-  block:
-    - name: Mount OS ISO image
-      mount:
-        path: "{{ os_iso_mount_dir.path }}"
-        src: "{{ os_iso_path }}"
-        fstype: iso9660
-        opts: loop
-        state: mounted
-        fstab: "{{ tempdir.path + '/tmp.fstab' }}"
-      become: true
+- name: Build custom ISO file
+  command:
+    cmd: >
+      genisoimage
+      -b isolinux/isolinux.bin
+      -c isolinux/boot.cat
+      -no-emul-boot
+      -boot-info-table
+      -boot-load-size 4
+      -eltorito-alt-boot
+      -e images/efiboot.img
+      -no-emul-boot
+      -input-charset UTF-8
+      -J -joliet-long -l -r -T
+      -V {{ iso_volume_id }}
+      -o {{ image_path }} .
+    chdir: "{{ iso_build_dir.path }}"
 
-    - name: Copy OS ISO files to custom ISO build directory
-      synchronize:
-        src: "{{ os_iso_mount_dir.path + '/' }}"
-        dest: "{{ iso_build_dir.path + '/' }}"
-        rsync_opts:
-          - "--chmod=D0755,F0644"
+- name: Make custom ISO hybrid bootable
+  command: isohybrid --uefi {{ image_path }}
 
-    - name: Create custom ISO boot loader files
-      template:
-        src: templates/{{ item.src }}
-        dest: "{{ iso_build_dir.path + '/' + item.dest }}"
-        mode: '0644'
-      loop:
-        - { 'src': 'grub.efi.j2', 'dest': 'EFI/BOOT/grub.cfg' }
-        - { 'src': 'grub.iso.j2', 'dest': 'isolinux/grub.conf' }
-        - { 'src': 'isolinux.cfg.j2', 'dest': 'isolinux/isolinux.cfg' }
-      loop_control:
-        label: "{{ item.dest }}"
+- name: Implant MD5 checksum into custom ISO
+  command: implantisomd5 {{ image_path }}
 
-    - name: Copy installer configuration
-      copy:
-        src: "{{ tempdir.path + '/inst.cfg' }}"
-        dest: "{{ iso_build_dir.path + '/inst.cfg' }}"
-        mode: '0600'
+- name: Calculate custom ISO SHA256 checksum
+  command: sha256sum {{ image_path }}
+  register: sha256sum_result
 
-    - name: Remove existing custom ISO file
-      file:
-        path: "{{ image_path }}"
-        state: absent
-      when: use_force | bool and iso_image.stat.exists
-
-    - name: Build custom ISO file
-      command:
-        cmd: >
-          genisoimage
-          -b isolinux/isolinux.bin
-          -c isolinux/boot.cat
-          -no-emul-boot
-          -boot-info-table
-          -boot-load-size 4
-          -eltorito-alt-boot
-          -e images/efiboot.img
-          -no-emul-boot
-          -input-charset UTF-8
-          -J -joliet-long -l -r -T
-          -V {{ iso_volume_id }}
-          -o {{ image_path }} .
-        chdir: "{{ iso_build_dir.path }}"
-
-    - name: Make custom ISO hybrid bootable
-      command: isohybrid --uefi {{ image_path }}
-
-    - name: Implant MD5 checksum on custom ISO
-      command: implantisomd5 {{ image_path }}
-
-    - name: Calculate custom ISO SHA256 checksum
-      command: sha256sum {{ image_path }}
-      register: sha256sum_result
-
-    - name: Write SHA256 checksum to image checksum file
-      copy:
-        content: "{{ sha256sum_result.stdout + '\n' }}"
-        dest: "{{ output_directory + '/' + image_checksum_file }}"
-        mode: '0644'
-  always:
-    - name: Unmount OS ISO image
-      mount:
-        path: "{{ os_iso_mount_dir.path }}"
-        state: unmounted
-        fstab: "{{ tempdir.path + '/tmp.fstab' }}"
-      become: true
+- name: Write SHA256 checksum to image checksum file
+  copy:
+    content: "{{ sha256sum_result.stdout + '\n' }}"
+    dest: "{{ output_directory + '/' + image_checksum_file }}"
+    mode: '0644'
