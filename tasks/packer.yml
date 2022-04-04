@@ -5,15 +5,14 @@
     dest: "{{ tempdir.path }}/build.json"
     mode: '0600'
 
-- name: Run Packer to build target image
-  environment:
-    PACKER_LOG: 1
-    CHECKPOINT_DISABLE: 1
-    TMPDIR: "{{ tempdir.path }}"
-    VCENTER_PASSWORD: "{{ vcenter_credentials.vcenter_password | default(omit) }}"
-  command:
-    cmd: "{{ packer_binary }} build -color=false {{ '-force' if use_force | bool else '' }} build.json"
-    chdir: "{{ tempdir.path }}"
+- name: Run Packer to build target image (this will take a while)
+  shell: |
+    cd {{ tempdir.path }}
+    export PACKER_LOG=1
+    export CHECKPOINT_DISABLE=1
+    export TMPDIR="{{ tempdir.path }}"
+    export VCENTER_PASSWORD="{{ vcenter_credentials.vcenter_password | default('', true) }}"
+    {{ packer_binary }} build -color=false {{ '-force' if use_force | bool else '' }} build.json
   register: packer_result
   failed_when: "'successful build' not in packer_result.stdout"
 
