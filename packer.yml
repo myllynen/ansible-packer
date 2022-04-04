@@ -11,6 +11,7 @@
     image_name: packer_image.qcow2
     disk_size: 30720
 
+    # Build options
     do_cleanup: true
     use_force: false
 
