@@ -12,6 +12,7 @@
     packer_target_pretty: Custom RHEL 8.5
     image_name: custom.iso
 
+    # Build options
     do_cleanup: false
     use_force: false
 
@@ -54,6 +55,8 @@
     #
 
     # Builder: ISO (not a Packer builder)
+    # Set ip= to create fully automated ISO for one particular server only
+    # Use 'ip=' for generic ISO and require typing IP info on boot from ISO
     iso_boot_parameters: inst.geoloc=0 ip=192.168.122.123::192.168.122.1:255.255.255.0:server.example.com:net0:none
     output_directory: /tmp/iso_images
 
