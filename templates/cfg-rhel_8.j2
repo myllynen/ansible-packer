@@ -210,6 +210,9 @@ vmtoolsd -b /run/vmtoolsd.pid
 # Import Red Hat RPM GPG key
 rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
 
+# Remote execution directory if tmp dirs are noexec
+mkdir -p -m 0700 /var/lib/exec
+
 {% if rh_register_command is defined %}
 # Update to latest packages
 {{ rh_register_command }} || exit 1
@@ -236,6 +239,7 @@ chmod 0600 {{ admin_user.home }}/.ssh/authorized_keys
 chown -R {{ admin_user.uid }}:{{ admin_user.gid }} {{ admin_user.home }}/.ssh
 restorecon -R {{ admin_user.home }}/.ssh
 {% endif %}
+chown -R {{ admin_user.uid }}:{{ admin_user.gid }} /var/lib/exec
 {% if admin_user.passwordless_sudo is defined and admin_user.passwordless_sudo | bool %}
 {% if admin_user.groups is not defined or 'wheel' not in admin_user.groups %}
 usermod -a -G wheel {{ admin_user.name }}
