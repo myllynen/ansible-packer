@@ -3,21 +3,21 @@
     {
       "type": "qemu",
 
-      "accelerator": "{{ qemu_accelerator }}",
       "qemu_binary": "{{ qemu_binary }}",
+      "accelerator": "{{ qemu_accelerator }}",
       "headless": true,
       "output_directory": "{{ output_directory }}",
 
       "vm_name": "{{ vm_name + '.qcow2' if '.qcow2' not in vm_name else vm_name }}",
 
+      "cpus": {{ vm_cpus }},
+      "memory": {{ vm_memory }},
 {% if vm_firmware is defined %}
       "firmware": "{{ vm_firmware }}",
 {% endif %}
-      "cpus": {{ vm_cpus }},
-      "memory": {{ vm_memory }},
-      "disk_size": "{{ vm_disk_size }}",
 
       "disk_interface": "virtio",
+      "disk_size": "{{ vm_disk_size }}",
       "disk_cache": "none",
       "format": "qcow2",
 

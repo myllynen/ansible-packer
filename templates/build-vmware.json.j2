@@ -13,22 +13,20 @@
       "insecure_connection": "{{ vcenter_insecure_connection }}",
 
       "datacenter": "{{ vcenter_datacenter }}",
-
-      "folder": "{{ vcenter_folder }}",
-
-{% if vcenter_host is defined %}
-      "host": "{{ vcenter_host }}",
-{% endif %}
 {% if vcenter_cluster is defined %}
       "cluster": "{{ vcenter_cluster }}",
 {% endif %}
-
+{% if vcenter_host is defined %}
+      "host": "{{ vcenter_host }}",
+{% endif %}
 {% if vcenter_resource_pool is defined %}
       "resource_pool": "{{ vcenter_resource_pool }}",
 {% endif %}
       "datastore": "{{ vcenter_datastore }}",
 
+      "folder": "{{ vcenter_folder }}",
       "convert_to_template": "{{ vcenter_convert_to_template }}",
+
 {% if vcenter_content_library is defined %}
       "content_library_destination" : {
         "library": "{{ vcenter_content_library.library }}",
