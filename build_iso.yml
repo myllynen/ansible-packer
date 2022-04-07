@@ -13,7 +13,7 @@
     image_name: custom.iso
 
     # Build options
-    do_cleanup: true
+    do_cleanup: false
     use_force: false
 
     #

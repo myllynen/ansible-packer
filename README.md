@@ -281,9 +281,6 @@ See also
 See also
 [https://github.com/myllynen/rhel-ansible-roles](https://github.com/myllynen/rhel-ansible-roles).
 
-See also
-[https://github.com/myllynen/windows-ansible-roles](https://github.com/myllynen/windows-ansible-roles).
-
 ## License
 
 GPLv2+
