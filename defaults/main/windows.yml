@@ -1,0 +1,83 @@
+---
+# Full path for additional drivers for the target Windows version
+# For QEMU/KVM example, see the virtio-win-drivers-prepare script
+# https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/stable-virtio/virtio-win.iso
+#win_drivers_path:
+
+# Windows ISO label
+win_iso_volume_id: WINDOWS_ISO
+
+# Disk with PowerShell scripts
+win_src_disk: "{{ 'A:' if packer_builder != 'iso' else 'D:' }}"
+
+# Administrator account will also use this password with ISO,
+# account will disabled and password reset during VM sysprep.
+#win_winrm_password:
+
+# Either bios, uefi, or custom
+# See below for custom example
+win_partitioning: bios
+
+win_timezone: UTC
+
+# System locale setting
+win_locale_system: en-US
+# UI locale setting
+win_locale_ui: en-US
+# User locale setting
+win_locale_user: en-US
+# Input locale setting
+# https://docs.microsoft.com/windows-hardware/manufacture/desktop/default-input-locales-for-windows-language-packs
+win_locale_input: en-US
+
+#win_product_key:
+#win_registered_owner:
+#win_registered_organization:
+
+# System customization script, runs before enabling WinRM
+#win_customize_script: |
+
+win_winrm_setup: |
+  # configure-winrm.ps1 always ensures the service is running,
+  # this part should configure WinRM per the local requirements
+  Set-Item -Path WSMan:\localhost\Service\Auth\Basic -Value $true
+  Set-Item -Path WSMan:\localhost\Service\AllowUnencrypted -Value $true
+
+# Additional Packer ansible-playbook call parameters with VM template
+win_ansible_arguments: '"--extra-vars", "ansible_winrm_scheme=http"'
+
+# List of tasks or roles to run on the VM,
+# all roles must be included with full path
+win_provisioner_playbook: |2
+    #vars:
+    #  boot_configuration_timeout: 5
+    #  dotnet_optimize_all_assemblies: true
+    tasks:
+      - win_ping:
+    #roles:
+    #  - /tmp/roles/accounts_local
+    #  - /tmp/roles/boot_configuration
+    #  #- /tmp/roles/system_update
+    #  - /tmp/roles/dotnet_optimize
+    #  - /tmp/roles/performance_tuning
+    #  - /tmp/roles/performance_tuning
+    #  - /tmp/roles/service_enablement
+    #  - /tmp/roles/service_recovery
+
+#win_custom_partitioning_create: |
+#    <CreatePartition wcm:action="add">
+#        <Order>1</Order>
+#        <Type>Primary</Type>
+#        <Extend>true</Extend>
+#    </CreatePartition>
+
+#win_custom_partitioning_modify: |
+#    <ModifyPartition wcm:action="modify">
+#        <Order>1</Order>
+#        <PartitionID>1</PartitionID>
+#        <Label>Windows</Label>
+#        <Format>NTFS</Format>
+#        <Letter>C</Letter>
+#    </ModifyPartition>
+
+#win_custom_partitioning_install_to: 1

@@ -1,0 +1,111 @@
+{
+  "variables": {
+    "vcenter_password": "{% raw %}{{env `VCENTER_PASSWORD`}}{% endraw %}",
+    "win_winrm_password": "{% raw %}{{env `WIN_WINRM_PASSWORD`}}{% endraw %}"
+  },
+  "sensitive-variables": ["vcenter_password", "win_winrm_password"],
+  "builders": [
+    {
+      "type": "vsphere-iso",
+
+      "vcenter_server": "{{ vcenter_credentials.vcenter_server }}",
+      "username": "{{ vcenter_credentials.vcenter_username | replace('\\', '\\\\') }}",
+      "password": "{% raw %}{{user `vcenter_password`}}{% endraw %}",
+      "insecure_connection": "{{ vcenter_insecure_connection }}",
+
+      "datacenter": "{{ vcenter_datacenter }}",
+{% if vcenter_cluster is defined %}
+      "cluster": "{{ vcenter_cluster }}",
+{% endif %}
+{% if vcenter_host is defined %}
+      "host": "{{ vcenter_host }}",
+{% endif %}
+{% if vcenter_resource_pool is defined %}
+      "resource_pool": "{{ vcenter_resource_pool }}",
+{% endif %}
+      "datastore": "{{ vcenter_datastore }}",
+
+      "folder": "{{ vcenter_folder }}",
+      "convert_to_template": "{{ vcenter_convert_to_template }}",
+
+{% if vcenter_content_library is defined %}
+      "content_library_destination" : {
+        "library": "{{ vcenter_content_library.library }}",
+{% if vcenter_content_library.name is defined %}
+        "name": "{{ vcenter_content_library.name }}",
+{% endif %}
+        "ovf": "{{ vcenter_content_library.ovf }}",
+        "destroy": "{{ vcenter_content_library.destroy }}"
+{% endif %}
+
+      "vm_name": "{{ vm_name }}",
+
+      "CPUs": {{ vm_cpus }},
+      "RAM": {{ vm_memory }},
+      "RAM_reserve_all": true,
+      "guest_os_type": "{{ vm_guest_os_type }}",
+{% if vm_firmware is defined %}
+      "firmware": "{{ vm_firmware }}",
+{% endif %}
+
+      "disk_controller_type": "pvscsi",
+      "storage": [
+        {
+          "disk_size": "{{ vm_disk_size }}",
+          "disk_thin_provisioned": true
+        }
+      ],
+
+      "network_adapters": [
+        {
+          "network": "{{ vcenter_network }}",
+          "network_card": "vmxnet3"
+        }
+      ],
+
+      "iso_url": "{{ iso[packer_target].url }}",
+      "iso_checksum": "{{ iso[packer_target].checksum }}",
+
+      "iso_paths": [
+        "[] /usr/lib/vmware/isoimages/windows.iso"
+      ],
+
+      "floppy_files": [
+        "autounattend.xml",
+        "optimize-powershell.ps1",
+        "customize-system.ps1",
+        "configure-winrm.ps1",
+        "sysprep.xml"
+      ],
+
+{% if custom_json_builder is defined %}
+{{ custom_json_builder }}
+{% endif %}
+
+      "communicator": "winrm",
+      "winrm_timeout": "15m",
+      "winrm_username": "winrm",
+      "winrm_password": "{% raw %}{{user `win_winrm_password`}}{% endraw %}",
+      "winrm_no_proxy": true,
+      "winrm_use_ssl": false,
+
+      "shutdown_command": "\\Windows\\System32\\Sysprep\\sysprep /oobe /generalize /mode:vm /shutdown /quiet /unattend:{{ win_src_disk }}\\sysprep.xml"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "ansible",
+      "use_proxy": false,
+      "playbook_file": "./win_packer.yml",
+      "user": "winrm",
+      "extra_arguments": [
+{{ win_ansible_arguments }}
+      ]
+{% if custom_json_provisioner is not defined %}
+    }
+{% else %}
+    },
+{{ custom_json_provisioner }}
+{% endif %}
+  ]
+}

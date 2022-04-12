@@ -17,9 +17,13 @@ galaxy_info:
   platforms:
     - name: EL
       versions:
+        - 7
         - 8
         - 9
     - name: Fedora
+      versions:
+        - any
+    - name: Windows
       versions:
         - any
 
@@ -30,5 +34,6 @@ galaxy_info:
     - rhel
     - centos
     - fedora
+    - windows
 
 dependencies: []

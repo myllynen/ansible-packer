@@ -1,0 +1,73 @@
+{
+  "variables": {
+    "win_winrm_password": "{% raw %}{{env `WIN_WINRM_PASSWORD`}}{% endraw %}"
+  },
+  "sensitive-variables": ["win_winrm_password"],
+  "builders": [
+    {
+      "type": "qemu",
+
+      "qemu_binary": "{{ qemu_binary }}",
+      "accelerator": "{{ qemu_accelerator }}",
+      "headless": true,
+      "output_directory": "{{ output_directory }}",
+
+      "vm_name": "{{ vm_name + '.qcow2' if '.qcow2' not in vm_name else vm_name }}",
+
+      "cpus": {{ vm_cpus }},
+      "memory": {{ vm_memory }},
+{% if vm_firmware is defined %}
+      "firmware": "{{ vm_firmware }}",
+{% endif %}
+
+      "disk_interface": "virtio",
+      "disk_size": "{{ vm_disk_size }}",
+      "disk_cache": "none",
+      "format": "qcow2",
+
+      "net_device": "virtio-net",
+
+      "iso_url": "{{ iso[packer_target].url }}",
+      "iso_checksum": "{{ iso[packer_target].checksum }}",
+
+      "cd_files": ["{{ win_drivers_path }}/*"],
+
+      "floppy_files": [
+        "autounattend.xml",
+        "optimize-powershell.ps1",
+        "customize-system.ps1",
+        "configure-winrm.ps1",
+        "sysprep.xml"
+      ],
+
+{% if custom_json_builder is defined %}
+{{ custom_json_builder }}
+{% endif %}
+
+      "communicator": "winrm",
+      "winrm_timeout": "15m",
+      "winrm_username": "winrm",
+      "winrm_password": "{% raw %}{{user `win_winrm_password`}}{% endraw %}",
+      "winrm_no_proxy": true,
+      "winrm_use_ssl": false,
+
+      "shutdown_command": "\\Windows\\System32\\Sysprep\\sysprep /oobe /generalize /mode:vm /shutdown /quiet /unattend:{{ win_src_disk }}\\sysprep.xml"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "ansible",
+      "use_proxy": false,
+      "playbook_file": "./win_packer.yml",
+      "user": "winrm",
+      "extra_arguments": [
+{{ win_ansible_arguments }}
+      ]
+{% if custom_json_provisioner is not defined %}
+    }
+{% else %}
+    },
+{{ custom_json_provisioner }}
+{% endif %}
+  ]
+}

@@ -3,24 +3,58 @@
 [![License: GPLv2](https://img.shields.io/badge/license-GPLv2-brightgreen.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
 [![License: GPLv3](https://img.shields.io/badge/license-GPLv3-brightgreen.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-Ansible role for building OS images with Packer.
+Ansible role for building VM images with Packer.
 
 Also supports creating custom ISO installer images.
 
+## Introduction
+
+This role builds custom Linux and Windows VM template images using
+[Packer](https://www.packer.io/). OS installation parameters are
+provided as Ansible variables to allow for high degree of
+customizations. Same customizations can be applied to both VM template
+images and unattended BIOS/UEFI ISO installer images.
+
+See [this example](./packer.yml) how a playbook could look like.
+
+Currently (2022-04) tested Packer builders (platforms) are:
+
+* [QEMU](https://www.packer.io/plugins/builders/qemu) (for KVM/libvirt/RHV/etc)
+* [VMware vSphere](https://www.packer.io/plugins/builders/vsphere/vsphere-iso)
+
+Currently tested OS variants and versions are:
+
+* [RHEL](https://www.redhat.com/en/technologies/linux-platforms/enterprise-linux) 7, 8, 9
+* [Windows Server](https://www.microsoft.com/en-us/windows-server) 2019, 2022
+
+VM images are prepared for imaging at the end of automated installation,
+RHEL with
+[kickstart post-scripts](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html-single/performing_an_advanced_rhel_installation/index)
+and Windows with
+[sysprep](https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/sysprep--system-preparation--overview).
+
+VM images can also be further customized and updated automatically at
+the end of the installation by using the Packer
+[Ansible provisioner](https://www.packer.io/plugins/provisioners/ansible/ansible).
+VMware VM images are
+[VMware Tools](https://docs.vmware.com/en/VMware-Tools) enabled so the
+hypervisor can customize the OS in VMs created from these images.
+
+Both RHEL and Windows custom ISO installer images embed and load the
+installer configuration automatically on boot to proceed to install the
+OS completely unattended.
+
+Less tested but verified to work in the past OS variants include:
+
+* [CentOS](https://www.centos.org/) 8, 9
+* [Fedora](https://getfedora.org/) 34, 35
+
 ## Quick Usage Example
 
-This role builds custom operating system images with
-[Packer](https://www.packer.io/).
+To build an image [install Packer](https://www.packer.io/downloads) on a
+build host, install this role, and run a playbook as shown below.
 
-To build an image install Packer on a build host, install this role, and
-run a playbook as shown below.
-
-For completeness sake, this role can also be used to create custom ISO
-installer images (without Packer). See the example for creating custom
-ISO later in this page.
-
-After [installing Packer](https://www.packer.io/downloads), install this
-role:
+After Packer installation, install this role:
 
 ```
 mkdir roles
@@ -73,8 +107,7 @@ This is a basic playbook for building an image with Qemu:
     - ansible-packer
 ```
 
-This is a more complete playbook for building an image with VMware
-vSphere:
+This is a more complete playbook for building an image on VMware:
 
 ```
 ---
@@ -175,10 +208,10 @@ ansible-playbook -i 192.168.122.123, -u builder packer.yml \
 
 A custom ISO can be used to perform unattended OS installation based on
 the configuration provided in a playbook. User would then only need to
-provide the correct IP address for the host on the boot prompt if not
-using DHCP. For the RHEL installer (Anaconda) the static network boot
-parameter format is ip=_ip::gateway:netmask:hostname:interface:none_,
-see
+provide the correct IP address (RHEL) for the host on the boot prompt if
+not using DHCP (Windows). For the RHEL installer (Anaconda) the static
+network boot parameter format is
+ip=_ip::gateway:netmask:hostname:interface:none_, see
 [RHEL documentation](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/performing_an_advanced_rhel_installation/kickstart-and-advanced-boot-options_installing-rhel-as-an-experienced-user#network-boot-options_kickstart-and-advanced-boot-options)
 for more details.
 
@@ -235,7 +268,8 @@ and other images with [Packer](https://www.packer.io/) using either
 [VMware vSphere](https://www.packer.io/docs/builders/vsphere/vsphere-iso)
 as builders.
 
-These templates do not save cleartext passwords on disk at any point.
+Linux builds do not save cleartext passwords on disk at any point,
+however Windows unattend files do have cleartext password in them.
 
 Three paramaters, _packer\_builder_, _packer\_target_ and
 _root\_password_ are mandatory, the rest are optional. See
@@ -264,7 +298,8 @@ The value of _security\_profile_ is passed as-is to the installer
 
 To create local admin user on the VM for Ansible etc, see
 [defaults/main/os.yml](defaults/main/os.yml) for admin user data
-specification.
+specification (Linux). Windows admin user is _winrm_, see
+[defaults/main/windows.yml](defaults/main/windows.yml) for details.
 
 Vaulted password variables are supported. Note that the provided CentOS
 templates do not support all the variables as the latest RHEL templates.

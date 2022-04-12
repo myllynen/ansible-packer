@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- https://docs.microsoft.com/en-us/windows-hardware/customize/desktop/unattend/ -->
+<unattend xmlns="urn:schemas-microsoft-com:unattend">
+    <settings pass="windowsPE">
+        <component name="Microsoft-Windows-PnpCustomizationsWinPE" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <DriverPaths>
+                <PathAndCredentials wcm:keyValue="1" wcm:action="add">
+{% if packer_builder == 'iso' %}
+                    <Path>D:\drivers</Path>
+{% else %}
+                    <Path>E:\</Path>
+{% endif %}
+                </PathAndCredentials>
+            </DriverPaths>
+        </component>
+        <component name="Microsoft-Windows-International-Core-WinPE" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <SetupUILanguage>
+                <UILanguage>{{ win_locale_system }}</UILanguage>
+            </SetupUILanguage>
+            <InputLocale>{{ win_locale_input }}</InputLocale>
+            <SystemLocale>{{ win_locale_system }}</SystemLocale>
+            <UILanguage>{{ win_locale_ui }}</UILanguage>
+            <UILanguageFallback>{{ win_locale_system }}</UILanguageFallback>
+            <UserLocale>{{ win_locale_user }}</UserLocale>
+        </component>
+        <component name="Microsoft-Windows-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <DiskConfiguration>
+                <Disk wcm:action="add">
+                    <DiskID>0</DiskID>
+                    <WillWipeDisk>true</WillWipeDisk>
+                    <CreatePartitions>
+{% if win_partitioning == 'bios' %}
+                        <CreatePartition wcm:action="add">
+                            <Order>1</Order>
+                            <Type>Primary</Type>
+                            <Extend>true</Extend>
+                        </CreatePartition>
+{% elif win_partitioning == 'uefi' %}
+                        <CreatePartition wcm:action="add">
+                            <Order>1</Order>
+                            <Type>EFI</Type>
+                            <Size>100</Size>
+                        </CreatePartition>
+                        <CreatePartition wcm:action="add">
+                            <Order>2</Order>
+                            <Type>Primary</Type>
+                            <Extend>true</Extend>
+                        </CreatePartition>
+{% elif win_partitioning == 'custom' %}
+{{ win_custom_partitioning_create }}
+{% endif %}
+                    </CreatePartitions>
+                    <ModifyPartitions>
+{% if win_partitioning == 'bios' %}
+                        <ModifyPartition wcm:action="modify">
+                            <Order>1</Order>
+                            <PartitionID>1</PartitionID>
+                            <Label>Windows</Label>
+                            <Format>NTFS</Format>
+                            <Letter>C</Letter>
+                        </ModifyPartition>
+{% elif win_partitioning == 'uefi' %}
+                        <ModifyPartition wcm:action="modify">
+                            <Order>1</Order>
+                            <PartitionID>1</PartitionID>
+                            <Label>System</Label>
+                            <Format>FAT32</Format>
+                        </ModifyPartition>
+                        <ModifyPartition wcm:action="modify">
+                            <Order>2</Order>
+                            <PartitionID>2</PartitionID>
+                            <Label>Windows</Label>
+                            <Format>NTFS</Format>
+                            <Letter>C</Letter>
+                        </ModifyPartition>
+{% elif win_partitioning == 'custom' %}
+{{ win_custom_partitioning_modify }}
+{% endif %}
+                    </ModifyPartitions>
+                </Disk>
+                <WillShowUI>OnError</WillShowUI>
+            </DiskConfiguration>
+            <ImageInstall>
+                <OSImage>
+                    <InstallFrom>
+                        <MetaData wcm:action="add">
+                            <Key>/IMAGE/INDEX</Key>
+                            <Value>2</Value>
+                        </MetaData>
+                    </InstallFrom>
+                    <InstallTo>
+                        <DiskID>0</DiskID>
+{% if win_partitioning == 'bios' %}
+                        <PartitionID>1</PartitionID>
+{% elif win_partitioning == 'uefi' %}
+                        <PartitionID>2</PartitionID>
+{% elif win_partitioning == 'custom' %}
+                        <PartitionID>{{ win_custom_partitioning_install_to }}</PartitionID>
+{% endif %}
+                    </InstallTo>
+                    <WillShowUI>OnError</WillShowUI>
+                </OSImage>
+            </ImageInstall>
+            <UserData>
+{% if win_product_key is defined %}
+                <ProductKey>
+                    <Key>{{ win_product_key }}</Key>
+                    <WillShowUI>OnError</WillShowUI>
+                </ProductKey>
+{% endif %}
+                <AcceptEula>true</AcceptEula>
+            </UserData>
+            <Diagnostics>
+                <OptIn>false</OptIn>
+            </Diagnostics>
+        </component>
+    </settings>
+    <settings pass="specialize">
+        <component name="Microsoft-Windows-SQMApi" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <CEIPEnabled>0</CEIPEnabled>
+        </component>
+        <component name="Microsoft-Windows-ServerManager-SvrMgrNc" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <DoNotOpenServerManagerAtLogon>true</DoNotOpenServerManagerAtLogon>
+        </component>
+        <component name="Microsoft-Windows-Security-SPP-UX" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <SkipAutoActivation>true</SkipAutoActivation>
+        </component>
+    </settings>
+    <settings pass="oobeSystem">
+        <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <ComputerName>*</ComputerName>
+{% if win_registered_owner is defined %}
+            <RegisteredOwner>{{ win_registered_owner }}</RegisteredOwner>
+{% endif %}
+{% if win_registered_organization is defined %}
+            <RegisteredOrganization>{{ win_registered_organization }}</RegisteredOrganization>
+{% endif %}
+            <TimeZone>{{ win_timezone }}</TimeZone>
+            <UserAccounts>
+                <AdministratorPassword>
+                    <Value>{{ win_winrm_password }}</Value>
+                    <PlainText>true</PlainText>
+                </AdministratorPassword>
+                <LocalAccounts>
+                    <LocalAccount wcm:action="add">
+                        <Name>winrm</Name>
+                        <Password>
+                            <Value>{{ win_winrm_password }}</Value>
+                            <PlainText>true</PlainText>
+                        </Password>
+                        <Group>Administrators</Group>
+                        <DisplayName>WinRM User</DisplayName>
+                        <Description>WinRM User for Ansible</Description>
+                    </LocalAccount>
+                </LocalAccounts>
+            </UserAccounts>
+            <OOBE>
+                <HideEULAPage>true</HideEULAPage>
+                <HideOEMRegistrationScreen>true</HideOEMRegistrationScreen>
+                <HideOnlineAccountScreens>true</HideOnlineAccountScreens>
+                <HideWirelessSetupInOOBE>true</HideWirelessSetupInOOBE>
+                <HideLocalAccountScreen>true</HideLocalAccountScreen>
+                <NetworkLocation>Work</NetworkLocation>
+                <ProtectYourPC>3</ProtectYourPC>
+            </OOBE>
+            <AutoLogon>
+                <Enabled>true</Enabled>
+                <LogonCount>1</LogonCount>
+                <Username>Administrator</Username>
+                <Password>
+                    <Value>{{ win_winrm_password }}</Value>
+                    <PlainText>true</PlainText>
+                </Password>
+            </AutoLogon>
+            <FirstLogonCommands>
+                <SynchronousCommand wcm:action="add">
+                    <CommandLine>cmd.exe /c powershell -Command New-Item -Path HKLM:\System\CurrentControlSet\Control\Network\NewNetworkWindowOff -Force</CommandLine>
+                    <Description>Disable network location wizard</Description>
+                    <Order>1</Order>
+                </SynchronousCommand>
+{% if packer_builder != 'iso' %}
+                <SynchronousCommand wcm:action="add">
+                    <CommandLine>cmd.exe /c powershell -Command Disable-LocalUser -Name Administrator</CommandLine>
+                    <Description>Disable built-in Administrator account</Description>
+                    <Order>2</Order>
+                </SynchronousCommand>
+{% endif %}
+                <SynchronousCommand wcm:action="add">
+                    <CommandLine>cmd.exe /c powershell -Command Set-LocalUser -Name winrm -PasswordNeverExpires $true</CommandLine>
+                    <Description>Disable password expiration for WinRM user</Description>
+                    <Order>3</Order>
+                </SynchronousCommand>
+                <SynchronousCommand wcm:action="add">
+                    <CommandLine>cmd.exe /c powershell -Command "New-Item -Path 'HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Winlogon\SpecialAccounts\UserList' -Force | New-ItemProperty -Name winrm -PropertyType DWord -Value 0 -Force"</CommandLine>
+                    <Description>Hide WinRM user</Description>
+                    <Order>4</Order>
+                </SynchronousCommand>
+                <SynchronousCommand wcm:action="add">
+                    <CommandLine>cmd.exe /c powershell -File {{ win_src_disk }}\optimize-powershell.ps1</CommandLine>
+                    <Description>Optimize PowerShell assemblies</Description>
+                    <Order>5</Order>
+                </SynchronousCommand>
+{% if packer_builder == 'vmware' %}
+                <SynchronousCommand wcm:action="add">
+                    <CommandLine>cmd.exe /c E:\setup64 /s /v "/qn REBOOT=R"</CommandLine>
+                    <Description>Installing VM tools...</Description>
+                    <Order>6</Order>
+                </SynchronousCommand>
+{% endif %}
+                <SynchronousCommand wcm:action="add">
+                    <CommandLine>cmd.exe /c powershell -File {{ win_src_disk }}\customize-system.ps1</CommandLine>
+                    <Description>Customize system</Description>
+                    <Order>7</Order>
+                </SynchronousCommand>
+                <SynchronousCommand wcm:action="add">
+                    <CommandLine>cmd.exe /c powershell -File {{ win_src_disk }}\configure-winrm.ps1</CommandLine>
+                    <Description>Configure WinRM service</Description>
+                    <Order>8</Order>
+                </SynchronousCommand>
+                <!-- Finalize VM installation over WinRM -->
+                <SynchronousCommand wcm:action="add">
+                    <CommandLine>cmd.exe /c logoff</CommandLine>
+                    <Description>Logoff</Description>
+                    <Order>9</Order>
+                </SynchronousCommand>
+            </FirstLogonCommands>
+        </component>
+    </settings>
+</unattend>

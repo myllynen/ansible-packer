@@ -7,11 +7,11 @@ packer_binary: packer.io
 communicator: "none"
 
 #custom_json_builder: |
-#      "parameter": value,
+#  "parameter": value,
 
 #custom_json_provisioner: |
-#    {
-#      "type": "shell",
-#      "script": "inst-sysprep",
-#      "remote_path": "/root/inst-sysprep"
-#    }
+#  {
+#    "type": "shell",
+#    "script": "inst-sysprep",
+#    "remote_path": "/root/inst-sysprep"
+#  }

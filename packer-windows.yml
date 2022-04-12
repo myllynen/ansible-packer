@@ -1,0 +1,142 @@
+---
+- name: Build Windows image with Packer
+  hosts: all
+  vars:
+    #
+    # Base configuration
+    #
+    packer_binary: packer.io
+    packer_builder: qemu
+    packer_target: win_2k22
+    image_name: w2k22_image.qcow2
+
+    vm_cpus: 4
+    vm_memory: 8192
+    disk_size: 30720
+
+    # Full path for additional drivers for the target Windows version
+    # For QEMU/KVM example, see the virtio-win-drivers-prepare script
+    # https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/stable-virtio/virtio-win.iso
+    win_drivers_path: /tmp/drivers
+
+    # Build options
+    do_cleanup: true
+    use_force: false
+
+    #
+    # OS configuration
+    #
+    # Administrator account will also use this password with ISO,
+    # account will disabled and password reset during VM sysprep.
+    win_winrm_password: "{{ image_password }}"
+
+    # Either bios, uefi, or custom
+    # See below for custom example
+    win_partitioning: bios
+
+    win_timezone: FLE Standard Time
+
+    # System locale setting
+    win_locale_system: en-US
+    # UI locale setting
+    win_locale_ui: en-US
+    # User locale setting
+    win_locale_user: en-US
+    # Input locale setting
+    # https://docs.microsoft.com/windows-hardware/manufacture/desktop/default-input-locales-for-windows-language-packs
+    win_locale_input: fi-FI
+
+    #win_product_key:
+    win_registered_owner: "Ansible Packer"
+    win_registered_organization: "Test Department"
+
+    # System customization script, runs before enabling WinRM
+    #win_customize_script: |
+
+    win_winrm_setup: |
+      # configure-winrm.ps1 always ensures the service is running,
+      # this part should configure WinRM per the local requirements
+      Set-Item -Path WSMan:\localhost\Service\Auth\Basic -Value $true
+      Set-Item -Path WSMan:\localhost\Service\AllowUnencrypted -Value $true
+
+    # Additional Packer ansible-playbook call parameters with VM template
+    win_ansible_arguments: '"--extra-vars", "ansible_winrm_scheme=http"'
+
+    # List of tasks or roles to run on the VM,
+    # all roles must be included with full path
+    win_provisioner_playbook: |2
+        vars:
+          dotnet_optimize_all_assemblies: true
+        #tasks:
+        #  - win_ping:
+        roles:
+          - /tmp/roles/accounts_local
+          #- /tmp/roles/system_update
+          - /tmp/roles/dotnet_optimize
+          - /tmp/roles/performance_tuning
+          - /tmp/roles/service_enablement
+          - /tmp/roles/service_recovery
+
+    #win_custom_partitioning_create: |
+    #    <CreatePartition wcm:action="add">
+    #        <Order>1</Order>
+    #        <Type>Primary</Type>
+    #        <Extend>true</Extend>
+    #    </CreatePartition>
+
+    #win_custom_partitioning_modify: |
+    #    <ModifyPartition wcm:action="modify">
+    #        <Order>1</Order>
+    #        <PartitionID>1</PartitionID>
+    #        <Label>Windows</Label>
+    #        <Format>NTFS</Format>
+    #        <Letter>C</Letter>
+    #    </ModifyPartition>
+
+    #win_custom_partitioning_install_to: 1
+
+
+    #
+    # Builder configurations
+    #
+
+    # Builder: qemu
+    # https://www.packer.io/docs/builders/qemu
+    qemu_binary: /usr/libexec/qemu-kvm
+    output_directory: /tmp/packer_images
+
+    # Builder: vmware
+    # https://www.packer.io/docs/builders/vsphere/vsphere-iso
+    #vcenter_credentials:
+    #  vcenter_server: vcenter.example.com
+    #  vcenter_username: vcuser
+    #  vcenter_password: vcpass
+    vcenter_insecure_connection: true
+    vcenter_datacenter: DC1
+    vcenter_folder: Windows/templates
+    # https://www.packer.io/docs/builders/vsphere/vsphere-iso#working-with-clusters-and-hosts
+    #vcenter_host: vcenter-host1.example.com
+    vcenter_cluster: DC1-C1
+    #vcenter_resource_pool: DC1-RP1
+    vcenter_datastore: DC1-C1-LUN-1
+    vcenter_network: DC1-C1-VLAN-123
+    #vm_guest_os_type: windows9Server64Guest
+    #vm_firmware: bios
+    # https://www.packer.io/plugins/builders/vsphere/vsphere-iso#content-library-import-configuration
+    vcenter_convert_to_template: true
+    #vcenter_content_library:
+    #  library: DC1-CL
+    #  #name: cl-template
+    #  ovf: false
+    #  destroy: true
+
+    #
+    # OS installer configuration
+    #
+    iso:
+      win_2k22:
+        url: file:///VirtualMachines/boot/SERVER_EVAL_x64FRE_en-us.iso
+        checksum: sha256:3e4fa6d8507b554856fc9ca6079cc402df11a8b79344871669f0251535255325
+
+  roles:
+    - ansible-packer

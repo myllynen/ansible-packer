@@ -33,6 +33,13 @@
     state: directory
   register: iso_build_dir
 
+- name: Create custom Windows ISO drivers directory
+  file:
+    path: "{{ tempdir.path + '/iso-build/drivers' }}"
+    state: directory
+  register: iso_drivers_dir
+  when: win_winrm_password is defined and win_drivers_path is defined
+
 - name: Copy OS ISO files to custom ISO build directory
   command: 7z x -o{{ iso_build_dir.path }} {{ os_iso_path }}
 
@@ -47,12 +54,32 @@
     - { 'src': 'isolinux.cfg.j2', 'dest': 'isolinux/isolinux.cfg' }
   loop_control:
     label: "{{ item.dest }}"
+  when: win_winrm_password is not defined
 
 - name: Copy installer configuration
   copy:
     src: "{{ tempdir.path + '/inst.cfg' }}"
     dest: "{{ iso_build_dir.path + '/inst.cfg' }}"
     mode: '0600'
+  when: win_winrm_password is not defined
+
+- name: Copy Windows installer configurations
+  copy:
+    src: "{{ tempdir.path + '/' + item }}"
+    dest: "{{ iso_build_dir.path + '/' + item }}"
+    mode: '0600'
+  loop:
+    - autounattend.xml
+    - optimize-powershell.ps1
+    - customize-system.ps1
+    - configure-winrm.ps1
+  when: win_winrm_password is defined
+
+- name: Copy Windows drivers directory
+  synchronize:
+    src: "{{ win_drivers_path + '/' }}"
+    dest: "{{ iso_drivers_dir.path }}"
+  when: win_winrm_password is defined and win_drivers_path is defined
 
 - name: Remove existing custom ISO file
   file:
@@ -77,12 +104,35 @@
       -V {{ iso_volume_id }}
       -o {{ image_path }} .
     chdir: "{{ iso_build_dir.path }}"
+  when: win_winrm_password is not defined
+
+- name: Build custom Windows ISO file
+  command:
+    cmd: >
+      genisoimage
+      -b boot/etfsboot.com
+      -no-emul-boot
+      -boot-load-seg 0x07C0
+      -boot-load-size 8
+      -eltorito-alt-boot
+      -e efi/microsoft/boot/efisys_noprompt.bin
+      -no-emul-boot
+      -boot-load-size 1
+      -input-charset UTF-8
+      -l -allow-limited-size
+      -V {{ win_iso_volume_id }}
+      -volset {{ win_iso_volume_id }}
+      -o {{ image_path }} .
+    chdir: "{{ iso_build_dir.path }}"
+  when: win_winrm_password is defined
 
 - name: Make custom ISO hybrid bootable
   command: isohybrid --uefi {{ image_path }}
+  when: win_winrm_password is not defined
 
 - name: Implant MD5 checksum into custom ISO
   command: implantisomd5 {{ image_path }}
+  when: win_winrm_password is not defined
 
 - name: Calculate custom ISO SHA256 checksum
   command: sha256sum {{ image_path }}

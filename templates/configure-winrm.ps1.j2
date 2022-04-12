@@ -1,0 +1,10 @@
+Write-Host Configuring WinRM service...
+
+Enable-PSRemoting -Force
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Force
+
+# StartupType AutomaticDelayedStart needs PowerShell 6.0+
+#Set-Service -Name WinRM –StartupType AutomaticDelayedStart
+sc.exe config WinRM start= delayed-auto
+
+{{ win_winrm_setup | default('', true) }}

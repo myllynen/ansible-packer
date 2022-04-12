@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/how-configuration-passes-work -->
+<unattend xmlns="urn:schemas-microsoft-com:unattend">
+    <settings pass="generalize">
+        <component name="Microsoft-Windows-PnpSysprep" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <PersistAllDeviceInstalls>true</PersistAllDeviceInstalls>
+            <DoNotCleanUpNonPresentDevices>true</DoNotCleanUpNonPresentDevices>
+        </component>
+    </settings>
+    <settings pass="oobeSystem">
+        <component name="Microsoft-Windows-International-Core" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <InputLocale>{{ win_locale_input }}</InputLocale>
+            <SystemLocale>{{ win_locale_system }}</SystemLocale>
+            <UILanguage>{{ win_locale_ui }}</UILanguage>
+            <UILanguageFallback>{{ win_locale_system }}</UILanguageFallback>
+            <UserLocale>{{ win_locale_user }}</UserLocale>
+        </component>
+        <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <OOBE>
+                <HideEULAPage>true</HideEULAPage>
+                <HideOEMRegistrationScreen>true</HideOEMRegistrationScreen>
+                <HideOnlineAccountScreens>true</HideOnlineAccountScreens>
+                <HideWirelessSetupInOOBE>true</HideWirelessSetupInOOBE>
+                <HideLocalAccountScreen>true</HideLocalAccountScreen>
+                <NetworkLocation>Work</NetworkLocation>
+                <ProtectYourPC>3</ProtectYourPC>
+                <VMModeOptimizations>
+                    <SkipAdministratorProfileRemoval>false</SkipAdministratorProfileRemoval>
+                    <SkipNotifyUILanguageChange>true</SkipNotifyUILanguageChange>
+                    <SkipWinREInitialization>true</SkipWinREInitialization>
+                </VMModeOptimizations>
+            </OOBE>
+        </component>
+    </settings>
+</unattend>

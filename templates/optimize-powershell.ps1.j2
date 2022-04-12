@@ -1,0 +1,11 @@
+Write-Host Optimizing PowerShell assemblies...
+
+# From https://docs.ansible.com/ansible/latest/user_guide/windows_performance.html
+$env:path = [Runtime.InteropServices.RuntimeEnvironment]::GetRuntimeDirectory()
+[AppDomain]::CurrentDomain.GetAssemblies() | % {
+  if (!$_.location) { continue }
+  $Name = Split-Path $_.location -leaf
+  if ($Name.startswith("Microsoft.PowerShell")) {
+    ngen install $_.location /nologo
+  }
+}

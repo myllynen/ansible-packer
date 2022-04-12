@@ -1,0 +1,3 @@
+Write-Host Customizing system...
+
+{{ win_customize_script | default('Exit 0', true) }}

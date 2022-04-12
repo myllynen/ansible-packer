@@ -1,0 +1,70 @@
+---
+- name: Build custom Windows ISO
+  hosts: all
+  vars:
+    #
+    # Base configuration
+    #
+    # Using packer_ variables for compatibility,
+    # genisoimage not Packer used to build image
+    packer_builder: iso
+    packer_target: win_2k22
+    image_name: custom_w2k22.iso
+    win_iso_volume_id: WINDOWS_SERVER_2022
+
+    # Full path for additional drivers for the target Windows version
+    # define only if these are needed on the installation target HW
+    win_drivers_path: /tmp/drivers
+
+    # Build options
+    do_cleanup: true
+    use_force: false
+
+    #
+    # OS configuration
+    #
+    # Administrator account will also use this password with ISO,
+    # account will disabled and password reset during VM sysprep.
+    win_winrm_password: "{{ image_password }}"
+    # Either bios, uefi, or custom
+    # See below for custom example
+    win_partitioning: bios
+    win_timezone: FLE Standard Time
+
+    # System locale setting
+    win_locale_system: en-US
+    # User locale setting
+    win_locale_user: en-US
+    # Input locale (language and keyboard) setting, see
+    # https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/default-input-locales-for-windows-language-packs
+    win_locale_input: fi-FI
+    # UI locale setting
+    win_locale_ui: en-US
+
+    #win_product_key:
+    win_registered_owner: "Ansible Packer"
+    win_registered_organization: "Test Department"
+
+    win_winrm_setup: |
+        # configure-winrm.ps1 always ensures the service is running,
+        # this part should configure WinRM per the local requirements
+        Set-Item -Path WSMan:\localhost\Service\Auth\Basic -Value $true
+        Set-Item -Path WSMan:\localhost\Service\AllowUnencrypted -Value $true
+
+    #
+    # Builder configurations
+    #
+
+    # Builder: ISO (not a Packer builder)
+    output_directory: /tmp/iso_images
+
+    #
+    # OS installer configuration
+    #
+    iso:
+      win_2k22:
+        url: file:///VirtualMachines/boot/SERVER_EVAL_x64FRE_en-us.iso
+        checksum: sha256:3e4fa6d8507b554856fc9ca6079cc402df11a8b79344871669f0251535255325
+
+  roles:
+    - ansible-packer
