@@ -13,7 +13,7 @@ This role builds custom Linux and Windows VM template images using
 [Packer](https://www.packer.io/). OS installation parameters are
 provided as Ansible variables to allow for high degree of
 customizations. Same customizations can be applied to both VM template
-images and unattended BIOS/UEFI ISO installer images.
+images and unattended BIOS/UEFI-compatible ISO installer images.
 
 See [this example](./packer.yml) how a playbook could look like.
 
@@ -261,19 +261,22 @@ ansible-playbook -c local -i localhost, build_iso.yml \
 
 ## Role Description
 
-[Ansible](https://www.ansible.com/) role to allow quick building of
-[RHEL](https://www.redhat.com/en/technologies/linux-platforms/enterprise-linux)
-and other images with [Packer](https://www.packer.io/) using either
+[Ansible](https://www.ansible.com/) role to allow for quickly building
+of RHEL, Windows, and other OS images with
+[Packer](https://www.packer.io/) using either
 [Qemu](https://www.packer.io/docs/builders/qemu) or
 [VMware vSphere](https://www.packer.io/docs/builders/vsphere/vsphere-iso)
 as builders.
 
 Linux builds do not save cleartext passwords on disk at any point,
-however Windows unattend files do have cleartext password in them.
+however Windows unattend files do have cleartext passwords in them. This
+is unavoidable as the Windows installer does not support encrypted
+passwords.
 
 Three paramaters, _packer\_builder_, _packer\_target_ and
-_root\_password_ are mandatory, the rest are optional. See
-[defaults/main](defaults/main) for all the supported variables.
+_root\_password_ for Linux or _win\_winrm\_password_ for Windows are
+mandatory, the rest are optional. See [defaults/main](defaults/main) for
+all the supported variables.
 
 See [defaults/main/content_iso.yml](defaults/main/content_iso.yml) how
 to define OS versions and ISO locations.
@@ -284,8 +287,8 @@ Packer builder related variables and their default values. ISO related
 variables are in
 [defaults/main/builder_iso.yml](defaults/main/builder_iso.yml).
 
-Create BIOS/UEFI bootable image setting _bios_uefi\_boot_ to `true`,
-otherwise the image supports only the platform used for building the
+Create BIOS/UEFI bootable image by setting _bios_uefi\_boot_ to `true`,
+otherwise the VM image supports only the platform used for building the
 image.
 
 See the provided partitioning alternatives at
@@ -293,7 +296,7 @@ See the provided partitioning alternatives at
 _custom\_partition_ and set `partitioning: custom` to use custom
 partitioning layout.
 
-The value of _security\_profile_ is passed as-is to the installer
+The value of _security\_profile_ is passed as-is to the Linux installer
 [OpenSCAP](https://www.open-scap.org/) module.
 
 To create local admin user on the VM for Ansible etc, see
