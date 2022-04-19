@@ -6,7 +6,7 @@ packer_binary: packer.io
 
 communicator: "none"
 
-#custom_builder_section_json: |
+#custom_json_builder_section: |
 #  "parameter": value,
 
 #custom_json_provisioner: |

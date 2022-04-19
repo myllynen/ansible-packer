@@ -34,8 +34,8 @@
         "{{ boot_command }} {{ boot_parameters }}<enter><wait>"
       ],
 
-{% if custom_builder_section_json is defined %}
-{{ custom_builder_section_json }}
+{% if custom_json_builder_section is defined %}
+{{ custom_json_builder_section }}
 {% endif %}
 
       "communicator": "{{ communicator }}",
