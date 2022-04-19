@@ -78,8 +78,8 @@
         "sysprep.xml"
       ],
 
-{% if custom_json_builder is defined %}
-{{ custom_json_builder }}
+{% if custom_builder_section_json is defined %}
+{{ custom_builder_section_json }}
 {% endif %}
 
       "communicator": "winrm",
