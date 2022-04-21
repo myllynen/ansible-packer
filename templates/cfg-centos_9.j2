@@ -20,7 +20,11 @@ timesource --ntp-server {{ ntp_server }}
 {% endfor %}
 keyboard {{ keyboard }}
 services --enabled tuned
+{% if communicator == 'none' %}
 poweroff
+{% else %}
+reboot
+{% endif %}
 
 %packages
 bash-completion

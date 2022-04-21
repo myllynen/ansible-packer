@@ -66,7 +66,11 @@ timesource --ntp-server {{ ntp_server }}
 {% endfor %}
 keyboard {{ keyboard }}
 services --enabled tuned
+{% if communicator == 'none' %}
 poweroff
+{% else %}
+reboot
+{% endif %}
 
 {% if security_profile is defined %}
 %addon com_redhat_oscap

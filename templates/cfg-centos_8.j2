@@ -17,7 +17,11 @@ lang en_US.UTF-8
 timezone --ntpservers {{ ntp_servers }} --utc {{ timezone }}
 keyboard {{ keyboard }}
 services --enabled tuned
+{% if communicator == 'none' %}
 poweroff
+{% else %}
+reboot
+{% endif %}
 
 %packages
 @Core

@@ -6,12 +6,21 @@ packer_binary: packer.io
 
 communicator: "none"
 
+# Example Packer Ansible provisioner conf for RHEL
+# NB. Writes cleartext root password in build.json
+#
+#communicator: "ssh"
+#
+## Needs to have root_permit_ssh set accordingly
 #custom_json_builder_section: |
-#  "parameter": value,
-
+#  "ssh_username": "root",
+#  "ssh_password": "{{ image_password }}",
+#  "ssh_timeout": "15m",
+#
 #custom_json_provisioner: |
 #  {
-#    "type": "shell",
-#    "script": "inst-sysprep",
-#    "remote_path": "/root/inst-sysprep"
+#    "type": "ansible",
+#    "use_proxy": false,
+#    "playbook_file": "/tmp/rhel_packer.yml",
+#    "user": "admin"
 #  }
