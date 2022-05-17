@@ -10,7 +10,7 @@
 
 - name: Set custom ISO full path
   set_fact:
-    image_path: "{{ output_directory + '/' + image_name | default(target_fullname + '.iso', true) }}"
+    image_path: "{{ output_directory + '/' + image_name | default(__target_fullname + '.iso', true) }}"
 
 - name: Check existing custom ISO file
   stat:

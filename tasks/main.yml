@@ -24,12 +24,12 @@
 - name: Create temporary work directory
   tempfile:
     state: directory
-    suffix: _packer_build_{{ packer_builder }}_{{ target_fullname }}
+    suffix: _packer_build_{{ packer_builder }}_{{ __target_fullname }}
   register: tempdir
 
 - name: Create installer configuration file
   template:
-    src: templates/cfg-{{ target_config }}.j2
+    src: templates/cfg-{{ __target_config }}.j2
     dest: "{{ tempdir.path }}/inst.cfg"
     mode: '0600'
   when: win_winrm_password is not defined

@@ -5,11 +5,11 @@ cmdline
 zerombr
 clearpart --all --initlabel
 
-{% set boot_parameters_full = console_boot_string + boot_parameters %}
-{% if boot_pw_encrypted == '' %}
+{% set boot_parameters_full = __console_boot_string + boot_parameters %}
+{% if __boot_pw_encrypted == '' %}
 bootloader --timeout 1 --append "{{ boot_parameters_full }}"
 {% else %}
-bootloader --timeout 1 --append "{{ boot_parameters_full }}" --iscrypted --password {{ boot_pw_encrypted }}
+bootloader --timeout 1 --append "{{ boot_parameters_full }}" --iscrypted --password {{ __boot_pw_encrypted }}
 {% endif %}
 
 {% if partitioning is defined and partitioning == 'auto' %}
@@ -36,7 +36,7 @@ logvol /var/tmp       --vgname vg_rhel --fstype xfs  --size 2048  --name lv_var_
 
 selinux --{{ selinux }}
 auth --useshadow --passalgo sha512
-rootpw --iscrypted {{ root_pw_encrypted }}
+rootpw --iscrypted {{ __root_pw_encrypted }}
 
 {% if packer_builder != 'iso' %}
 {% if network_setup_dhcp | bool %}

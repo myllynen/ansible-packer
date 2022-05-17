@@ -1,7 +1,7 @@
 ---
-base_target: "{{ packer_target.split('_')[0] }}"
-base_version: "{{ packer_target.split('_')[1] }}"
-full_version: "{{ packer_target.split('_')[1:] | join('_') }}"
-target_config: "{{ base_target + '_' + base_version }}"
-target_fullname: "{{ base_target + '_' + full_version }}\
-                  {{ '' if security_profile is not defined else '_' + security_profile }}"
+__base_target: "{{ packer_target.split('_')[0] }}"
+__base_version: "{{ packer_target.split('_')[1] }}"
+__full_version: "{{ packer_target.split('_')[1:] | join('_') }}"
+__target_config: "{{ __base_target + '_' + __base_version }}"
+__target_fullname: "{{ __base_target + '_' + __full_version }}\
+                    {{ '' if security_profile is not defined else '_' + security_profile }}"

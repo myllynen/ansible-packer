@@ -9,7 +9,7 @@ bootloader --timeout 1 --append "{{ boot_parameters }}"
 autopart
 selinux --enforcing
 authselect --useshadow --passalgo sha512
-rootpw --iscrypted {{ root_pw_encrypted }}
+rootpw --iscrypted {{ __root_pw_encrypted }}
 network --device net0 --bootproto dhcp --onboot yes --hostname {{ hostname }}
 firewall --enabled --service ssh
 firstboot --disabled

@@ -1,2 +1,2 @@
 ---
-console_boot_string: "{{ 'console=tty0 console=ttyS0,115200 ' if serial_console_setup | bool else '' }}"
+__console_boot_string: "{{ 'console=tty0 console=ttyS0,115200 ' if serial_console_setup | bool else '' }}"
