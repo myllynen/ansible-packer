@@ -15,7 +15,7 @@ set as Ansible variables to allow for high degree of customization. Same
 customizations can be applied to both VM template images and unattended
 BIOS/UEFI-compatible ISO installer images.
 
-See [this example](./packer.yml) how a playbook could look like.
+See [this example](packer.yml) how a playbook could look like.
 
 Currently (2022-06) tested Packer builders (platforms) are:
 
@@ -69,7 +69,7 @@ EOF
 ansible-galaxy role install -p roles -r roles/requirements.yml
 ```
 
-Then, create a [playbook](./packer.yml) to use this role.
+Then, create a [playbook](packer.yml) to use this role.
 
 This is a basic playbook for building an image with Qemu:
 
@@ -187,7 +187,7 @@ This is a more complete playbook for building an image on VMware:
     - ansible-packer
 ```
 
-See the example [playbook](./packer.yml) for a more complete example and
+See the example [playbook](packer.yml) for a more complete example and
 [defaults/main](defaults/main) for all the supported variables.
 
 Finally, build image on a build host:
@@ -212,8 +212,8 @@ installation based on the configuration provided in a playbook. User
 would then only need to provide a static IP address (RHEL) for the host
 on the boot prompt if not using DHCP (Windows). For the RHEL installer
 (Anaconda) the static network boot parameter format is
-ip=_ip::gateway:netmask:hostname:interface:none_, see [RHEL
-documentation](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/performing_an_advanced_rhel_installation/kickstart-and-advanced-boot-options_installing-rhel-as-an-experienced-user#network-boot-options_kickstart-and-advanced-boot-options)
+ip=_ip::gateway:netmask:hostname:interface:none_, see
+[RHEL documentation](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/performing_an_advanced_rhel_installation/kickstart-and-advanced-boot-options_installing-rhel-as-an-experienced-user#network-boot-options_kickstart-and-advanced-boot-options)
 for more details. Note that the double-semicolon is required.
 
 A playbook to build custom ISO installer image is almost identical to
