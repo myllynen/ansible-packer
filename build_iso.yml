@@ -8,8 +8,8 @@
     # Using packer_ variables for compatibility,
     # genisoimage not Packer used to build image
     packer_builder: iso
-    packer_target: rhel_8_5
-    packer_target_pretty: Custom RHEL 8.5
+    packer_target: rhel_8_6
+    packer_target_pretty: Custom RHEL 8.6
     image_name: custom.iso
 
     # Build options
@@ -64,9 +64,9 @@
     # OS installer configuration
     #
     iso:
-      rhel_8_5:
-        url: file:///VirtualMachines/boot/rhel-8.5-x86_64-dvd.iso
-        checksum: sha256:1f78e705cd1d8897a05afa060f77d81ed81ac141c2465d4763c0382aa96cadd0
+      rhel_8_6:
+        url: file:///VirtualMachines/boot/rhel-8.6-x86_64-dvd.iso
+        checksum: sha256:c324f3b07283f9393168f0a4ad2167ebbf7e4699d65c9670e0d9e58ba4e2a9a8
 
   roles:
     - ansible-packer
