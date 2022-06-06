@@ -1,12 +1,12 @@
 ---
 iso:
   centos_8:
-    url: file:///VirtualMachines/boot/CentOS-8.5.2111-x86_64-dvd1.iso
-    checksum: sha256:3b795863001461d4f670b0dedd02d25296b6d64683faceb8f2b60c53ac5ebb3e
+    url: file:///VirtualMachines/boot/CentOS-Stream-8-x86_64-latest-dvd1.iso
+    checksum: sha256:7120e48d53471713f0ec41c5193c01edcbf84843b81073b09e33925361c3adbc
 
   centos_9:
     url: file:///VirtualMachines/boot/CentOS-Stream-9-latest-x86_64-dvd1.iso
-    checksum: sha256:5af0d4535a13e8b1c5129df85f6e8c853f0a82f77d8614d4f91187bc7aa94d52
+    checksum: sha256:f5b04ffeb6da81f6f6c234b728c017e2e40f4081dcf1f9eea5bef5204aac5683
 
   rhel_7:
     url: file:///VirtualMachines/boot/rhel-server-7.9-x86_64-dvd.iso
@@ -28,6 +28,10 @@ iso:
     url: file:///VirtualMachines/boot/rhel-8.6-x86_64-dvd.iso
     checksum: sha256:c324f3b07283f9393168f0a4ad2167ebbf7e4699d65c9670e0d9e58ba4e2a9a8
 
+  rhel_9_0:
+    url: file:///VirtualMachines/boot/rhel-baseos-9.0-x86_64-dvd.iso
+    checksum: sha256:a387f3230acf87ee38707ee90d3c88f44d7bf579e6325492f562f0f1f9449e89
+
   rhel_9:
-    url: file:///VirtualMachines/boot/rhel-baseos-9.0-beta-0-x86_64-dvd.iso
-    checksum: sha256:23e6d31e12a22b6d56f00889ea7dc465360ea84e3b7d7854e4c627ecd3160473
+    url: file:///VirtualMachines/boot/rhel-baseos-9.0-x86_64-dvd.iso
+    checksum: sha256:a387f3230acf87ee38707ee90d3c88f44d7bf579e6325492f562f0f1f9449e89
