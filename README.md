@@ -292,7 +292,7 @@ Create BIOS/UEFI bootable image by setting _bios_uefi\_boot_ to `true`,
 otherwise the VM image supports only the platform used for building the
 image.
 
-See the provided partitioning alternatives at
+See the provided partitioning alternatives in
 [templates/cfg-rhel_8.j2](templates/cfg-rhel_8.j2), specify
 _custom\_partition_ and set `partitioning: custom` to use custom
 partitioning layout.
