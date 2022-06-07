@@ -8,6 +8,12 @@
       "headless": true,
       "output_directory": "{{ output_directory }}",
 
+{% if __base_target == 'rhel' or __base_target == 'centos' %}
+{% if __base_version == '9' %}
+      "qemuargs": [["-cpu", "host"]],
+{% endif %}
+{% endif %}
+
       "vm_name": "{{ vm_name + '.qcow2' if '.qcow2' not in vm_name else vm_name }}",
 
       "cpus": {{ vm_cpus }},
