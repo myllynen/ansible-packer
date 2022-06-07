@@ -95,7 +95,7 @@ systemctl disable kdump.service
 yum -y update
 
 # Configure root SSH access
-sed -Ei -e 's,^(#|)PermitRootLogin .*,PermitRootLogin {{ ssh_permit_root }},' /etc/ssh/sshd_config
+echo "PermitRootLogin {{ root_permit_ssh }}" > /etc/ssh/sshd_config.d/99-permitrootlogin.conf
 
 # Remove machine identification and state
 truncate -s 0 /etc/machine-id /etc/resolv.conf

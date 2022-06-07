@@ -231,9 +231,6 @@ passwd -l root
 {% if security_policy is not defined or
   (security_policy is defined and root_permit_override_security_policy | bool) %}
 sed -Ei -e 's,^(#|)PermitRootLogin .*,PermitRootLogin {{ root_permit_ssh }},' /etc/ssh/sshd_config
-for sshd_conf in $(/bin/ls -1 /etc/ssh/sshd_config.d/*.conf 2>/dev/null); do
-  sed -i -e 's,^PermitRootLogin .*,PermitRootLogin {{ root_permit_ssh }},' $sshd_conf
-done
 {% endif %}
 
 # Services
