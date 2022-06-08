@@ -274,7 +274,7 @@ passwd -l root
 # Configure root SSH access
 {% if security_policy is not defined or
   (security_policy is defined and root_permit_override_security_policy | bool) %}
-echo "PermitRootLogin {{ root_permit_ssh }}" > /etc/ssh/sshd_config.d/01-permitrootlogin.conf
+echo "PermitRootLogin {{ root_permit_ssh }}" > /etc/ssh/sshd_config.d/0-local.conf
 {% endif %}
 
 # Services
