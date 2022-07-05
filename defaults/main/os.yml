@@ -63,6 +63,7 @@ rh_satellite_tools_install: true
 #  cloud-utils-growpart
 #  insights-client
 #  rhc
+#  rhc-worker-playbook
 #  sos
 #  unzip
 

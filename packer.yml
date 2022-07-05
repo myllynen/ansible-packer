@@ -62,6 +62,7 @@
     #  cloud-utils-growpart
     #  insights-client
     #  rhc
+    #  rhc-worker-playbook
     #  sos
     #  unzip
     #  zsh
