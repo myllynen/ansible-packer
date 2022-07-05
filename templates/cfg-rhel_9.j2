@@ -258,7 +258,7 @@ chown -R {{ admin_user.uid }}:{{ admin_user.gid }} /var/lib/exec
 {% if admin_user.groups is not defined or 'wheel' not in admin_user.groups %}
 usermod -a -G wheel {{ admin_user.name }}
 {% endif %}
-echo '{{ admin_user.name }} ALL = (ALL) NOPASSWD: ALL' > /etc/sudoers.d/{{ admin_user.name }}
+echo '{{ admin_user.name }} ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/{{ admin_user.name }}
 chmod 0440 /etc/sudoers.d/{{ admin_user.name }}
 restorecon /etc/sudoers.d/{{ admin_user.name }}
 {% endif %}
