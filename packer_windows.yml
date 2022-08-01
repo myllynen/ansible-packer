@@ -14,6 +14,9 @@
     vm_memory: 8192
     disk_size: 30720
 
+    # Windows OS edition to install from the ISO
+    win_os_edition: 1
+
     # Full path for additional drivers for the target Windows version
     # For QEMU/KVM example, see the virtio-win-drivers-prepare script
     # https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/stable-virtio/virtio-win.iso
