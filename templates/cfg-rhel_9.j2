@@ -192,7 +192,6 @@ for netconf in $(ls -1 /etc/NetworkManager/system-connections/*.nmconnection); d
 done
 sed -i -e '/^::1/d' /etc/hosts
 echo "AddressFamily inet" > /etc/ssh/sshd_config.d/50-ipv6.conf
-sed -i -e 's,^IPv6_rpfilter=yes,IPv6_rpfilter=no,' /etc/firewalld/firewalld.conf
 sed -i -e '/dhcpv6-client/d' /etc/firewalld/zones/public.xml
 if [ -d /etc/vmware-tools ]; then
   echo "[guestinfo]" > /etc/vmware-tools/tools.conf
