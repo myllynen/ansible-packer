@@ -154,6 +154,11 @@ if [ -d /etc/vmware-tools ]; then
   echo "max-ipv6-routes=0" >> /etc/vmware-tools/tools.conf
 fi
 %end
+{% else %}
+%post
+echo "net.ipv6.conf.all.disable_ipv6 = 0" > /etc/sysctl.d/50-ipv6.conf
+echo "net.ipv6.conf.default.disable_ipv6 = 0" >> /etc/sysctl.d/50-ipv6.conf
+%end
 {% endif %}
 
 {% if root_ssh_key is defined %}
