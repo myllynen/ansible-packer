@@ -20,7 +20,7 @@
     #
     boot_password: "{{ image_password }}"
     root_password: "{{ image_password }}"
-    bios_uefi_boot: false
+    bios_uefi_boot: true
     # auto/custom/default/single
     partitioning: auto
     disable_ipv6: true

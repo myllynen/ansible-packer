@@ -7,7 +7,7 @@ boot_parameters: net.ifnames.prefix=net quiet systemd.show_status=yes
 boot_password:
 #root_password:
 
-bios_uefi_boot: false
+bios_uefi_boot: true
 # One of: auto/custom/default/single
 #partitioning:
 disable_ipv6: false
