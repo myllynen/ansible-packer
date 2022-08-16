@@ -20,9 +20,11 @@
     #
     boot_password: "{{ image_password }}"
     root_password: "{{ image_password }}"
+    # Autopartitioning does not support
+    # creating BIOS/UEFI-compatible images
     bios_uefi_boot: true
-    # auto/custom/default/single
-    partitioning: auto
+    # One of: auto/custom/default/single
+    partitioning: default
     disable_ipv6: true
     selinux: enforcing
     #security_profile: cis_server_l1

@@ -7,6 +7,8 @@ boot_parameters: net.ifnames.prefix=net quiet systemd.show_status=yes
 boot_password:
 #root_password:
 
+# Autopartitioning does not support
+# creating BIOS/UEFI-compatible images
 bios_uefi_boot: true
 # One of: auto/custom/default/single
 #partitioning:
