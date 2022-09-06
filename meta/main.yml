@@ -5,7 +5,7 @@
 ---
 galaxy_info:
   author: Marko Myllynen <myllynen@redhat.com>
-  description: Ansible role for building OS images with Packer.
+  description: Ansible Packer Role for VM/ISO Image Creation.
   company: Red Hat, Inc.
 
   issue_tracker_url: https://github.com/myllynen/ansible-packer/issues
