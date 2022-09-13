@@ -69,6 +69,8 @@ This is a basic playbook for building an image with Qemu:
 ---
 - name: Build image with Packer on Qemu
   hosts: all
+  collections:
+    - myllynen.ansible_packer
   vars:
     packer_binary: packer.io
     packer_builder: qemu
@@ -97,7 +99,7 @@ This is a basic playbook for building an image with Qemu:
         checksum: sha256:c324f3b07283f9393168f0a4ad2167ebbf7e4699d65c9670e0d9e58ba4e2a9a8
 
   roles:
-    - myllynen.ansible_packer
+    - ansible_packer
 ```
 
 This is a more complete playbook for building an image on VMware:
@@ -106,6 +108,8 @@ This is a more complete playbook for building an image on VMware:
 ---
 - name: Build image with Packer on VMware vSphere
   hosts: all
+  collections:
+    - myllynen.ansible_packer
   vars:
     #
     # Base configuration
@@ -176,7 +180,7 @@ This is a more complete playbook for building an image on VMware:
         checksum: sha256:c324f3b07283f9393168f0a4ad2167ebbf7e4699d65c9670e0d9e58ba4e2a9a8
 
   roles:
-    - myllynen.ansible_packer
+    - ansible_packer
 ```
 
 See the example [playbook](packer.yml) for a more complete example and
@@ -215,6 +219,8 @@ the above playbooks used to build VM images with Packer:
 ---
 - name: Build custom ISO
   hosts: all
+  collections:
+    - myllynen.ansible_packer
   vars:
     # Using packer_ variables for compatibility,
     # genisoimage not Packer used to build image
@@ -241,7 +247,7 @@ the above playbooks used to build VM images with Packer:
         checksum: sha256:c324f3b07283f9393168f0a4ad2167ebbf7e4699d65c9670e0d9e58ba4e2a9a8
 
   roles:
-    - myllynen.ansible_packer
+    - ansible_packer
 ```
 
 To build custom ISO on a build host:

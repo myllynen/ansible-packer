@@ -1,6 +1,8 @@
 ---
 - name: Build custom ISO
   hosts: all
+  collections:
+    - myllynen.ansible_packer
   vars:
     #
     # Base configuration
@@ -72,4 +74,4 @@
         checksum: sha256:c324f3b07283f9393168f0a4ad2167ebbf7e4699d65c9670e0d9e58ba4e2a9a8
 
   roles:
-    - ansible-packer
+    - ansible_packer

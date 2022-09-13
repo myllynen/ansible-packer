@@ -1,6 +1,8 @@
 ---
 - name: Build image with Packer
   hosts: all
+  collections:
+    - myllynen.ansible_packer
   vars:
     #
     # Base configuration
@@ -140,4 +142,4 @@
     boot_command: <up><wait><tab><wait> ip=dhcp inst.ks=hd:/dev/sr1:inst.cfg inst.geoloc=0 inst.nosave=all
 
   roles:
-    - ansible-packer
+    - ansible_packer
