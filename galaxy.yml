@@ -1,0 +1,21 @@
+namespace: myllynen
+name: ansible_packer
+version: "0.1.0"
+readme: README.md
+authors:
+  - Marko Myllynen <myllynen@redhat.com>
+description: >
+  Ansible Packer Role for VM/ISO Image Creation.
+license:
+  - GPL-3.0-or-later
+tags:
+  - packer
+  - build
+  - image
+  - rhel
+  - centos
+  - fedora
+  - windows
+dependencies: []
+repository: https://www.github.com/myllynen/ansible-packer
+issues: https://www.github.com/myllynen/ansible-packer/issues

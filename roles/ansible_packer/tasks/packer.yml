@@ -3,7 +3,7 @@
   vars:
     win_str: "{{ '-win' if win_winrm_password is defined else '' }}"
   template:
-    src: templates/build-{{ packer_builder }}{{ win_str }}.json.j2
+    src: build-{{ packer_builder }}{{ win_str }}.json.j2
     dest: "{{ tempdir.path }}/build.json"
     mode: '0600'
 

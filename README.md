@@ -10,10 +10,10 @@ The role also supports creating custom ISO installer images.
 ## Introduction
 
 This role builds custom Linux and Windows VM template images using
-[Packer](https://www.packer.io/). Many OS installation parameters can be
-set as Ansible variables to allow for high degree of customization. Same
-customizations can be applied to both VM template images and unattended
-BIOS/UEFI-compatible ISO installer images.
+[Packer](https://www.packer.io/). Many OS installation parameters can
+be set as Ansible variables to allow for high degree of customization.
+Same customizations can be applied to both VM template images and
+unattended BIOS/UEFI-compatible ISO installer images.
 
 See [this example](packer.yml) how a playbook could look like.
 
@@ -55,18 +55,10 @@ Less tested but verified to work in the past OS variants include:
 To build a VM image [install Packer](https://www.packer.io/downloads) on
 a build host, install this role, and run a playbook as shown below.
 
-After Packer installation, install this role:
+After Packer installation, install this collection:
 
 ```
-mkdir roles
-cat << EOF > roles/requirements.yml
----
-roles:
-  - src: https://github.com/myllynen/ansible-packer.git
-    type: git
-    version: master
-EOF
-ansible-galaxy role install -p roles -r roles/requirements.yml
+ansible-galaxy collection install git+https://github.com/myllynen/ansible-packer,master
 ```
 
 Then, create a [playbook](packer.yml) to use this role.
@@ -105,7 +97,7 @@ This is a basic playbook for building an image with Qemu:
         checksum: sha256:c324f3b07283f9393168f0a4ad2167ebbf7e4699d65c9670e0d9e58ba4e2a9a8
 
   roles:
-    - ansible-packer
+    - myllynen.ansible_packer
 ```
 
 This is a more complete playbook for building an image on VMware:
@@ -184,7 +176,7 @@ This is a more complete playbook for building an image on VMware:
         checksum: sha256:c324f3b07283f9393168f0a4ad2167ebbf7e4699d65c9670e0d9e58ba4e2a9a8
 
   roles:
-    - ansible-packer
+    - myllynen.ansible_packer
 ```
 
 See the example [playbook](packer.yml) for a more complete example and
@@ -249,7 +241,7 @@ the above playbooks used to build VM images with Packer:
         checksum: sha256:c324f3b07283f9393168f0a4ad2167ebbf7e4699d65c9670e0d9e58ba4e2a9a8
 
   roles:
-    - ansible-packer
+    - myllynen.ansible_packer
 ```
 
 To build custom ISO on a build host:
@@ -276,34 +268,40 @@ passwords.
 
 Three paramaters, _packer\_builder_, _packer\_target_ and
 _root\_password_ for Linux or _win\_winrm\_password_ for Windows are
-mandatory, the rest are optional. See [defaults/main](defaults/main) for
-all the supported variables.
+mandatory, the rest are optional. See
+[roles/ansible_packer/defaults/main](roles/ansible_packer/defaults/main)
+for all the supported variables.
 
-See [defaults/main/content_iso.yml](defaults/main/content_iso.yml) how
-to define OS versions and ISO locations.
+See
+[roles/ansible_packer/defaults/main/content_iso.yml](roles/ansible_packer/defaults/main/content_iso.yml)
+how to define OS versions and ISO locations.
 
-See [defaults/main/builder_qemu.yml](defaults/main/builder_qemu.yml) and
-[defaults/main/builder_vmware.yml](defaults/main/builder_vmware.yml) for
-Packer builder related variables and their default values. ISO related
-variables are in
-[defaults/main/builder_iso.yml](defaults/main/builder_iso.yml).
+See
+[roles/ansible_packer/defaults/main/builder_qemu.yml](roles/ansible_packer/defaults/main/builder_qemu.yml)
+and
+[roles/ansible_packer/defaults/main/builder_vmware.yml](roles/ansible_packer/defaults/main/builder_vmware.yml)
+for Packer builder related variables and their default values. ISO
+related variables are in
+[roles/ansible_packer/defaults/main/builder_iso.yml](roles/ansible_packer/defaults/main/builder_iso.yml).
 
 Create BIOS/UEFI bootable image by setting _bios_uefi\_boot_ to `true`,
 otherwise the VM image supports only the platform used for building the
 image.
 
 See the provided partitioning alternatives in
-[templates/cfg-rhel_8.j2](templates/cfg-rhel_8.j2), specify
-_custom\_partition_ and set `partitioning: custom` to use custom
-partitioning layout.
+[roles/ansible_packer/templates/cfg-rhel_8.j2](roles/ansible_packer/templates/cfg-rhel_8.j2),
+specify _custom\_partition_ and set `partitioning: custom` to use
+custom partitioning layout.
 
 The value of _security\_profile_ is passed as-is to the Linux installer
 [OpenSCAP](https://www.open-scap.org/) module.
 
 To create local admin user on the VM for Ansible etc, see
-[defaults/main/os.yml](defaults/main/os.yml) for admin user data
-specification (Linux). Windows admin user is _winrm_, see
-[defaults/main/windows.yml](defaults/main/windows.yml) for details.
+[roles/ansible_packer/defaults/main/os.yml](roles/ansible_packer/defaults/main/os.yml)
+for admin user data specification (Linux). Windows admin user is
+_winrm_, see
+[roles/ansible_packer/defaults/main/windows.yml](roles/ansible_packer/defaults/main/windows.yml)
+for details.
 
 Vaulted password variables are supported. Note that the provided CentOS
 templates do not support all the variables as the latest RHEL templates.

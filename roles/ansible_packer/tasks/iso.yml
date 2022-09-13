@@ -45,7 +45,7 @@
 
 - name: Create custom ISO boot loader files
   template:
-    src: templates/{{ item.src }}
+    src: "{{ item.src }}"
     dest: "{{ iso_build_dir.path + '/' + item.dest }}"
     mode: '0644'
   loop:
