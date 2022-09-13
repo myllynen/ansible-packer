@@ -72,6 +72,9 @@
       rhel_8_6:
         url: file:///VirtualMachines/boot/rhel-8.6-x86_64-dvd.iso
         checksum: sha256:c324f3b07283f9393168f0a4ad2167ebbf7e4699d65c9670e0d9e58ba4e2a9a8
+      rhel_9_0:
+        url: file:///VirtualMachines/boot/rhel-baseos-9.0-x86_64-dvd.iso
+        checksum: sha256:a387f3230acf87ee38707ee90d3c88f44d7bf579e6325492f562f0f1f9449e89
 
   roles:
     - ansible_packer
