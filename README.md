@@ -184,7 +184,8 @@ This is a more complete playbook for building an image on VMware:
 ```
 
 See the example [playbook](packer.yml) for a more complete example and
-[defaults/main](defaults/main) for all the supported variables.
+[roles/ansible_packer/defaults/main](roles/ansible_packer/defaults/main)
+for all the supported variables.
 
 Finally, build image on a build host:
 
