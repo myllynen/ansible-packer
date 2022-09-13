@@ -1,8 +1,6 @@
 ---
 - name: Build Windows image with Packer
   hosts: all
-  collections:
-    - myllynen.ansible_packer
   vars:
     #
     # Base configuration
@@ -144,4 +142,4 @@
         checksum: sha256:3e4fa6d8507b554856fc9ca6079cc402df11a8b79344871669f0251535255325
 
   roles:
-    - ansible_packer
+    - myllynen.ansible_packer.ansible_packer
