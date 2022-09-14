@@ -187,6 +187,7 @@ systemctl enable serial-getty@ttyS0.service
 %post
 echo "net.ipv6.conf.all.disable_ipv6 = 1" > /etc/sysctl.d/50-ipv6.conf
 echo "net.ipv6.conf.default.disable_ipv6 = 1" >> /etc/sysctl.d/50-ipv6.conf
+echo "net.ipv6.conf.lo.disable_ipv6 = 1" >> /etc/sysctl.d/50-ipv6.conf
 for netconf in $(ls -1 /etc/NetworkManager/system-connections/*.nmconnection); do
   sed -i -e '/^\[ipv6\]$/,/^\[/ s/method=.*/method=disabled/' $netconf
 done
