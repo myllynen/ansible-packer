@@ -16,6 +16,7 @@ tags:
   - centos
   - fedora
   - windows
-dependencies: {}
+dependencies:
+  ansible.posix: ">=1.4.0"
 repository: https://www.github.com/myllynen/ansible-packer
 issues: https://www.github.com/myllynen/ansible-packer/issues
