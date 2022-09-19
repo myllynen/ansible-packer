@@ -26,17 +26,20 @@
   file:
     path: "{{ output_directory }}"
     state: directory
+    mode: '0700'
 
 - name: Create custom ISO build directory
   file:
     path: "{{ tempdir.path + '/iso-build' }}"
     state: directory
+    mode: '0700'
   register: iso_build_dir
 
 - name: Create custom Windows ISO drivers directory
   file:
     path: "{{ tempdir.path + '/iso-build/drivers' }}"
     state: directory
+    mode: '0700'
   register: iso_drivers_dir
   when: win_winrm_password is defined and win_drivers_path is defined
 

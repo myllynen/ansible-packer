@@ -49,7 +49,7 @@ root_permit_override_security_policy: false
 #root_ssh_key: "ssh-rsa ... root@image"
 
 # Define to temporarily register and update RHEL
-# To be replaced with rhsm directive once available 
+# To be replaced with rhsm directive once available
 #rh_register_command:
 # Install Satellite tools when updating packages
 rh_satellite_tools_install: true
