@@ -5,7 +5,9 @@
 ## Configuration
 
 Please see the files in [defaults](defaults) for all the
-configuration options this role supports. Please see the
+configuration options this role supports.
+
+Please see the
 [collection README.md](../../README.md) for higher level description.
 
 ## License
