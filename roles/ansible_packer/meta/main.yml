@@ -1,0 +1,28 @@
+galaxy_info:
+  role_name: ansible_packer
+  author: Marko Myllynen <myllynen@redhat.com>
+  description: ansible_packer role
+  license: GPLv3+
+  min_ansible_version: 2.9
+  platforms:
+    - name: EL
+      versions:
+        - 7
+        - 8
+        - 9
+    - name: Fedora
+      versions:
+        - any
+    - name: Windows
+      versions:
+        - 2019
+        - 2022
+  galaxy_tags:
+    - packer
+    - build
+    - image
+    - rhel
+    - centos
+    - fedora
+    - windows
+dependencies: []
