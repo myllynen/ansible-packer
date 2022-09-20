@@ -1,6 +1,7 @@
 galaxy_info:
   role_name: ansible_packer
   author: Marko Myllynen <myllynen@redhat.com>
+  company: Red Hat, Inc.
   description: ansible_packer role
   license: GPLv3+
   min_ansible_version: 2.9
