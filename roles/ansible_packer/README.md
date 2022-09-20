@@ -4,7 +4,7 @@
 
 ## Configuration
 
-Please see the files in [defaults](defaults) for all the
+Please see the files in [defaults/main](defaults/main) for all the
 configuration options this role supports.
 
 Please see the [collection](../..) for a higher level description.
