@@ -7,7 +7,7 @@
 Please see the files in [defaults/main](defaults/main) for all the
 configuration options this role supports.
 
-Please see the [collection](../../../../) for a higher level
+Please see the [collection](../../../..) for a higher level
 description.
 
 ## License
