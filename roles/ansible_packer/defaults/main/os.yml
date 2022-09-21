@@ -78,3 +78,7 @@ rh_satellite_tools_install: true
 #  %post --erroronfail
 #  touch /.unconfigured
 #  %end
+
+# RHEL Edge options
+ostree_url: http://rh-imgbuilder-09.cool.lab:8080/repo/
+ostree_href: rhel/9/x86_64/edge

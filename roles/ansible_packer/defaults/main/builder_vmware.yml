@@ -18,7 +18,7 @@ vcenter_cluster:
 vcenter_datastore:
 vcenter_network:
 
-vm_guest_os_type: "{{ __base_target + __base_version }}_64Guest"
+vm_guest_os_type: "{{ __base_target.split('-')[0] + __base_version }}_64Guest"
 
 #vm_firmware:
 
