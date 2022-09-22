@@ -6,6 +6,8 @@ Ansible role for building VM images with Packer.
 
 The role also supports creating custom ISO installer images.
 
+Support for RHEL Edge is currently under development.
+
 ## Introduction
 
 This role builds custom Linux and Windows VM template images using
@@ -24,6 +26,7 @@ Currently (2022-06) tested Packer builders (platforms) are:
 Currently (2022-06) tested OS variants and versions are:
 
 * [RHEL](https://www.redhat.com/en/technologies/linux-platforms/enterprise-linux) 7, 8, 9
+* [RHEL Edge](https://www.redhat.com/en/technologies/linux-platforms/enterprise-linux/edge-computing) 9 (experimental)
 * [Windows Server](https://www.microsoft.com/en-us/windows-server) 2019, 2022
 
 VM images are modified to be used as templates at the end of automated
@@ -183,7 +186,7 @@ This example has additional options for building RHEL Edge image:
 ```
     packer_target: rhel-edge_9
     packer_target_pretty: RHEL 9 Edge
-    ostree_url: http://10.1.1.10:8080/repo/
+    ostree_url: http://10.1.1.10/repo/
     ostree_href: rhel/9/x86_64/edge
 
     iso:
