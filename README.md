@@ -179,19 +179,18 @@ This is a more complete playbook for building an image on VMware:
 ```
 
 This example has additional options for building RHEL Edge image:
+
 ```
-    packer_target: rhel-edge_9_0
-    packer_target_pretty: RHEL9 Edge
-    ostree_url: http://10.128.1.177:8080/repo/
+    packer_target: rhel-edge_9
+    packer_target_pretty: RHEL 9 Edge
+    ostree_url: http://10.1.1.10:8080/repo/
     ostree_href: rhel/9/x86_64/edge
 
     iso:
-       rhel-edge_9_0:
-         url: "file:///VirtualMachines/rhel-baseos-9.0-x86_64-dvd.iso"
-         checksum: sha256:c6942e3ed65947ed48c30589d9c1a752e96c5b94ee8de1923331449fee162cc1
-
+      rhel-edge_9:
+        url: "file:///VirtualMachines/rhel-baseos-9.0-x86_64-dvd.iso"
+        checksum: sha256:c6942e3ed65947ed48c30589d9c1a752e96c5b94ee8de1923331449fee162cc1
 ```
-
 
 See the example [playbook](packer.yml) for a more complete example and
 [roles/ansible_packer/defaults/main](roles/ansible_packer/defaults/main)

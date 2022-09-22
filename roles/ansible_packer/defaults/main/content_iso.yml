@@ -30,8 +30,8 @@ iso:
 
   rhel_9:
     url: file:///VirtualMachines/boot/rhel-baseos-9.0-x86_64-dvd.iso
-    checksum: sha256:a387f3230acf87ee38707ee90d3c88f44d7bf579e6325492f562f0f1f9449e89
+    checksum: sha256:c6942e3ed65947ed48c30589d9c1a752e96c5b94ee8de1923331449fee162cc1
 
   rhel_9_0:
     url: file:///VirtualMachines/boot/rhel-baseos-9.0-x86_64-dvd.iso
-    checksum: sha256:a387f3230acf87ee38707ee90d3c88f44d7bf579e6325492f562f0f1f9449e89
+    checksum: sha256:c6942e3ed65947ed48c30589d9c1a752e96c5b94ee8de1923331449fee162cc1
