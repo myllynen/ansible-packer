@@ -19,7 +19,9 @@ timezone --utc {{ timezone }}
 timesource --ntp-server {{ ntp_server }}
 {% endfor %}
 keyboard {{ keyboard }}
+{% if security_profile is undefined or security_profile != 'stig' %}
 services --enabled tuned
+{% endif %}
 {% if communicator == 'none' %}
 poweroff
 {% else %}
@@ -40,10 +42,13 @@ python3
 python3-libselinux
 setools-console
 tar
-tuned
 #unzip
 #vim-enhanced
 yum-utils
+
+{% if security_profile is undefined or security_profile != 'stig' %}
+tuned
+{% endif %}
 
 {% if packer_builder == 'vmware' %}
 # https://bugzilla.redhat.com/show_bug.cgi?id=2041424

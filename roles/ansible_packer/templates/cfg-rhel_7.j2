@@ -53,7 +53,9 @@ firstboot --disabled
 lang en_US.UTF-8
 timezone --ntpservers {{ ntp_servers }} --utc {{ timezone }}
 keyboard {{ keyboard }}
+{% if security_profile is undefined or security_profile != 'stig' %}
 services --enabled tuned
+{% endif %}
 {% if communicator == 'none' %}
 poweroff
 {% else %}
@@ -84,7 +86,6 @@ psmisc
 setools-console
 #sos
 tar
-tuned
 #unzip
 #vim-enhanced
 virt-what
@@ -94,6 +95,10 @@ yum-utils
 openscap
 openscap-scanner
 scap-security-guide
+{% endif %}
+
+{% if security_profile is undefined or security_profile != 'stig' %}
+tuned
 {% endif %}
 
 {% if packer_builder == 'vmware' %}
