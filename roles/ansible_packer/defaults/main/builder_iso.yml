@@ -1,5 +1,5 @@
 ---
-# This is not a Packer builder configuration
+# ISO builder configuration which is not using Packer
 
 packer_target_pretty: Custom {{ __target_fullname }}
 

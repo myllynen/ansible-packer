@@ -57,7 +57,7 @@ Less tested but verified to work in the past OS variants include:
 To build a VM image [install Packer](https://www.packer.io/downloads) on
 a build host, install this role, and run a playbook as shown below.
 
-After Packer installation, install this collection:
+To install this collection from GitHub:
 
 ```
 ansible-galaxy collection install git+https://github.com/myllynen/ansible-packer,master
