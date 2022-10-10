@@ -30,9 +30,8 @@
       "iso_url": "{{ iso[packer_target].url }}",
       "iso_checksum": "{{ iso[packer_target].checksum }}",
 
-      "cd_files": ["{{ win_drivers_path }}/*"],
-
-      "floppy_files": [
+      "cd_files": [
+        "{{ win_drivers_path }}/*",
         "autounattend.xml",
         "optimize-powershell.ps1",
         "customize-system.ps1",

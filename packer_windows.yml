@@ -15,6 +15,7 @@
     disk_size: 30720
 
     # Windows OS edition to install from the ISO
+    # Interactive installation will show editions
     win_os_edition: 1
 
     # Full path for additional drivers for the target Windows version
