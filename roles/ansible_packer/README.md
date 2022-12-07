@@ -76,28 +76,24 @@ iso:
     checksum: sha256:19d653ce2f04f202e79773a0cbeda82070e7527557e814ebbce658773fbe8191
 
   rhel_8:
-    url: file:///VirtualMachines/boot/rhel-8.6-x86_64-dvd.iso
-    checksum: sha256:c324f3b07283f9393168f0a4ad2167ebbf7e4699d65c9670e0d9e58ba4e2a9a8
-
-  rhel_8_4:
-    url: file:///VirtualMachines/boot/rhel-8.4-x86_64-dvd.iso
-    checksum: sha256:48f955712454c32718dcde858dea5aca574376a1d7a4b0ed6908ac0b85597811
-
-  rhel_8_5:
-    url: file:///VirtualMachines/boot/rhel-8.5-x86_64-dvd.iso
-    checksum: sha256:1f78e705cd1d8897a05afa060f77d81ed81ac141c2465d4763c0382aa96cadd0
+    url: file:///VirtualMachines/boot/rhel-8.7-x86_64-dvd.iso
+    checksum: sha256:a6a7418a75d721cc696d3cbdd648b5248808e7fef0f8742f518e43b46fa08139
 
   rhel_8_6:
     url: file:///VirtualMachines/boot/rhel-8.6-x86_64-dvd.iso
-    checksum: sha256:c324f3b07283f9393168f0a4ad2167ebbf7e4699d65c9670e0d9e58ba4e2a9a8
+    checksum: sha256:8cb0dfacc94b789933253d5583a2fb7afce26d38d75be7c204975fe20b7bdf71
+
+  rhel_8_7:
+    url: file:///VirtualMachines/boot/rhel-8.7-x86_64-dvd.iso
+    checksum: sha256:a6a7418a75d721cc696d3cbdd648b5248808e7fef0f8742f518e43b46fa08139
 
   rhel_9:
-    url: file:///VirtualMachines/boot/rhel-baseos-9.0-x86_64-dvd.iso
-    checksum: sha256:c6942e3ed65947ed48c30589d9c1a752e96c5b94ee8de1923331449fee162cc1
+    url: file:///VirtualMachines/boot/rhel-baseos-9.1-x86_64-dvd.iso
+    checksum: sha256:d9dcae2b6e760d0f9dcf4a517bddc227d5fa3f213a8323592f4a07a05aa542a2
 
-  rhel_9_0:
-    url: file:///VirtualMachines/boot/rhel-baseos-9.0-x86_64-dvd.iso
-    checksum: sha256:c6942e3ed65947ed48c30589d9c1a752e96c5b94ee8de1923331449fee162cc1
+  rhel_9_1:
+    url: file:///VirtualMachines/boot/rhel-baseos-9.1-x86_64-dvd.iso
+    checksum: sha256:d9dcae2b6e760d0f9dcf4a517bddc227d5fa3f213a8323592f4a07a05aa542a2
 
 ---
 # https://www.packer.io/plugins/builders/qemu#boot-configuration

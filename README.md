@@ -74,7 +74,7 @@ This is a basic playbook for building an image with Qemu:
   vars:
     packer_binary: packer.io
     packer_builder: qemu
-    packer_target: rhel_8
+    packer_target: rhel_9
     disk_size: 8192
 
     root_password: "{{ image_password }}"
@@ -94,9 +94,9 @@ This is a basic playbook for building an image with Qemu:
     # OS installer configuration
     #
     iso:
-      rhel_8:
-        url: file:///VirtualMachines/boot/rhel-8.6-x86_64-dvd.iso
-        checksum: sha256:c324f3b07283f9393168f0a4ad2167ebbf7e4699d65c9670e0d9e58ba4e2a9a8
+      rhel_9:
+        url: file:///VirtualMachines/boot/rhel-9.1-x86_64-dvd.iso
+        checksum: sha256:d9dcae2b6e760d0f9dcf4a517bddc227d5fa3f213a8323592f4a07a05aa542a2
 
   roles:
     - myllynen.ansible_packer.ansible_packer
@@ -114,7 +114,7 @@ This is a more complete playbook for building an image on VMware:
     #
     packer_binary: /usr/local/sbin/packer.io
     packer_builder: vmware
-    packer_target: rhel_8_6
+    packer_target: rhel_9_1
     image_name: rhel8-template
     disk_size: 30720
 
@@ -173,9 +173,9 @@ This is a more complete playbook for building an image on VMware:
     # OS installer configuration
     #
     iso:
-      rhel_8_6:
-        url: file:///VirtualMachines/boot/rhel-8.6-x86_64-dvd.iso
-        checksum: sha256:c324f3b07283f9393168f0a4ad2167ebbf7e4699d65c9670e0d9e58ba4e2a9a8
+      rhel_9_1:
+        url: file:///VirtualMachines/boot/rhel-9.1-x86_64-dvd.iso
+        checksum: sha256:d9dcae2b6e760d0f9dcf4a517bddc227d5fa3f213a8323592f4a07a05aa542a2
 
   roles:
     - myllynen.ansible_packer.ansible_packer
@@ -191,8 +191,8 @@ This example has additional options for building RHEL Edge image:
 
     iso:
       rhel-edge_9:
-        url: "file:///VirtualMachines/rhel-baseos-9.0-x86_64-dvd.iso"
-        checksum: sha256:c6942e3ed65947ed48c30589d9c1a752e96c5b94ee8de1923331449fee162cc1
+        url: file:///VirtualMachines/rhel-baseos-9.1-x86_64-dvd.iso
+        checksum: sha256:d9dcae2b6e760d0f9dcf4a517bddc227d5fa3f213a8323592f4a07a05aa542a2
 ```
 
 See the example [playbook](packer.yml) for a more complete example and
@@ -202,13 +202,13 @@ for all the supported variables.
 Finally, build image on a build host:
 
 ```
-# Build latest RHEL 8 image with playbook defaults
+# Build latest RHEL 9 image with playbook defaults
 ansible-playbook -c local -i localhost, packer.yml \
-  -e packer_target=rhel_8
+  -e packer_target=rhel_9
 
-# Build RHEL 8.6 image on VMware vSphere with customizations
+# Build RHEL 9.1 image on VMware vSphere with customizations
 ansible-playbook -i 192.168.122.123, -u builder packer.yml \
-  -e packer_builder=vmware -e packer_target=rhel_8_6 \
+  -e packer_builder=vmware -e packer_target=rhel_9_1 \
   -e bios_uefi_boot=true -e partitioning=single \
   -e disable_ipv6=true -e security_profile=cis_server_l1 \
   -e image_name=test_image
@@ -236,8 +236,8 @@ the above playbooks used to build VM images with Packer:
     # Using packer_ variables for compatibility,
     # genisoimage not Packer used to build image
     packer_builder: iso
-    packer_target: rhel_8_6
-    packer_target_pretty: Custom RHEL 8.6
+    packer_target: rhel_9_1
+    packer_target_pretty: Custom RHEL 9.1
     image_name: custom.iso
 
     root_password: "{{ image_password }}"
@@ -253,9 +253,9 @@ the above playbooks used to build VM images with Packer:
     output_directory: /tmp/iso_images
 
     iso:
-      rhel_8_6:
-        url: file:///VirtualMachines/boot/rhel-8.6-x86_64-dvd.iso
-        checksum: sha256:c324f3b07283f9393168f0a4ad2167ebbf7e4699d65c9670e0d9e58ba4e2a9a8
+      rhel_9_1:
+        url: file:///VirtualMachines/boot/rhel-9.1-x86_64-dvd.iso
+        checksum: sha256:d9dcae2b6e760d0f9dcf4a517bddc227d5fa3f213a8323592f4a07a05aa542a2
 
   roles:
     - myllynen.ansible_packer.ansible_packer
@@ -264,7 +264,7 @@ the above playbooks used to build VM images with Packer:
 To build custom ISO on a build host:
 
 ```
-# Build latest RHEL 8 image with playbook defaults
+# Build latest RHEL image with playbook defaults
 ansible-playbook -c local -i localhost, build_iso.yml \
   -e image_password=foobar
 ```
