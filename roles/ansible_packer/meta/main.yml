@@ -1,3 +1,4 @@
+---
 galaxy_info:
   role_name: ansible_packer
   author: Marko Myllynen <myllynen@redhat.com>

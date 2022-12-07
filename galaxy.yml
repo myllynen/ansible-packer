@@ -1,3 +1,4 @@
+---
 namespace: myllynen
 name: ansible_packer
 version: "0.3.3"
