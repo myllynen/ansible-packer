@@ -1,2 +1,3 @@
 ---
 __console_boot_string: "{{ 'console=tty0 console=ttyS0,115200 ' if serial_console_setup | bool else '' }}"
+__fips_boot_parameter: "{{ 'fips=1 ' if fips_enable | bool else '' }}"

@@ -128,6 +128,7 @@ This is a more complete playbook for building an image on VMware:
     root_password: "{{ image_password }}"
     partitioning: auto
     disable_ipv6: true
+    #fips_enable: true
     #security_profile: cis_server_l1
     boot_parameters: net.ifnames.prefix=net quiet systemd.show_status=yes
 
@@ -211,7 +212,7 @@ ansible-playbook -i 192.168.122.123, -u builder packer.yml \
   -e packer_builder=vmware -e packer_target=rhel_9_1 \
   -e bios_uefi_boot=true -e partitioning=single \
   -e disable_ipv6=true -e security_profile=cis_server_l1 \
-  -e image_name=test_image
+  -e fips_enable=true -e image_name=test_image
 ```
 
 ## Custom ISO Installer Image Creation

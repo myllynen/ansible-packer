@@ -27,6 +27,7 @@
     partitioning: default
     disable_ipv6: true
     selinux: enforcing
+    #fips_enable: true
     #security_profile: cis_server_l1
     boot_parameters: net.ifnames.prefix=net quiet systemd.show_status=yes
     serial_console_setup: true

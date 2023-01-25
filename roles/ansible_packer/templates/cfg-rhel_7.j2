@@ -5,7 +5,7 @@ cmdline
 zerombr
 clearpart --all --initlabel
 
-{% set boot_parameters_full = __console_boot_string + boot_parameters %}
+{% set boot_parameters_full = __console_boot_string + __fips_boot_parameter + boot_parameters %}
 {% if __boot_pw_encrypted == '' %}
 bootloader --timeout 1 --append "{{ boot_parameters_full }}"
 {% else %}
