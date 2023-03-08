@@ -199,12 +199,13 @@ mkdir -p -m 0700 /var/lib/exec
 {{ rh_register_command }} || sleep 3600
 yum -y update
 {% if rh_satellite_tools_install | bool %}
-yum -y install katello-host-tools katello-host-tools-tracer || sleep 3600
+yum -y install katello-host-tools-tracer || sleep 3600
 {% endif %}
 subscription-manager unregister || sleep 3600
 subscription-manager clean
 yum -C remove -y 'katello-ca-consumer-*'
 mv /etc/rhsm/rhsm.conf.kat-backup /etc/rhsm/rhsm.conf
+sed -i -e 's,^package_profile_on_trans = .*,package_profile_on_trans = 1,' /etc/rhsm/rhsm.conf
 rm -f /etc/rhsm/syspurpose/syspurpose.json /etc/rhsm/ca/katello-*-ca.pem /var/lib/rhsm/cache/* \
   /var/lib/rhsm/facts/*.json /var/lib/rhsm/repo*/*.repo /var/lib/rhsm/*_name
 {% endif %}
