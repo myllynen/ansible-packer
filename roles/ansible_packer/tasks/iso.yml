@@ -1,7 +1,7 @@
 ---
-- name: Abort if not supported OS ISO URL
+- name: Fail if not supported OS ISO URL
   fail:
-    msg: "Custom ISO building requires file:// URL, aborting!"
+    msg: "Custom ISO building requires file:// type URL."
   when: "'file://' not in iso[packer_target].url"
 
 - name: Set OS ISO path
@@ -17,9 +17,9 @@
     path: "{{ image_path }}"
   register: iso_image
 
-- name: Abort if custom ISO file exists and not allowed to overwrite
+- name: Fail if custom ISO file exists and not allowed to overwrite
   fail:
-    msg: Custom ISO file already exists and use_force not enabled.
+    msg: "Custom ISO file already exists and use_force not enabled."
   when: not use_force | bool and iso_image.stat.exists
 
 - name: Create output directory
