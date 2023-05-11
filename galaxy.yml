@@ -1,7 +1,7 @@
 ---
 namespace: myllynen
 name: ansible_packer
-version: "0.4.1"
+version: "0.4.2"
 readme: README.md
 authors:
   - Marko Myllynen <myllynen@redhat.com>
