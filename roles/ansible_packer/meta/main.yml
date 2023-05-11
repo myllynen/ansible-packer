@@ -5,20 +5,20 @@ galaxy_info:
   company: Red Hat, Inc.
   description: ansible_packer role
   license: GPLv3+
-  min_ansible_version: 2.9
+  min_ansible_version: "2.9"
   platforms:
     - name: EL
       versions:
-        - 7
-        - 8
-        - 9
+        - "7"
+        - "8"
+        - "9"
     - name: Fedora
       versions:
-        - any
+        - all
     - name: Windows
       versions:
-        - 2019
-        - 2022
+        - "2019"
+        - "2022"
   galaxy_tags:
     - packer
     - build
