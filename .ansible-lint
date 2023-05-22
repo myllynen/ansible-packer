@@ -1,5 +1,19 @@
 ---
 offline: true
+profile: production
+strict: true
+
+# Additional rules to enable if no profile set
+enable_list:
+  - args
+  - empty-string-compare
+  - no-log-password
+  - no-same-owner
+  - yaml
+
 skip_list:
   - fqcn[action-core]
+  - galaxy[no-changelog]
+  - no-handler
+  - var-naming[no-role-prefix]
   - yaml[comments]

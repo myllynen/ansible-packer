@@ -83,6 +83,8 @@
   ansible.posix.synchronize:
     src: "{{ win_drivers_path + '/' }}"
     dest: "{{ iso_drivers_dir.path }}"
+    owner: false
+    group: false
   when: win_winrm_password is defined and win_drivers_path is defined
 
 - name: Remove existing custom ISO file
