@@ -8,7 +8,7 @@
       "headless": true,
       "output_directory": "{{ output_directory }}",
 
-      "qemuargs": [["-cpu", "host"]],
+      "qemuargs": [["-cpu", "host,+nx"]],
 
       "vm_name": "{{ vm_name + '.qcow2' if '.qcow2' not in vm_name else vm_name }}",
 
