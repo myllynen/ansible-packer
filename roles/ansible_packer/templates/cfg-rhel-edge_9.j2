@@ -1,36 +1,34 @@
 # RHEL 9 edge image kickstart file
 
-cmdline
+rootpw --lock
+text
+cdrom
 zerombr
-clearpart --all --initlabel --disklabel gpt
+clearpart --all --initlabel
 autopart
 
-rootpw --lock
-
-ostreesetup --nogpg --osname=rhel --remote=edge --url={{ ostree_url }} --ref={{ ostree_href }}
-
 firewall --enabled --service ssh
-firstboot --disabled
 lang C.UTF-8
 timezone --utc {{ timezone }}
 {% for ntp_server in ntp_servers.split(',') %}
 timesource --ntp-server {{ ntp_server }}
 {% endfor %}
 keyboard {{ keyboard }}
-{% if security_profile is undefined or security_profile != 'stig' %}
 services --enabled tuned
-{% endif %}
 {% if communicator == 'none' %}
 poweroff
 {% else %}
 reboot
 {% endif %}
 
+ostreesetup --nogpg --osname=rhel --remote=edge --url={{ ostree_url }} --ref={{ ostree_href }}
+
 %post
 systemctl enable rhcd.service
 systemctl enable insights-client.service
 systemctl enable cockpit.socket
 tuned-adm profile virtual-guest
+echo -e "admin     ALL=(ALL)       NOPASSWD: ALL\n" > /etc/sudoers.d/admin
 %end
 
 {% if root_ssh_key is defined %}
