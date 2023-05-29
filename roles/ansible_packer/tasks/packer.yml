@@ -16,6 +16,7 @@
     export VCENTER_PASSWORD='{{ vcenter_credentials.vcenter_password | default("", true) }}'
     export WIN_WINRM_PASSWORD='{{ win_winrm_password | default("", true) }}'
     {{ packer_binary }} build -color=false {{ '-force' if use_force | bool else '' }} build.json
+  no_log: "{{ packer_build_no_log }}"
   register: packer_result
   failed_when: "'successful build' not in packer_result.stdout"
   changed_when: true

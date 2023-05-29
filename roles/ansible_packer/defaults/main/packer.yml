@@ -4,6 +4,10 @@ use_force: false
 
 packer_binary: packer.io
 
+# Set no_log when running Packer, should be set if
+# using password for vCenter or WinRM after tests
+packer_build_no_log: false
+
 communicator: "none"
 
 # Example Packer Ansible provisioner conf for RHEL
