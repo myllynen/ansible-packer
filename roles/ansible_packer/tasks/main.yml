@@ -41,7 +41,6 @@
     mode: '0600'
   loop:
     - autounattend.xml
-    - optimize-powershell.ps1
     - customize-system.ps1
     - configure-winrm.ps1
     - sysprep.xml
