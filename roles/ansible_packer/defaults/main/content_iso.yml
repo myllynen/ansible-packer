@@ -1,4 +1,5 @@
 ---
+# Set checksum to "none" to skip installation media checksum check by Packer
 iso:
   centos_8:
     url: file:///VirtualMachines/boot/CentOS-Stream-8-x86_64-latest-dvd1.iso
@@ -10,24 +11,24 @@ iso:
 
   rhel_7:
     url: file:///VirtualMachines/boot/rhel-server-7.9-x86_64-dvd.iso
-    checksum: sha256:19d653ce2f04f202e79773a0cbeda82070e7527557e814ebbce658773fbe8191
+    checksum: sha256:2cb36122a74be084c551bc7173d2d38a1cfb75c8ffbc1489c630c916d1b31b25
 
   rhel_8:
-    url: file:///VirtualMachines/boot/rhel-8.7-x86_64-dvd.iso
-    checksum: sha256:a6a7418a75d721cc696d3cbdd648b5248808e7fef0f8742f518e43b46fa08139
-
-  rhel_8_6:
-    url: file:///VirtualMachines/boot/rhel-8.6-x86_64-dvd.iso
-    checksum: sha256:8cb0dfacc94b789933253d5583a2fb7afce26d38d75be7c204975fe20b7bdf71
+    url: file:///VirtualMachines/boot/rhel-8.8-x86_64-dvd.iso
+    checksum: sha256:517abcc67ee3b7212f57e180f5d30be3e8269e7a99e127a3399b7935c7e00a09
 
   rhel_8_7:
     url: file:///VirtualMachines/boot/rhel-8.7-x86_64-dvd.iso
     checksum: sha256:a6a7418a75d721cc696d3cbdd648b5248808e7fef0f8742f518e43b46fa08139
 
-  rhel_9:
-    url: file:///VirtualMachines/boot/rhel-baseos-9.1-x86_64-dvd.iso
-    checksum: sha256:d9dcae2b6e760d0f9dcf4a517bddc227d5fa3f213a8323592f4a07a05aa542a2
+  rhel_8_8:
+    url: file:///VirtualMachines/boot/rhel-8.8-x86_64-dvd.iso
+    checksum: sha256:517abcc67ee3b7212f57e180f5d30be3e8269e7a99e127a3399b7935c7e00a09
 
-  rhel_9_1:
-    url: file:///VirtualMachines/boot/rhel-baseos-9.1-x86_64-dvd.iso
-    checksum: sha256:d9dcae2b6e760d0f9dcf4a517bddc227d5fa3f213a8323592f4a07a05aa542a2
+  rhel_9:
+    url: file:///VirtualMachines/boot/rhel-9.2-x86_64-dvd.iso
+    checksum: sha256:a18bf014e2cb5b6b9cee3ea09ccfd7bc2a84e68e09487bb119a98aa0e3563ac2
+
+  rhel_9_2:
+    url: file:///VirtualMachines/boot/rhel-9.2-x86_64-dvd.iso
+    checksum: sha256:a18bf014e2cb5b6b9cee3ea09ccfd7bc2a84e68e09487bb119a98aa0e3563ac2
