@@ -8,17 +8,22 @@
       "type": "qemu",
 
       "qemu_binary": "{{ qemu_binary }}",
+      "qemuargs": [{{ qemu_args }}],
       "accelerator": "{{ qemu_accelerator }}",
       "headless": true,
       "output_directory": "{{ output_directory }}",
 
       "vm_name": "{{ vm_name + '.qcow2' if '.qcow2' not in vm_name else vm_name }}",
 
+      "vTPM": {{ vm_tpm | string | lower }},
+{% if vm_type == 'uefi' or vm_type == 'uefi-secure' %}
+      "machine_type": "q35",
+      "efi_firmware_code": "{{ qemu_uefi_code }}",
+      "efi_firmware_vars": "{{ qemu_uefi_vars }}",
+{% endif %}
+
       "cpus": {{ vm_cpus }},
       "memory": {{ vm_memory }},
-{% if vm_firmware is defined %}
-      "firmware": "{{ vm_firmware }}",
-{% endif %}
 
       "disk_interface": "virtio",
       "disk_size": "{{ vm_disk_size }}",
@@ -33,11 +38,17 @@
       "cd_files": [
         "{{ win_drivers_path }}/*",
         "autounattend.xml",
-        "optimize-powershell.ps1",
         "customize-system.ps1",
         "configure-winrm.ps1",
         "sysprep.xml"
       ],
+
+      "boot_wait": "{{ win_boot_wait }}",
+{% if win_boot_command is defined %}
+      "boot_command": [
+        "{{ win_boot_command }}"
+      ],
+{% endif %}
 
 {% if custom_json_builder_section is defined %}
 {{ custom_json_builder_section }}

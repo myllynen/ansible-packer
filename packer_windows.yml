@@ -10,6 +10,8 @@
     packer_target: win_2k22
     image_name: w2k22_image.qcow2
 
+    vm_type: bios
+    vm_tpm: false
     vm_cpus: 4
     vm_memory: 8192
     disk_size: 30720
@@ -125,7 +127,6 @@
     vcenter_datastore: DC1-C1-LUN-1
     vcenter_network: DC1-C1-VLAN-123
     #vm_guest_os_type: windows9Server64Guest
-    #vm_firmware: bios
     # https://www.packer.io/plugins/builders/vsphere/vsphere-iso#content-library-import-configuration
     vcenter_convert_to_template: true
     #vcenter_content_library:

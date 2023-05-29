@@ -1,6 +1,11 @@
 ---
 # https://www.packer.io/docs/builders/qemu
 qemu_binary: /usr/libexec/qemu-kvm
+qemu_args: '["-cpu", "host,+nx"]'
 qemu_accelerator: kvm
+
+# Used when vm_type is set to uefi or uefi-secure
+qemu_uefi_code: /usr/share/OVMF/OVMF_CODE.secboot.fd
+qemu_uefi_vars: /usr/share/OVMF/OVMF_VARS.secboot.fd
 
 output_directory: /tmp/packer_images

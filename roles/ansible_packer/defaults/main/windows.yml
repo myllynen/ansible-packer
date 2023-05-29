@@ -1,4 +1,9 @@
 ---
+# https://www.packer.io/plugins/builders/qemu#boot-configuration
+win_boot_wait: 3s
+# Must be set when using UEFI
+#win_boot_command: <enter>FS1:<enter>EFI\\BOOT\\bootx64.efi<enter>
+
 # Full path for additional drivers for the target Windows version
 # For QEMU/KVM example, see the virtio-win-drivers-prepare script
 # https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/stable-virtio/virtio-win.iso

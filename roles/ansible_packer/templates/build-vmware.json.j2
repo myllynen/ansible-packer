@@ -10,7 +10,7 @@
       "vcenter_server": "{{ vcenter_credentials.vcenter_server }}",
       "username": "{{ vcenter_credentials.vcenter_username | replace('\\', '\\\\') }}",
       "password": "{% raw %}{{user `vcenter_password`}}{% endraw %}",
-      "insecure_connection": "{{ vcenter_insecure_connection }}",
+      "insecure_connection": {{ vcenter_insecure_connection | string | lower }},
 
       "datacenter": "{{ vcenter_datacenter }}",
 {% if vcenter_cluster is defined %}
@@ -25,7 +25,7 @@
       "datastore": "{{ vcenter_datastore }}",
 
       "folder": "{{ vcenter_folder }}",
-      "convert_to_template": "{{ vcenter_convert_to_template }}",
+      "convert_to_template": {{ vcenter_convert_to_template | string | lower }},
 
 {% if vcenter_content_library is defined %}
       "content_library_destination" : {
@@ -39,13 +39,13 @@
 
       "vm_name": "{{ vm_name }}",
 
+      "vTPM": {{ vm_tpm | string | lower }},
+      "firmware": "{{ vm_type | replace('uefi', 'efi') }}",
+      "guest_os_type": "{{ vm_guest_os_type }}",
+
       "CPUs": {{ vm_cpus }},
       "RAM": {{ vm_memory }},
       "RAM_reserve_all": true,
-      "guest_os_type": "{{ vm_guest_os_type }}",
-{% if vm_firmware is defined %}
-      "firmware": "{{ vm_firmware }}",
-{% endif %}
 
       "disk_controller_type": "pvscsi",
       "storage": [
@@ -69,9 +69,9 @@
       "cd_label": "inst.cfg",
       "remove_cdrom": true,
 
-      "boot_wait": "15s",
+      "boot_wait": "{{ boot_wait }}",
       "boot_command": [
-        "{{ boot_command }} {{ boot_parameters }}<enter><wait>"
+        "{{ boot_command }} {{ boot_parameters }} {{ boot_start }}"
       ],
 
 {% if custom_json_builder_section is defined %}
