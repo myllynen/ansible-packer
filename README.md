@@ -95,8 +95,8 @@ This is a basic playbook for building an image with Qemu:
     #
     iso:
       rhel_9:
-        url: file:///VirtualMachines/boot/rhel-9.1-x86_64-dvd.iso
-        checksum: sha256:d9dcae2b6e760d0f9dcf4a517bddc227d5fa3f213a8323592f4a07a05aa542a2
+        url: file:///VirtualMachines/boot/rhel-9.2-x86_64-dvd.iso
+        checksum: sha256:a18bf014e2cb5b6b9cee3ea09ccfd7bc2a84e68e09487bb119a98aa0e3563ac2
 
   roles:
     - myllynen.ansible_packer.ansible_packer
@@ -114,7 +114,7 @@ This is a more complete playbook for building an image on VMware:
     #
     packer_binary: /usr/local/sbin/packer.io
     packer_builder: vmware
-    packer_target: rhel_9_1
+    packer_target: rhel_9_2
     image_name: rhel8-template
     disk_size: 30720
 
@@ -129,7 +129,7 @@ This is a more complete playbook for building an image on VMware:
     partitioning: auto
     disable_ipv6: true
     #fips_enable: true
-    #security_profile: cis_server_l1
+    #security_profile: cis
     boot_parameters: net.ifnames.prefix=net quiet systemd.show_status=yes
 
     hostname: localhost.localdomain
@@ -174,9 +174,9 @@ This is a more complete playbook for building an image on VMware:
     # OS installer configuration
     #
     iso:
-      rhel_9_1:
-        url: file:///VirtualMachines/boot/rhel-9.1-x86_64-dvd.iso
-        checksum: sha256:d9dcae2b6e760d0f9dcf4a517bddc227d5fa3f213a8323592f4a07a05aa542a2
+      rhel_9_2:
+        url: file:///VirtualMachines/boot/rhel-9.2-x86_64-dvd.iso
+        checksum: sha256:a18bf014e2cb5b6b9cee3ea09ccfd7bc2a84e68e09487bb119a98aa0e3563ac2
 
   roles:
     - myllynen.ansible_packer.ansible_packer
@@ -209,9 +209,9 @@ ansible-playbook -c local -i localhost, packer.yml \
 
 # Build RHEL 9.1 image on VMware vSphere with customizations
 ansible-playbook -i 192.168.122.123, -u builder packer.yml \
-  -e packer_builder=vmware -e packer_target=rhel_9_1 \
+  -e packer_builder=vmware -e packer_target=rhel_9_2 \
   -e bios_uefi_boot=true -e partitioning=single \
-  -e disable_ipv6=true -e security_profile=cis_server_l1 \
+  -e disable_ipv6=true -e security_profile=cis \
   -e fips_enable=true -e image_name=test_image
 ```
 
@@ -237,8 +237,8 @@ the above playbooks used to build VM images with Packer:
     # Using packer_ variables for compatibility,
     # genisoimage not Packer used to build image
     packer_builder: iso
-    packer_target: rhel_9_1
-    packer_target_pretty: Custom RHEL 9.1
+    packer_target: rhel_9_2
+    packer_target_pretty: Custom RHEL 9.2
     image_name: custom.iso
 
     root_password: "{{ image_password }}"
@@ -254,9 +254,9 @@ the above playbooks used to build VM images with Packer:
     output_directory: /tmp/iso_images
 
     iso:
-      rhel_9_1:
-        url: file:///VirtualMachines/boot/rhel-9.1-x86_64-dvd.iso
-        checksum: sha256:d9dcae2b6e760d0f9dcf4a517bddc227d5fa3f213a8323592f4a07a05aa542a2
+      rhel_9_2:
+        url: file:///VirtualMachines/boot/rhel-9.2-x86_64-dvd.iso
+        checksum: sha256:a18bf014e2cb5b6b9cee3ea09ccfd7bc2a84e68e09487bb119a98aa0e3563ac2
 
   roles:
     - myllynen.ansible_packer.ansible_packer

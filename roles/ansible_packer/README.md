@@ -25,7 +25,12 @@ iso_volume_id: "{{ packer_target | upper | replace('_', '-') + '-0-Custom-' + an
 ---
 # https://www.packer.io/docs/builders/qemu
 qemu_binary: /usr/libexec/qemu-kvm
+qemu_args: '["-cpu", "host,+nx"]'
 qemu_accelerator: kvm
+
+# Used when vm_type is set to uefi or uefi-secure
+qemu_uefi_code: /usr/share/OVMF/OVMF_CODE.secboot.fd
+qemu_uefi_vars: /usr/share/OVMF/OVMF_VARS.secboot.fd
 
 output_directory: /tmp/packer_images
 
@@ -51,8 +56,6 @@ vcenter_network:
 
 vm_guest_os_type: "{{ __base_target.split('-')[0] + __base_version }}_64Guest"
 
-#vm_firmware:
-
 # https://www.packer.io/plugins/builders/vsphere/vsphere-iso#content-library-import-configuration
 vcenter_convert_to_template: true
 #vcenter_content_library:
@@ -62,6 +65,7 @@ vcenter_convert_to_template: true
 #  destroy:
 
 ---
+# Set checksum to "none" to skip installation media checksum check by Packer
 iso:
   centos_8:
     url: file:///VirtualMachines/boot/CentOS-Stream-8-x86_64-latest-dvd1.iso
@@ -73,31 +77,39 @@ iso:
 
   rhel_7:
     url: file:///VirtualMachines/boot/rhel-server-7.9-x86_64-dvd.iso
-    checksum: sha256:19d653ce2f04f202e79773a0cbeda82070e7527557e814ebbce658773fbe8191
+    checksum: sha256:2cb36122a74be084c551bc7173d2d38a1cfb75c8ffbc1489c630c916d1b31b25
 
   rhel_8:
-    url: file:///VirtualMachines/boot/rhel-8.7-x86_64-dvd.iso
-    checksum: sha256:a6a7418a75d721cc696d3cbdd648b5248808e7fef0f8742f518e43b46fa08139
-
-  rhel_8_6:
-    url: file:///VirtualMachines/boot/rhel-8.6-x86_64-dvd.iso
-    checksum: sha256:8cb0dfacc94b789933253d5583a2fb7afce26d38d75be7c204975fe20b7bdf71
+    url: file:///VirtualMachines/boot/rhel-8.8-x86_64-dvd.iso
+    checksum: sha256:517abcc67ee3b7212f57e180f5d30be3e8269e7a99e127a3399b7935c7e00a09
 
   rhel_8_7:
     url: file:///VirtualMachines/boot/rhel-8.7-x86_64-dvd.iso
     checksum: sha256:a6a7418a75d721cc696d3cbdd648b5248808e7fef0f8742f518e43b46fa08139
 
-  rhel_9:
-    url: file:///VirtualMachines/boot/rhel-baseos-9.1-x86_64-dvd.iso
-    checksum: sha256:d9dcae2b6e760d0f9dcf4a517bddc227d5fa3f213a8323592f4a07a05aa542a2
+  rhel_8_8:
+    url: file:///VirtualMachines/boot/rhel-8.8-x86_64-dvd.iso
+    checksum: sha256:517abcc67ee3b7212f57e180f5d30be3e8269e7a99e127a3399b7935c7e00a09
 
-  rhel_9_1:
-    url: file:///VirtualMachines/boot/rhel-baseos-9.1-x86_64-dvd.iso
-    checksum: sha256:d9dcae2b6e760d0f9dcf4a517bddc227d5fa3f213a8323592f4a07a05aa542a2
+  rhel_9:
+    url: file:///VirtualMachines/boot/rhel-9.2-x86_64-dvd.iso
+    checksum: sha256:a18bf014e2cb5b6b9cee3ea09ccfd7bc2a84e68e09487bb119a98aa0e3563ac2
+
+  rhel_9_2:
+    url: file:///VirtualMachines/boot/rhel-9.2-x86_64-dvd.iso
+    checksum: sha256:a18bf014e2cb5b6b9cee3ea09ccfd7bc2a84e68e09487bb119a98aa0e3563ac2
 
 ---
 # https://www.packer.io/plugins/builders/qemu#boot-configuration
+boot_wait: 10s
+
+# The OS installer boot_command will be appended by boot_parameters and boot_start
+# RHEL-compatible boot_command on BIOS
 boot_command: <up><wait><tab><wait> ip=dhcp inst.ks=hd:/dev/sr1:inst.cfg inst.geoloc=0 inst.nosave=all
+# RHEL-compatible boot_command on UEFI
+#boot_command: <up><wait>e<wait><down><down><leftCtrlOn>e<leftCtrlOff> ip=dhcp inst.ks=cdrom:inst.cfg inst.geoloc=0 inst.nosave=all
+# NB. With RHEL on BIOS use '<enter>' to boot, on UEFI must use '<leftCtrlOn>x<leftCtrlOff>'
+boot_start: <enter><wait>
 
 boot_parameters: net.ifnames.prefix=net quiet systemd.show_status=yes
 
@@ -187,6 +199,10 @@ use_force: false
 
 packer_binary: packer.io
 
+# Set no_log when running Packer, should be set if
+# using password for vCenter or WinRM after tests
+packer_build_no_log: false
+
 communicator: "none"
 
 # Example Packer Ansible provisioner conf for RHEL
@@ -210,11 +226,19 @@ communicator: "none"
 
 ---
 vm_name: "{{ image_name | default(__target_fullname + '_image.qcow2', true) }}"
+# Either bios, uefi, or uefi-secure
+vm_type: bios
+vm_tpm: false
 vm_cpus: 2
 vm_memory: 4096
 vm_disk_size: "{{ disk_size | default(30720) }}"
 
 ---
+# https://www.packer.io/plugins/builders/qemu#boot-configuration
+win_boot_wait: 3s
+# Must be set when using UEFI
+#win_boot_command: <enter>FS1:<enter>EFI\\BOOT\\bootx64.efi<enter>
+
 # Full path for additional drivers for the target Windows version
 # For QEMU/KVM example, see the virtio-win-drivers-prepare script
 # https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/stable-virtio/virtio-win.iso

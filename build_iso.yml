@@ -8,8 +8,8 @@
     # Using packer_ variables for compatibility,
     # genisoimage not Packer used to build image
     packer_builder: iso
-    packer_target: rhel_9_1
-    packer_target_pretty: Custom RHEL 9.1
+    packer_target: rhel_9_2
+    packer_target_pretty: Custom RHEL 9.2
     image_name: custom.iso
 
     # Build options
@@ -29,7 +29,7 @@
     disable_ipv6: true
     selinux: enforcing
     #fips_enable: true
-    #security_profile: cis_server_l1
+    #security_profile: cis
     boot_parameters: net.ifnames.prefix=net quiet systemd.show_status=yes
 
     # hostname not used with ISO, set the ip= boot parameter instead
@@ -68,12 +68,12 @@
     # OS installer configuration
     #
     iso:
-      rhel_8_6:
-        url: file:///VirtualMachines/boot/rhel-8.6-x86_64-dvd.iso
-        checksum: sha256:8cb0dfacc94b789933253d5583a2fb7afce26d38d75be7c204975fe20b7bdf71
-      rhel_9_1:
-        url: file:///VirtualMachines/boot/rhel-baseos-9.1-x86_64-dvd.iso
-        checksum: sha256:d9dcae2b6e760d0f9dcf4a517bddc227d5fa3f213a8323592f4a07a05aa542a2
+      rhel_8_8:
+        url: file:///VirtualMachines/boot/rhel-8.8-x86_64-dvd.iso
+        checksum: sha256:517abcc67ee3b7212f57e180f5d30be3e8269e7a99e127a3399b7935c7e00a09
+      rhel_9_2:
+        url: file:///VirtualMachines/boot/rhel-9.2-x86_64-dvd.iso
+        checksum: sha256:a18bf014e2cb5b6b9cee3ea09ccfd7bc2a84e68e09487bb119a98aa0e3563ac2
 
   roles:
     - myllynen.ansible_packer.ansible_packer
