@@ -18,20 +18,21 @@ unattended BIOS/UEFI-compatible ISO installer images.
 
 See [this example](packer.yml) how a playbook could look like.
 
-Currently (2022-06) tested Packer builders (platforms) are:
+Currently (2023-05) tested Packer builders (platforms) are:
 
 * [QEMU](https://www.packer.io/plugins/builders/qemu) (for KVM/libvirt/RHV/etc)
 * [VMware vSphere](https://www.packer.io/plugins/builders/vsphere/vsphere-iso)
 
-Currently (2022-06) tested OS variants and versions are:
+Currently (2023-05) tested OS variants and versions are:
 
 * [RHEL](https://www.redhat.com/en/technologies/linux-platforms/enterprise-linux) 7, 8, 9
 * [RHEL Edge](https://www.redhat.com/en/technologies/linux-platforms/enterprise-linux/edge-computing) 9 (experimental)
 * [Windows Server](https://www.microsoft.com/en-us/windows-server) 2019, 2022
+* [Windows](https://www.microsoft.com/en-us/windows/) 11
 
 VM images are modified to be used as templates at the end of automated
 installation, RHEL with
-[kickstart post-scripts](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html-single/performing_an_advanced_rhel_installation/index)
+[kickstart post-scripts](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html-single/performing_an_advanced_rhel_installation/index)
 and Windows with
 [sysprep](https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/sysprep--system-preparation--overview).
 
@@ -115,7 +116,7 @@ This is a more complete playbook for building an image on VMware:
     packer_binary: /usr/local/sbin/packer.io
     packer_builder: vmware
     packer_target: rhel_9_2
-    image_name: rhel8-template
+    image_name: rhel9-template
     disk_size: 30720
 
     do_cleanup: true
@@ -192,8 +193,8 @@ This example has additional options for building RHEL Edge image:
 
     iso:
       rhel-edge_9:
-        url: file:///VirtualMachines/rhel-baseos-9.1-x86_64-dvd.iso
-        checksum: sha256:d9dcae2b6e760d0f9dcf4a517bddc227d5fa3f213a8323592f4a07a05aa542a2
+        url: file:///VirtualMachines/rhel-9.2-x86_64-dvd.iso
+        checksum: sha256:a18bf014e2cb5b6b9cee3ea09ccfd7bc2a84e68e09487bb119a98aa0e3563ac2
 ```
 
 See the example [playbook](packer.yml) for a more complete example and
@@ -223,7 +224,7 @@ would then only need to provide a static IP address (RHEL) for the host
 on the boot prompt if not using DHCP (Windows). For the RHEL installer
 (Anaconda) the static network boot parameter format is
 ip=_ip::gateway:netmask:hostname:interface:none_, see
-[RHEL documentation](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/performing_an_advanced_rhel_installation/kickstart-and-advanced-boot-options_installing-rhel-as-an-experienced-user#network-boot-options_kickstart-and-advanced-boot-options)
+[RHEL documentation](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html/boot_options_for_rhel_installer/kickstart-and-advanced-boot-options_boot-options-for-rhel-installer#network-boot-options_kickstart-and-advanced-boot-options)
 for more details. Note that the double-semicolon is required.
 
 A playbook to build custom ISO installer image is almost identical to
@@ -307,7 +308,7 @@ otherwise the VM image supports only the platform used for building the
 image.
 
 See the provided partitioning alternatives in
-[roles/ansible_packer/templates/cfg-rhel_8.j2](roles/ansible_packer/templates/cfg-rhel_8.j2),
+[roles/ansible_packer/templates/cfg-rhel_9.j2](roles/ansible_packer/templates/cfg-rhel_9.j2),
 specify _custom\_partition_ and set `partitioning: custom` to use
 custom partitioning layout.
 
