@@ -113,6 +113,7 @@
 
     # Builder: vmware
     # https://www.packer.io/docs/builders/vsphere/vsphere-iso
+    # These should come from vault
     #vcenter_credentials:
     #  vcenter_server: vcenter.example.com
     #  vcenter_username: vcuser

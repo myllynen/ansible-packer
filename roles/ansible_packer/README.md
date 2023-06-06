@@ -12,6 +12,11 @@ Below are the role default values from defaults/main/:
 ---
 # ISO builder configuration which is not using Packer
 
+# Path to genisoimage supporting -allow-limited-size,
+# this is required when building Windows ISO images
+# Last known-good version is available on RHEL 8
+genisoimage_command: /usr/bin/genisoimage
+
 packer_target_pretty: Custom {{ __target_fullname }}
 
 iso_boot_parameters: inst.geoloc=0 ip=
@@ -36,6 +41,7 @@ output_directory: /tmp/packer_images
 
 ---
 # https://www.packer.io/docs/builders/vsphere/vsphere-iso
+# These should come from vault
 #vcenter_credentials:
 #  vcenter_server:
 #  vcenter_username:
@@ -105,11 +111,11 @@ boot_wait: 10s
 
 # The OS installer boot_command will be appended by boot_parameters and boot_start
 # RHEL-compatible boot_command on BIOS
-boot_command: <up><wait><tab><wait> ip=dhcp inst.ks=hd:/dev/sr1:inst.cfg inst.geoloc=0 inst.nosave=all
+#boot_command: <up><wait><tab><wait> ip=dhcp inst.ks=hd:/dev/sr1:inst.cfg inst.geoloc=0 inst.nosave=all
 # RHEL-compatible boot_command on UEFI
-#boot_command: <up><wait>e<wait><down><down><leftCtrlOn>e<leftCtrlOff> ip=dhcp inst.ks=cdrom:inst.cfg inst.geoloc=0 inst.nosave=all
+boot_command: <up><wait>e<wait><down><down><leftCtrlOn>e<leftCtrlOff> ip=dhcp inst.ks=cdrom:inst.cfg inst.geoloc=0 inst.nosave=all
 # NB. With RHEL on BIOS use '<enter>' to boot, on UEFI must use '<leftCtrlOn>x<leftCtrlOff>'
-boot_start: <enter><wait>
+boot_start: <leftCtrlOn>x<leftCtrlOff><wait>
 
 boot_parameters: net.ifnames.prefix=net quiet systemd.show_status=yes
 
@@ -227,8 +233,8 @@ communicator: "none"
 ---
 vm_name: "{{ image_name | default(__target_fullname + '_image.qcow2', true) }}"
 # Either bios, uefi, or uefi-secure
-vm_type: bios
-vm_tpm: false
+vm_type: uefi-secure
+vm_tpm: true
 vm_cpus: 2
 vm_memory: 4096
 vm_disk_size: "{{ disk_size | default(30720) }}"
@@ -236,8 +242,8 @@ vm_disk_size: "{{ disk_size | default(30720) }}"
 ---
 # https://www.packer.io/plugins/builders/qemu#boot-configuration
 win_boot_wait: 3s
-# Must be set when using UEFI
-#win_boot_command: <enter>FS1:<enter>EFI\\BOOT\\bootx64.efi<enter>
+# Must be set when using UEFI, use '<enter>' on BIOS
+win_boot_command: <enter>FS1:<enter>EFI\\BOOT\\bootx64.efi<enter>
 
 # Full path for additional drivers for the target Windows version
 # For QEMU/KVM example, see the virtio-win-drivers-prepare script
@@ -261,7 +267,7 @@ win_src_disk: "{{ win_pss_disk if packer_builder != 'iso' else 'D:' }}"
 
 # Either bios, uefi, or custom
 # See below for custom example
-win_partitioning: bios
+win_partitioning: uefi
 
 win_timezone: UTC
 

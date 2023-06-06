@@ -76,6 +76,7 @@ This is a basic playbook for building an image with Qemu:
     packer_binary: packer.io
     packer_builder: qemu
     packer_target: rhel_9
+
     disk_size: 8192
 
     root_password: "{{ image_password }}"
@@ -117,6 +118,9 @@ This is a more complete playbook for building an image on VMware:
     packer_builder: vmware
     packer_target: rhel_9_2
     image_name: rhel9-template
+
+    vm_type: uefi-secure
+    vm_tpm: true
     disk_size: 30720
 
     do_cleanup: true
@@ -159,10 +163,11 @@ This is a more complete playbook for building an image on VMware:
 
     # Builder: vmware
     # https://www.packer.io/docs/builders/vsphere/vsphere-iso
-    #vcenter_credentials:
-    #  vcenter_server: vcenter.example.com
-    #  vcenter_username: vcuser
-    #  vcenter_password: vcpass
+    # These should come from vault
+    vcenter_credentials:
+      vcenter_server: vcenter.example.com
+      vcenter_username: vcuser
+      vcenter_password: vcpass
     vcenter_insecure_connection: false
     vcenter_datacenter: DC1
     vcenter_folder: Linux/templates
