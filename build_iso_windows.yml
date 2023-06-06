@@ -12,6 +12,11 @@
     image_name: custom_w2k22.iso
     win_iso_volume_id: WINDOWS_SERVER_2022
 
+    # Path to genisoimage supporting -allow-limited-size,
+    # this is required when building Windows ISO images
+    # Last known-good version is available on RHEL 8
+    #genisoimage_command: /usr/local/bin/genisoimage-el8
+
     # Full path for additional drivers for the target Windows version
     # define only if these are needed on the installation target HW
     win_drivers_path: /tmp/drivers

@@ -95,7 +95,7 @@
 - name: Build custom ISO file
   command:
     cmd: >
-      genisoimage
+      {{ genisoimage_command }}
       -b isolinux/isolinux.bin
       -c isolinux/boot.cat
       -no-emul-boot
@@ -106,7 +106,7 @@
       -no-emul-boot
       -input-charset UTF-8
       -J -joliet-long -l -r -T
-      -V {{ iso_volume_id }}
+      -V "{{ iso_volume_id }}"
       -o {{ image_path }} .
     chdir: "{{ iso_build_dir.path }}"
   changed_when: true
@@ -115,10 +115,9 @@
 - name: Build custom Windows ISO file
   command:
     cmd: >
-      genisoimage
+      {{ genisoimage_command }}
       -b boot/etfsboot.com
       -no-emul-boot
-      -boot-load-seg 0x07C0
       -boot-load-size 8
       -eltorito-alt-boot
       -e efi/microsoft/boot/efisys_noprompt.bin
@@ -126,8 +125,8 @@
       -boot-load-size 1
       -input-charset UTF-8
       -l -allow-limited-size
-      -V {{ win_iso_volume_id }}
-      -volset {{ win_iso_volume_id }}
+      -V "{{ win_iso_volume_id }}"
+      -volset "{{ win_iso_volume_id }}"
       -o {{ image_path }} .
     chdir: "{{ iso_build_dir.path }}"
   changed_when: true
