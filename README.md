@@ -232,9 +232,10 @@ ip=_ip::gateway:netmask:hostname:interface:none_, see
 [RHEL documentation](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html/boot_options_for_rhel_installer/kickstart-and-advanced-boot-options_boot-options-for-rhel-installer#network-boot-options_kickstart-and-advanced-boot-options)
 for more details. Note that the double-semicolon is required.
 
-Note that root privileges are not needed for processing the ISOs with
-this role, instead install _p7zip-plugins_ from EPEL. Additionally,
-the _rsync_ package will be needed as well.
+Note that root privileges are not needed for processing ISOs with this
+role, instead install _p7zip-plugins_ from EPEL to be able to extract
+data from source ISOs. Additionally, the _rsync_ package will be needed
+as well.
 
 A playbook to build custom ISO installer image is almost identical to
 the above playbooks used to build VM images with Packer:
