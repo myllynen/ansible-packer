@@ -1,8 +1,8 @@
 ---
 vm_name: "{{ image_name | default(__target_fullname + '_image.qcow2', true) }}"
 # Either bios, uefi, or uefi-secure
-vm_type: bios
-vm_tpm: false
+vm_type: uefi-secure
+vm_tpm: true
 vm_cpus: 2
 vm_memory: 4096
 vm_disk_size: "{{ disk_size | default(30720) }}"

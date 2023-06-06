@@ -10,11 +10,11 @@
     packer_target: win_2k22
     image_name: w2k22_image.qcow2
 
-    vm_type: bios
-    vm_tpm: false
-    vm_cpus: 4
-    vm_memory: 8192
-    disk_size: 30720
+    vm_type: uefi-secure
+    vm_tpm: true
+    vm_cpus: 8
+    vm_memory: 16384
+    disk_size: 61440
 
     # Windows OS edition to install from the ISO
     # Interactive installation will show editions
@@ -38,7 +38,7 @@
 
     # Either bios, uefi, or custom
     # See below for custom example
-    win_partitioning: bios
+    win_partitioning: uefi
 
     win_timezone: FLE Standard Time
 
@@ -142,6 +142,9 @@
       win_2k22:
         url: file:///VirtualMachines/boot/SERVER_EVAL_x64FRE_en-us.iso
         checksum: sha256:3e4fa6d8507b554856fc9ca6079cc402df11a8b79344871669f0251535255325
+
+    # Must be set when using UEFI, use '<enter>' on BIOS
+    win_boot_command: <enter>FS1:<enter>EFI\\BOOT\\bootx64.efi<enter>
 
   roles:
     - myllynen.ansible_packer.ansible_packer

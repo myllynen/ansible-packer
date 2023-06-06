@@ -33,7 +33,7 @@
     win_winrm_password: "{{ image_password }}"
     # Either bios, uefi, or custom
     # See below for custom example
-    win_partitioning: bios
+    win_partitioning: uefi
     win_timezone: FLE Standard Time
 
     # System locale setting

@@ -1,8 +1,8 @@
 ---
 # https://www.packer.io/plugins/builders/qemu#boot-configuration
 win_boot_wait: 3s
-# Must be set when using UEFI
-#win_boot_command: <enter>FS1:<enter>EFI\\BOOT\\bootx64.efi<enter>
+# Must be set when using UEFI, use '<enter>' on BIOS
+win_boot_command: <enter>FS1:<enter>EFI\\BOOT\\bootx64.efi<enter>
 
 # Full path for additional drivers for the target Windows version
 # For QEMU/KVM example, see the virtio-win-drivers-prepare script
@@ -26,7 +26,7 @@ win_src_disk: "{{ win_pss_disk if packer_builder != 'iso' else 'D:' }}"
 
 # Either bios, uefi, or custom
 # See below for custom example
-win_partitioning: bios
+win_partitioning: uefi
 
 win_timezone: UTC
 
