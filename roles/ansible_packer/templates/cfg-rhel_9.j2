@@ -18,7 +18,7 @@ autopart
 reqpart
 {% else %}
 part biosboot  --fstype biosboot --size 1
-part /boot/efi --fstype efi      --size 63
+part /boot/efi --fstype efi      --size 127
 {% endif %}
 part /         --fstype xfs      --size 1024 --grow
 {% elif partitioning is defined and partitioning == 'custom' %}
@@ -28,7 +28,7 @@ part /         --fstype xfs      --size 1024 --grow
 reqpart
 {% else %}
 part biosboot  --fstype biosboot --size 1
-part /boot/efi --fstype efi      --size 63
+part /boot/efi --fstype efi      --size 127
 {% endif %}
 part /boot     --fstype xfs      --size 1024
 part pv.01                       --size 1024 --grow
