@@ -135,7 +135,7 @@ This is a more complete playbook for building an image on VMware:
     disable_ipv6: true
     #fips_enable: true
     #security_profile: cis
-    boot_parameters: net.ifnames.prefix=net quiet systemd.show_status=yes
+    boot_parameters: net.ifnames.prefix=net quiet
 
     hostname: localhost.localdomain
     ntp_servers: time.cloudflare.com

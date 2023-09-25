@@ -30,7 +30,7 @@
     selinux: enforcing
     #fips_enable: true
     #security_profile: cis
-    boot_parameters: net.ifnames.prefix=net quiet systemd.show_status=yes
+    boot_parameters: net.ifnames.prefix=net quiet
 
     # hostname not used with ISO, set the ip= boot parameter instead
     ntp_servers: time.cloudflare.com

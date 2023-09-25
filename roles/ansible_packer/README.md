@@ -111,13 +111,13 @@ boot_wait: 10s
 
 # The OS installer boot_command will be appended by boot_parameters and boot_start
 # RHEL-compatible boot_command on BIOS
-#boot_command: <up><wait><tab><wait> ip=dhcp inst.ks=hd:/dev/sr1:inst.cfg inst.geoloc=0 inst.nosave=all
+#boot_command: <up><wait><tab><wait> inst.ks=hd:/dev/sr1:inst.cfg inst.geoloc=0 inst.nosave=all ip=dhcp
 # RHEL-compatible boot_command on UEFI
-boot_command: <up><wait>e<wait><down><down><leftCtrlOn>e<leftCtrlOff> ip=dhcp inst.ks=cdrom:inst.cfg inst.geoloc=0 inst.nosave=all
+boot_command: <up><wait>e<wait><down><down><leftCtrlOn>e<leftCtrlOff> inst.ks=cdrom:inst.cfg inst.geoloc=0 inst.nosave=all ip=dhcp
 # NB. With RHEL on BIOS use '<enter>' to boot, on UEFI must use '<leftCtrlOn>x<leftCtrlOff>'
 boot_start: <leftCtrlOn>x<leftCtrlOff><wait>
 
-boot_parameters: net.ifnames.prefix=net quiet systemd.show_status=yes
+boot_parameters: net.ifnames.prefix=net quiet
 
 boot_password:
 #root_password:
