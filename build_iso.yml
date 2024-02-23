@@ -8,8 +8,8 @@
     # Using packer_ variables for compatibility,
     # genisoimage not Packer used to build image
     packer_builder: iso
-    packer_target: rhel_9_2
-    packer_target_pretty: Custom RHEL 9.2
+    packer_target: rhel_9_3
+    packer_target_pretty: Custom RHEL 9.3
     image_name: custom.iso
 
     # Build options
@@ -68,12 +68,12 @@
     # OS installer configuration
     #
     iso:
-      rhel_8_8:
-        url: file:///VirtualMachines/boot/rhel-8.8-x86_64-dvd.iso
-        checksum: sha256:517abcc67ee3b7212f57e180f5d30be3e8269e7a99e127a3399b7935c7e00a09
-      rhel_9_2:
-        url: file:///VirtualMachines/boot/rhel-9.2-x86_64-dvd.iso
-        checksum: sha256:a18bf014e2cb5b6b9cee3ea09ccfd7bc2a84e68e09487bb119a98aa0e3563ac2
+      rhel_8_9:
+        url: file:///VirtualMachines/boot/rhel-8.9-x86_64-dvd.iso
+        checksum: sha256:c4fd0632ce15a7d56e1d174176456943bd48306f9d35bcecbcb0a1dc49088e23
+      rhel_9_3:
+        url: file:///VirtualMachines/boot/rhel-9.3-x86_64-dvd.iso
+        checksum: sha256:5c802147aa58429b21e223ee60e347e850d6b0d8680930c4ffb27340ffb687a8
 
   roles:
     - myllynen.ansible_packer.ansible_packer

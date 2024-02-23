@@ -11,8 +11,8 @@ Support for RHEL Edge is currently under development.
 ## Introduction
 
 This role builds custom Linux and Windows VM template images using
-[Packer](https://www.packer.io/). Many OS installation parameters can
-be set as Ansible variables to allow for high degree of customization.
+[Packer](https://www.packer.io/). Many OS installation parameters can be
+set as Ansible variables to allow for a high degree of customization.
 Same customizations can be applied to both VM template images and
 unattended BIOS/UEFI-compatible ISO installer images.
 
@@ -97,8 +97,8 @@ This is a basic playbook for building an image with Qemu:
     #
     iso:
       rhel_9:
-        url: file:///VirtualMachines/boot/rhel-9.2-x86_64-dvd.iso
-        checksum: sha256:a18bf014e2cb5b6b9cee3ea09ccfd7bc2a84e68e09487bb119a98aa0e3563ac2
+        url: file:///VirtualMachines/boot/rhel-9.3-x86_64-dvd.iso
+        checksum: sha256:5c802147aa58429b21e223ee60e347e850d6b0d8680930c4ffb27340ffb687a8
 
   roles:
     - myllynen.ansible_packer.ansible_packer
@@ -116,7 +116,7 @@ This is a more complete playbook for building an image on VMware:
     #
     packer_binary: /usr/local/sbin/packer.io
     packer_builder: vmware
-    packer_target: rhel_9_2
+    packer_target: rhel_9_3
     image_name: rhel9-template
 
     vm_type: uefi-secure
@@ -180,9 +180,9 @@ This is a more complete playbook for building an image on VMware:
     # OS installer configuration
     #
     iso:
-      rhel_9_2:
-        url: file:///VirtualMachines/boot/rhel-9.2-x86_64-dvd.iso
-        checksum: sha256:a18bf014e2cb5b6b9cee3ea09ccfd7bc2a84e68e09487bb119a98aa0e3563ac2
+      rhel_9_3:
+        url: file:///VirtualMachines/boot/rhel-9.3-x86_64-dvd.iso
+        checksum: sha256:5c802147aa58429b21e223ee60e347e850d6b0d8680930c4ffb27340ffb687a8
 
   roles:
     - myllynen.ansible_packer.ansible_packer
@@ -191,15 +191,15 @@ This is a more complete playbook for building an image on VMware:
 This example has additional options for building RHEL Edge image:
 
 ```
-    packer_target: rhel-edge_9
+    packer_target: rhel_edge_9
     packer_target_pretty: RHEL 9 Edge
     ostree_url: http://10.1.1.10/repo/
     ostree_href: rhel/9/x86_64/edge
 
     iso:
-      rhel-edge_9:
-        url: file:///VirtualMachines/rhel-9.2-x86_64-dvd.iso
-        checksum: sha256:a18bf014e2cb5b6b9cee3ea09ccfd7bc2a84e68e09487bb119a98aa0e3563ac2
+      rhel_edge_9:
+        url: file:///VirtualMachines/rhel-9.3-x86_64-dvd.iso
+        checksum: sha256:5c802147aa58429b21e223ee60e347e850d6b0d8680930c4ffb27340ffb687a8
 ```
 
 See the example [playbook](packer.yml) for a more complete example and
@@ -215,7 +215,7 @@ ansible-playbook -c local -i localhost, packer.yml \
 
 # Build RHEL 9.1 image on VMware vSphere with customizations
 ansible-playbook -i 192.168.122.123, -u builder packer.yml \
-  -e packer_builder=vmware -e packer_target=rhel_9_2 \
+  -e packer_builder=vmware -e packer_target=rhel_9_3 \
   -e bios_uefi_boot=true -e partitioning=single \
   -e disable_ipv6=true -e security_profile=cis \
   -e fips_enable=true -e image_name=test_image
@@ -248,8 +248,8 @@ the above playbooks used to build VM images with Packer:
     # Using packer_ variables for compatibility,
     # genisoimage not Packer used to build image
     packer_builder: iso
-    packer_target: rhel_9_2
-    packer_target_pretty: Custom RHEL 9.2
+    packer_target: rhel_9_3
+    packer_target_pretty: Custom RHEL 9.3
     image_name: custom.iso
 
     root_password: "{{ image_password }}"
@@ -265,9 +265,9 @@ the above playbooks used to build VM images with Packer:
     output_directory: /tmp/iso_images
 
     iso:
-      rhel_9_2:
-        url: file:///VirtualMachines/boot/rhel-9.2-x86_64-dvd.iso
-        checksum: sha256:a18bf014e2cb5b6b9cee3ea09ccfd7bc2a84e68e09487bb119a98aa0e3563ac2
+      rhel_9_3:
+        url: file:///VirtualMachines/boot/rhel-9.3-x86_64-dvd.iso
+        checksum: sha256:5c802147aa58429b21e223ee60e347e850d6b0d8680930c4ffb27340ffb687a8
 
   roles:
     - myllynen.ansible_packer.ansible_packer
