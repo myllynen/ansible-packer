@@ -21,10 +21,10 @@ search --no-floppy --set=root -l '{{ iso_volume_id }}'
 
 ### BEGIN /etc/grub.d/10_linux ###
 menuentry 'Install {{ packer_target_pretty }}' --class fedora --class gnu-linux --class gnu --class os {
-	linuxefi /images/pxeboot/vmlinuz inst.stage2=hd:LABEL={{ iso_volume_id }} inst.ks=cdrom:/inst.cfg {{ boot_parameters }} {{ iso_boot_parameters }}
+	linuxefi /images/pxeboot/vmlinuz inst.stage2=hd:LABEL={{ iso_volume_id }} inst.ks=hd:LABEL={{ iso_volume_id }}:/inst.cfg {{ boot_parameters }} {{ iso_boot_parameters }}
 	initrdefi /images/pxeboot/initrd.img
 }
 menuentry 'Test this media & install {{ packer_target_pretty }}' --class fedora --class gnu-linux --class gnu --class os {
-	linuxefi /images/pxeboot/vmlinuz inst.stage2=hd:LABEL={{ iso_volume_id }} rd.live.check inst.ks=cdrom:/inst.cfg  {{ boot_parameters }} {{ iso_boot_parameters }}
+	linuxefi /images/pxeboot/vmlinuz inst.stage2=hd:LABEL={{ iso_volume_id }} rd.live.check inst.ks=hd:LABEL={{ iso_volume_id }}:/inst.cfg {{ boot_parameters }} {{ iso_boot_parameters }}
 	initrdefi /images/pxeboot/initrd.img
 }

@@ -61,13 +61,13 @@ menu separator # insert an empty line
 label linux
   menu label ^Install {{ packer_target_pretty }}
   kernel vmlinuz
-  append initrd=initrd.img inst.stage2=hd:LABEL={{ iso_volume_id }} inst.ks=cdrom:/inst.cfg {{ boot_parameters }} {{ iso_boot_parameters }}
+  append initrd=initrd.img inst.stage2=hd:LABEL={{ iso_volume_id }} inst.ks=hd:LABEL={{ iso_volume_id }}:/inst.cfg {{ boot_parameters }} {{ iso_boot_parameters }}
 
 label check
   menu label Test this ^media & install {{ packer_target_pretty }}
   menu default
   kernel vmlinuz
-  append initrd=initrd.img inst.stage2=hd:LABEL={{ iso_volume_id }} rd.live.check inst.ks=cdrom:/inst.cfg {{ boot_parameters }} {{ iso_boot_parameters }}
+  append initrd=initrd.img inst.stage2=hd:LABEL={{ iso_volume_id }} rd.live.check inst.ks=hd:LABEL={{ iso_volume_id }}:/inst.cfg {{ boot_parameters }} {{ iso_boot_parameters }}
 
 menu separator # insert an empty line
 
