@@ -11,6 +11,8 @@ win_boot_command: <enter>FS1:<enter>EFI\\BOOT\\bootx64.efi<enter>
 
 # Windows OS edition to install from the ISO
 # Interactive installation will show editions
+# The index reference should be either INDEX or NAME
+win_os_index: INDEX
 win_os_edition: 1
 
 # Windows ISO label
