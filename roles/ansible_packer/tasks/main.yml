@@ -41,8 +41,8 @@
     mode: '0600'
   loop:
     - autounattend.xml
-    - customize-system.ps1
     - configure-winrm.ps1
+    - customize-system.ps1
     - sysprep.xml
     - win_packer.yml
   when: win_winrm_password is defined
