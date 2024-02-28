@@ -21,6 +21,10 @@ packer_target_pretty: Custom {{ __target_fullname }}
 
 iso_boot_parameters: inst.geoloc=0 ip=
 
+# Apply boot config fix needed on UEFI with RHEL ISO
+# images booting from USB sticks. This requires sudo.
+iso_boot_usb_fix: false
+
 output_directory: /tmp/iso_images
 
 image_checksum_file: "{{ image_name | default(__target_fullname + '.iso', true) + '.sha256' }}"
@@ -263,8 +267,12 @@ win_iso_volume_id: WINDOWS_ISO
 win_pss_disk: "{{ 'A:' if packer_builder == 'vmware' else 'E:' }}"
 win_src_disk: "{{ win_pss_disk if packer_builder != 'iso' else 'D:' }}"
 
-# Administrator account will also use this password with ISO,
-# account will disabled and password reset during VM sysprep.
+# Password for the 'winrm' remote management account that will be
+# created during installation. The built-in Administrator account
+# will also use this password with ISO but that account will be
+# disabled and its password reset during the VM sysprep phase.
+# NB! This variable is used to determine whether to build RHEL
+#     or Windows ISOs/VMs and for building RHEL must be unset.
 #win_winrm_password:
 
 # Either bios, uefi, or custom

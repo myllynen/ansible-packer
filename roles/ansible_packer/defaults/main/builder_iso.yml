@@ -10,6 +10,10 @@ packer_target_pretty: Custom {{ __target_fullname }}
 
 iso_boot_parameters: inst.geoloc=0 ip=
 
+# Apply boot config fix needed on UEFI with RHEL ISO
+# images booting from USB sticks. This requires sudo.
+iso_boot_usb_fix: false
+
 output_directory: /tmp/iso_images
 
 image_checksum_file: "{{ image_name | default(__target_fullname + '.iso', true) + '.sha256' }}"
