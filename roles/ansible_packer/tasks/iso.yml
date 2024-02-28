@@ -44,7 +44,11 @@
   when: win_winrm_password is defined and win_drivers_path is defined
 
 - name: Copy OS ISO files to custom ISO build directory
-  command: 7z x -o{{ iso_build_dir.path }} {{ os_iso_path }}
+  vars:
+    iso_command: bsdtar -xf {{ os_iso_path }} -C {{ iso_build_dir.path }}
+    udf_command: 7z x -o{{ iso_build_dir.path }} {{ os_iso_path }}
+    run_command: "{{ iso_command if win_winrm_password is not defined else udf_command }}"
+  command: "{{ run_command }}"
   changed_when: true
 
 - name: Create custom ISO boot loader files
