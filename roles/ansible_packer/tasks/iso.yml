@@ -96,6 +96,17 @@
     state: absent
   when: use_force | bool and iso_image.stat.exists
 
+- name: Update custom ISO boot loader files for USB
+  become: true
+  shell: |
+    mount -o loop {{ iso_build_dir.path }}/images/efiboot.img {{ iso_build_dir.path }}/isolinux
+    cat {{ iso_build_dir.path }}/EFI/BOOT/grub.cfg > {{ iso_build_dir.path }}/isolinux/EFI/BOOT/grub.cfg
+    umount {{ iso_build_dir.path }}/isolinux
+  changed_when: true
+  when:
+    - win_winrm_password is not defined
+    - iso_boot_usb_fix | bool
+
 - name: Build custom ISO file
   command:
     cmd: >
