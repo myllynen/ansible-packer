@@ -232,10 +232,14 @@ ip=_ip::gateway:netmask:hostname:interface:none_, see
 [RHEL documentation](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html/boot_options_for_rhel_installer/kickstart-and-advanced-boot-options_boot-options-for-rhel-installer#network-boot-options_kickstart-and-advanced-boot-options)
 for more details. Note that the double-semicolon is required.
 
-Note that root privileges are not needed for processing ISOs with this
-role, instead install _p7zip-plugins_ from EPEL to be able to extract
-data from source ISOs. Additionally, the _rsync_ package will be needed
-as well.
+Root privileges are not needed for building ISOs with this role except
+when RHEL ISOs are to be booted from USB on UEFI, see the role defaults
+for more details. The required packages for RHEL ISO building are
+listed in the [bindep.txt](bindep.txt) file. When building Windows ISOs
+then also the _p7zip-plugins_ package from EPEL must be installed.
+Additionally, with Windows ISOs the _genisoimage_ command must support
+UDF and the _-allow-limited-size_ option, such a tool version version
+is available in the standard RHEL 8 repos and for RHEL 9 from EPEL.
 
 A playbook to build custom ISO installer image is almost identical to
 the above playbooks used to build VM images with Packer:
