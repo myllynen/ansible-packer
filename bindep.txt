@@ -1,0 +1,5 @@
+bsdtar [platform:rpm]
+genisoimage [platform:rpm]
+isomd5sum [platform:rpm]
+rsync [platform:rpm]
+syslinux [platform:rpm]
