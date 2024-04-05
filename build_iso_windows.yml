@@ -6,16 +6,11 @@
     # Base configuration
     #
     # Using packer_ variables for compatibility,
-    # genisoimage not Packer used to build image
+    # xorrisofs not Packer is used to build image
     packer_builder: iso
     packer_target: win_2k22
     image_name: custom_w2k22.iso
     win_iso_volume_id: WINDOWS_SERVER_2022
-
-    # Path to genisoimage supporting -allow-limited-size,
-    # this is required when building Windows ISO images
-    # Last known-good version is available on RHEL 8
-    #genisoimage_command: /usr/local/bin/genisoimage-el8
 
     # Full path for additional drivers for the target Windows version
     # define only if these are needed on the installation target HW

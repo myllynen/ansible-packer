@@ -1,11 +1,6 @@
 ---
 # ISO builder configuration which is not using Packer
 
-# Path to genisoimage supporting -allow-limited-size,
-# this is required when building Windows ISO images
-# Last known-good version is available on RHEL 8
-genisoimage_command: /usr/bin/genisoimage
-
 packer_target_pretty: Custom {{ __target_fullname }}
 
 iso_boot_parameters: inst.geoloc=0 ip=

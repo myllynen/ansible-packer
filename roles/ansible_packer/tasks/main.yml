@@ -23,8 +23,8 @@
 
 - name: Create temporary work directory
   tempfile:
-    state: directory
     suffix: _packer_build_{{ packer_builder }}_{{ __target_fullname }}
+    state: directory
   register: tempdir
 
 - name: Create installer configuration file

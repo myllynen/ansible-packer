@@ -25,21 +25,21 @@
 - name: Create output directory
   file:
     path: "{{ output_directory }}"
-    state: directory
     mode: '0700'
+    state: directory
 
 - name: Create custom ISO build directory
   file:
     path: "{{ tempdir.path + '/iso-build' }}"
-    state: directory
     mode: '0700'
+    state: directory
   register: iso_build_dir
 
 - name: Create custom Windows ISO drivers directory
   file:
     path: "{{ tempdir.path + '/iso-build/drivers' }}"
-    state: directory
     mode: '0700'
+    state: directory
   register: iso_drivers_dir
   when: win_winrm_password is defined and win_drivers_path is defined
 
@@ -110,7 +110,7 @@
 - name: Build custom ISO file
   command:
     cmd: >
-      {{ genisoimage_command }}
+      xorrisofs
       -b isolinux/isolinux.bin
       -c isolinux/boot.cat
       -no-emul-boot
@@ -130,16 +130,15 @@
 - name: Build custom Windows ISO file
   command:
     cmd: >
-      {{ genisoimage_command }}
+      xorrisofs
       -b boot/etfsboot.com
       -no-emul-boot
       -boot-load-size 8
       -eltorito-alt-boot
       -e efi/microsoft/boot/efisys_noprompt.bin
       -no-emul-boot
-      -boot-load-size 1
       -input-charset UTF-8
-      -l -allow-limited-size
+      -l -iso-level 3
       -V "{{ win_iso_volume_id }}"
       -volset "{{ win_iso_volume_id }}"
       -o {{ image_path }} .

@@ -6,7 +6,7 @@
     # Base configuration
     #
     # Using packer_ variables for compatibility,
-    # genisoimage not Packer used to build image
+    # xorrisofs not Packer is used to build image
     packer_builder: iso
     packer_target: rhel_9_3
     packer_target_pretty: Custom RHEL 9.3
