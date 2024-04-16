@@ -24,22 +24,22 @@
 
 - name: Create output directory
   file:
+    state: directory
     path: "{{ output_directory }}"
     mode: '0700'
-    state: directory
 
 - name: Create custom ISO build directory
   file:
+    state: directory
     path: "{{ tempdir.path + '/iso-build' }}"
     mode: '0700'
-    state: directory
   register: iso_build_dir
 
 - name: Create custom Windows ISO drivers directory
   file:
+    state: directory
     path: "{{ tempdir.path + '/iso-build/drivers' }}"
     mode: '0700'
-    state: directory
   register: iso_drivers_dir
   when: win_winrm_password is defined and win_drivers_path is defined
 
@@ -92,12 +92,13 @@
 
 - name: Remove existing custom ISO file
   file:
-    path: "{{ image_path }}"
     state: absent
+    path: "{{ image_path }}"
   when: use_force | bool and iso_image.stat.exists
 
 - name: Update custom ISO boot loader files for USB
   become: true
+  # noqa: command-instead-of-module
   shell: |
     mount -o loop {{ iso_build_dir.path }}/images/efiboot.img {{ iso_build_dir.path }}/isolinux
     cat {{ iso_build_dir.path }}/EFI/BOOT/grub.cfg > {{ iso_build_dir.path }}/isolinux/EFI/BOOT/grub.cfg

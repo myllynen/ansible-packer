@@ -14,8 +14,8 @@
 
 - name: Remove old outputs
   file:
-    path: "{{ item.path }}"
     state: absent
+    path: "{{ item.path }}"
   loop: "{{ old_outputs.files }}"
   loop_control:
     label: "{{ item.path }}"
@@ -23,8 +23,8 @@
 
 - name: Create temporary work directory
   tempfile:
-    suffix: _packer_build_{{ packer_builder }}_{{ __target_fullname }}
     state: directory
+    suffix: _packer_build_{{ packer_builder }}_{{ __target_fullname }}
   register: tempdir
 
 - name: Create installer configuration file
@@ -57,5 +57,5 @@
 
 - name: Remove temporary work directory
   file:
-    path: "{{ tempdir.path }}"
     state: absent
+    path: "{{ tempdir.path }}"
