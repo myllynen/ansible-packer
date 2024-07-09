@@ -1,6 +1,9 @@
 Write-Host Configuring WinRM service...
 
-Set-NetConnectionProfile -Name Network -NetworkCategory Private
+# Retrieve the network profile name
+$networkProfile = Get-NetConnectionProfile | Where-Object { $_.IPv4Connectivity -ne "Disconnected" }
+Set-NetConnectionProfile -InterfaceAlias $networkProfile.InterfaceAlias -NetworkCategory Private
+
 Enable-PSRemoting -Force
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Force
 
