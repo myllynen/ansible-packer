@@ -351,6 +351,12 @@ See also
 See also
 [https://github.com/myllynen/windows-ansible-roles](https://github.com/myllynen/windows-ansible-roles).
 
+See also
+[Red Hat Knowledge Base article on custom ISO with a kickstart file](https://access.redhat.com/solutions/60959).
+
+See also
+[https://weldr.io/lorax/mkksiso.html](https://weldr.io/lorax/mkksiso.html).
+
 ## License
 
 GPLv3+
