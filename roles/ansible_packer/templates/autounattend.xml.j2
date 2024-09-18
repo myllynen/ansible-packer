@@ -40,10 +40,15 @@
                         <CreatePartition wcm:action="add">
                             <Order>1</Order>
                             <Type>EFI</Type>
-                            <Size>250</Size>
+                            <Size>100</Size>
                         </CreatePartition>
                         <CreatePartition wcm:action="add">
                             <Order>2</Order>
+                            <Type>MSR</Type>
+                            <Size>16</Size>
+                        </CreatePartition>
+                        <CreatePartition wcm:action="add">
+                            <Order>3</Order>
                             <Type>Primary</Type>
                             <Extend>true</Extend>
                         </CreatePartition>
@@ -56,22 +61,26 @@
                         <ModifyPartition wcm:action="modify">
                             <Order>1</Order>
                             <PartitionID>1</PartitionID>
-                            <Label>Windows</Label>
                             <Format>NTFS</Format>
+                            <Label>Windows</Label>
                             <Letter>C</Letter>
                         </ModifyPartition>
 {% elif win_partitioning == 'uefi' %}
                         <ModifyPartition wcm:action="modify">
                             <Order>1</Order>
                             <PartitionID>1</PartitionID>
-                            <Label>System</Label>
                             <Format>FAT32</Format>
+                            <Label>System</Label>
                         </ModifyPartition>
                         <ModifyPartition wcm:action="modify">
                             <Order>2</Order>
                             <PartitionID>2</PartitionID>
-                            <Label>Windows</Label>
+                        </ModifyPartition>
+                        <ModifyPartition wcm:action="modify">
+                            <Order>3</Order>
+                            <PartitionID>3</PartitionID>
                             <Format>NTFS</Format>
+                            <Label>Windows</Label>
                             <Letter>C</Letter>
                         </ModifyPartition>
 {% elif win_partitioning == 'custom' %}
@@ -94,7 +103,7 @@
 {% if win_partitioning == 'bios' %}
                         <PartitionID>1</PartitionID>
 {% elif win_partitioning == 'uefi' %}
-                        <PartitionID>2</PartitionID>
+                        <PartitionID>3</PartitionID>
 {% elif win_partitioning == 'custom' %}
                         <PartitionID>{{ win_custom_partitioning_install_to }}</PartitionID>
 {% endif %}
