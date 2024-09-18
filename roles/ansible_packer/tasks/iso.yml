@@ -139,7 +139,7 @@
       -e efi/microsoft/boot/efisys_noprompt.bin
       -no-emul-boot
       -input-charset UTF-8
-      -l -iso-level 3
+      -J -joliet-long -l -iso-level 3
       -V "{{ win_iso_volume_id }}"
       -volset "{{ win_iso_volume_id }}"
       -o {{ image_path }} .
