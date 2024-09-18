@@ -10,6 +10,6 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Force
 # StartupType AutomaticDelayedStart needs PowerShell 6.0+
 #Set-Service -Name WinRM –Status Running
 #Set-Service -Name WinRM –StartupType AutomaticDelayedStart
-sc.exe config winrm start= delayed-auto
+sc.exe config winrm start= auto
 
 {{ win_winrm_setup | default('', true) }}
