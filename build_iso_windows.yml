@@ -12,6 +12,12 @@
     image_name: custom_w2k22.iso
     win_iso_volume_id: WINDOWS_SERVER_2022
 
+    # Windows OS edition to install from the ISO
+    # Interactive installation will show editions
+    # The index reference should be either INDEX or NAME
+    #win_os_index: INDEX
+    #win_os_edition: 2
+
     # Full path for additional drivers for the target Windows version
     # define only if these are needed on the installation target HW
     win_drivers_path: /tmp/drivers
@@ -30,9 +36,11 @@
     # NB! This variable is used to determine whether to build RHEL
     #     or Windows ISOs/VMs and for building RHEL must be unset.
     win_winrm_password: "{{ image_password }}"
+
     # Either bios, uefi, or custom
     # See below for custom example
     win_partitioning: uefi
+
     win_timezone: FLE Standard Time
 
     # System locale setting
@@ -41,7 +49,7 @@
     win_locale_user: en-US
     # Input locale (language and keyboard) setting, see
     # https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/default-input-locales-for-windows-language-packs
-    win_locale_input: fi-FI
+    win_locale_input: 0409:0000040B
     # UI locale setting
     win_locale_ui: en-US
 
@@ -49,11 +57,26 @@
     win_registered_owner: "Ansible Packer"
     win_registered_organization: "Test Department"
 
+    # System customization script, runs before enabling WinRM
+    win_customize_script: |
+      # Disable IPv6
+      Get-NetAdapter | foreach { Disable-NetAdapterBinding -InterfaceAlias $_.Name -ComponentID ms_tcpip6 }
+      # Disable NetBIOS
+      $i = 'HKLM:\SYSTEM\CurrentControlSet\Services\NetBT\Parameters\Interfaces'
+      Get-ChildItem $i | ForEach-Object {
+        Set-ItemProperty -Path "$i\$($_.pschildname)" -Name NetbiosOptions -Value 2
+      }
+      # Remove Azure Arc
+      Remove-WindowsCapability -Name AzureArcSetup -Online
+      # Don't display last user name
+      $d = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System'
+      Set-ItemProperty -Path "$d" -Name DontDisplayLastUserName -Type DWord -Value 1 -Force
+
+    # configure-winrm.ps1 always ensures the service is running,
+    # this part should configure WinRM per the local requirements
     win_winrm_setup: |
-        # configure-winrm.ps1 always ensures the service is running,
-        # this part should configure WinRM per the local requirements
-        Set-Item -Path WSMan:\localhost\Service\Auth\Basic -Value $true
-        Set-Item -Path WSMan:\localhost\Service\AllowUnencrypted -Value $true
+      Set-Item -Path WSMan:\localhost\Service\Auth\Basic -Value $true
+      Set-Item -Path WSMan:\localhost\Service\AllowUnencrypted -Value $true
 
     #
     # Builder configurations
