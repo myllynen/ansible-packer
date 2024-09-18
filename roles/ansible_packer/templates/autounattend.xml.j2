@@ -127,14 +127,17 @@
     </settings>
     <settings pass="generalize"></settings>
     <settings pass="specialize">
-        <component name="Microsoft-Windows-SQMApi" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <component name="Microsoft-Windows-SQMAPI" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <CEIPEnabled>0</CEIPEnabled>
+        </component>
+        <component name="Microsoft-Windows-Security-SPP-UX" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <SkipAutoActivation>true</SkipAutoActivation>
         </component>
         <component name="Microsoft-Windows-ServerManager-SvrMgrNc" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <DoNotOpenServerManagerAtLogon>true</DoNotOpenServerManagerAtLogon>
         </component>
-        <component name="Microsoft-Windows-Security-SPP-UX" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-            <SkipAutoActivation>true</SkipAutoActivation>
+        <component name="Microsoft-Windows-SystemRestore-Main" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <DisableSR>1</DisableSR>
         </component>
     </settings>
     <settings pass="auditSystem"></settings>
@@ -146,6 +149,9 @@
             <UILanguage>{{ win_locale_ui }}</UILanguage>
             <UILanguageFallback>{{ win_locale_system }}</UILanguageFallback>
             <UserLocale>{{ win_locale_user }}</UserLocale>
+        </component>
+        <component name="Microsoft-Windows-WinRE-RecoveryAgent" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <UninstallWindowsRE>true</UninstallWindowsRE>
         </component>
         <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <ComputerName>*</ComputerName>
@@ -199,55 +205,70 @@
             </OOBE>
             <FirstLogonCommands>
                 <SynchronousCommand wcm:action="add">
-                    <CommandLine>cmd.exe /c powershell -Command New-Item -Path HKLM:\System\CurrentControlSet\Control\Network\NewNetworkWindowOff -Force</CommandLine>
-                    <Description>Disable network location wizard</Description>
+                    <CommandLine>cmd.exe /c powershell -Command Stop-Service wuauserv -Force</CommandLine>
+                    <Description>Stop wuauserv service temporarily</Description>
                     <Order>1</Order>
+                </SynchronousCommand>
+                <SynchronousCommand wcm:action="add">
+                    <CommandLine>cmd.exe /c powershell -Command New-Item -Path HKLM:\SYSTEM\CurrentControlSet\Control\Network\NewNetworkWindowOff -Force</CommandLine>
+                    <Description>Disable network location wizard</Description>
+                    <Order>2</Order>
                 </SynchronousCommand>
 {% if packer_builder != 'iso' %}
                 <SynchronousCommand wcm:action="add">
                     <CommandLine>cmd.exe /c powershell -Command Disable-LocalUser -Name Administrator</CommandLine>
                     <Description>Disable built-in Administrator account</Description>
-                    <Order>2</Order>
+                    <Order>3</Order>
                 </SynchronousCommand>
 {% endif %}
                 <SynchronousCommand wcm:action="add">
                     <CommandLine>cmd.exe /c powershell -Command Set-LocalUser -Name winrm -PasswordNeverExpires $true</CommandLine>
                     <Description>Disable password expiration for WinRM user</Description>
-                    <Order>3</Order>
-                </SynchronousCommand>
-                <SynchronousCommand wcm:action="add">
-                    <CommandLine>cmd.exe /c powershell -Command "New-Item -Path 'HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Winlogon\SpecialAccounts\UserList' -Force | New-ItemProperty -Name winrm -PropertyType DWord -Value 0 -Force"</CommandLine>
-                    <Description>Hide WinRM user</Description>
                     <Order>4</Order>
                 </SynchronousCommand>
                 <SynchronousCommand wcm:action="add">
-                    <CommandLine>cmd.exe /c powershell -Command "Set-ExecutionPolicy -ExecutionPolicy Bypass -Force</CommandLine>
-                    <Description>Allow running PowerShell scripts</Description>
+                    <CommandLine>cmd.exe /c powershell -Command "New-Item -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\SpecialAccounts\UserList' -Force | New-ItemProperty -Name winrm -PropertyType DWord -Value 0 -Force"</CommandLine>
+                    <Description>Hide WinRM user</Description>
                     <Order>5</Order>
                 </SynchronousCommand>
+{% if packer_builder == 'qemu' %}
+                <SynchronousCommand wcm:action="add">
+                    <CommandLine>cmd.exe /c {{ win_vm_tools_disk }}\virtio-win-guest-tools.exe /install /passive /norestart</CommandLine>
+                    <Description>Install VM tools</Description>
+                    <Order>6</Order>
+                </SynchronousCommand>
+{% endif %}
 {% if packer_builder == 'vmware' %}
                 <SynchronousCommand wcm:action="add">
-                    <CommandLine>cmd.exe /c E:\setup64 /s /v "/qn REBOOT=R"</CommandLine>
-                    <Description>Installing VM tools...</Description>
+                    <CommandLine>cmd.exe /c {{ win_vm_tools_disk }}\setup64.exe /S /v "/qn REBOOT=R"</CommandLine>
+                    <Description>Install VM tools</Description>
                     <Order>6</Order>
                 </SynchronousCommand>
 {% endif %}
                 <SynchronousCommand wcm:action="add">
-                    <CommandLine>cmd.exe /c powershell -File {{ win_src_disk }}\customize-system.ps1</CommandLine>
+                    <CommandLine>cmd.exe /c powershell -ExecutionPolicy Bypass -File {{ win_src_disk }}\customize-system.ps1</CommandLine>
                     <Description>Customize system</Description>
                     <Order>7</Order>
                 </SynchronousCommand>
                 <SynchronousCommand wcm:action="add">
-                    <CommandLine>cmd.exe /c powershell -File {{ win_src_disk }}\configure-winrm.ps1</CommandLine>
+                    <CommandLine>cmd.exe /c powershell -ExecutionPolicy Bypass -File {{ win_src_disk }}\configure-winrm.ps1</CommandLine>
                     <Description>Configure WinRM service</Description>
                     <Order>8</Order>
                 </SynchronousCommand>
+{% if packer_builder != 'iso' %}
                 <!-- Finalize VM installation over WinRM -->
                 <SynchronousCommand wcm:action="add">
                     <CommandLine>cmd.exe /c logoff</CommandLine>
                     <Description>Logoff</Description>
                     <Order>9</Order>
                 </SynchronousCommand>
+{% else %}
+                <SynchronousCommand wcm:action="add">
+                    <CommandLine>cmd.exe /c powershell Restart-Computer</CommandLine>
+                    <Description>Reboot</Description>
+                    <Order>9</Order>
+                </SynchronousCommand>
+{% endif %}
             </FirstLogonCommands>
         </component>
     </settings>

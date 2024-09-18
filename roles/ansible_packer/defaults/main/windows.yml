@@ -18,9 +18,10 @@ win_os_edition: 1
 # Windows ISO label
 win_iso_volume_id: WINDOWS_ISO
 
-# Disk with PowerShell scripts
+# Disk drive definitions: PowerShell scripts, Windows installer, VM tools
 win_pss_disk: "{{ 'A:' if packer_builder == 'vmware' else 'E:' }}"
 win_src_disk: "{{ win_pss_disk if packer_builder != 'iso' else 'D:' }}"
+win_vm_tools_disk: "{{ 'E:' if packer_builder == 'vmware' else win_src_disk }}"
 
 # Password for the 'winrm' remote management account that will be
 # created during installation. The built-in Administrator account
