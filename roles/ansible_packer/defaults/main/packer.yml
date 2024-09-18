@@ -10,6 +10,9 @@ packer_build_no_log: false
 
 communicator: "none"
 
+# Timeout for Packer VM installation
+shutdown_timeout: 15m
+
 # Example Packer Ansible provisioner conf for RHEL
 # NB. Writes cleartext root password in build.json
 #

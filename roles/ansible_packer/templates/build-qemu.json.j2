@@ -44,7 +44,7 @@
 {% endif %}
 
       "communicator": "{{ communicator }}",
-      "shutdown_timeout": "15m"
+      "shutdown_timeout": "{{ shutdown_timeout }}"
     }
 {% if custom_json_provisioner is not defined %}
   ]

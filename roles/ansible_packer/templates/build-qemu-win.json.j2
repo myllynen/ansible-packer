@@ -55,7 +55,7 @@
 {% endif %}
 
       "communicator": "winrm",
-      "winrm_timeout": "15m",
+      "winrm_timeout": "{{ shutdown_timeout }}",
       "winrm_username": "winrm",
       "winrm_password": "{% raw %}{{user `win_winrm_password`}}{% endraw %}",
       "winrm_no_proxy": true,
