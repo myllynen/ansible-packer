@@ -210,6 +210,9 @@ packer_build_no_log: false
 
 communicator: "none"
 
+# Timeout for Packer VM installation
+shutdown_timeout: 15m
+
 # Example Packer Ansible provisioner conf for RHEL
 # NB. Writes cleartext root password in build.json
 #
@@ -258,9 +261,10 @@ win_os_edition: 1
 # Windows ISO label
 win_iso_volume_id: WINDOWS_ISO
 
-# Disk with PowerShell scripts
+# Disk drive definitions: PowerShell scripts, Windows installer, VM tools
 win_pss_disk: "{{ 'A:' if packer_builder == 'vmware' else 'E:' }}"
 win_src_disk: "{{ win_pss_disk if packer_builder != 'iso' else 'D:' }}"
+win_vm_tools_disk: "{{ 'E:' if packer_builder == 'vmware' else win_src_disk }}"
 
 # Password for the 'winrm' remote management account that will be
 # created during installation. The built-in Administrator account
@@ -293,9 +297,9 @@ win_locale_input: en-US
 # System customization script, runs before enabling WinRM
 #win_customize_script: |
 
+# configure-winrm.ps1 always ensures the service is running,
+# this part should configure WinRM per the local requirements
 win_winrm_setup: |
-  # configure-winrm.ps1 always ensures the service is running,
-  # this part should configure WinRM per the local requirements
   Set-Item -Path WSMan:\localhost\Service\Auth\Basic -Value $true
   Set-Item -Path WSMan:\localhost\Service\AllowUnencrypted -Value $true
 
