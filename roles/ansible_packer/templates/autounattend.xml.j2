@@ -158,16 +158,16 @@
             <TimeZone>{{ win_timezone }}</TimeZone>
             <UserAccounts>
                 <AdministratorPassword>
-                    <Value>{{ win_winrm_password }}</Value>
-                    <PlainText>true</PlainText>
+                    <Value>{{ (win_winrm_password + 'AdministratorPassword') | b64encode(encoding='utf-16-le') }}</Value>
+                    <PlainText>false</PlainText>
                 </AdministratorPassword>
                 <LocalAccounts>
                     <LocalAccount wcm:action="add">
                         <Name>winrm</Name>
                         <Group>Administrators</Group>
                         <Password>
-                            <Value>{{ win_winrm_password }}</Value>
-                            <PlainText>true</PlainText>
+                            <Value>{{ (win_winrm_password + 'Password') | b64encode(encoding='utf-16-le') }}</Value>
+                            <PlainText>false</PlainText>
                         </Password>
                         <DisplayName>WinRM User</DisplayName>
                         <Description>WinRM User for Ansible</Description>
@@ -179,8 +179,8 @@
                 <LogonCount>1</LogonCount>
                 <Username>Administrator</Username>
                 <Password>
-                    <Value>{{ win_winrm_password }}</Value>
-                    <PlainText>true</PlainText>
+                    <Value>{{ (win_winrm_password + 'Password') | b64encode(encoding='utf-16-le') }}</Value>
+                    <PlainText>false</PlainText>
                 </Password>
             </AutoLogon>
             <OOBE>

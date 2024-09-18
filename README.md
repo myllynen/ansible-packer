@@ -279,7 +279,7 @@ To build custom ISO on a build host:
 ```
 # Build latest RHEL image with playbook defaults
 ansible-playbook -c local -i localhost, build_iso.yml \
-  -e image_password=foobar
+  -e image_password=Foobar_12
 ```
 
 ## Role Description
@@ -291,8 +291,8 @@ of RHEL, Windows, and other OS images with
 [VMware vSphere](https://www.packer.io/docs/builders/vsphere/vsphere-iso)
 as builders.
 
-Linux builds do not save cleartext passwords on disk at any point,
-however Windows unattend files do have cleartext passwords in them. This
+Linux builds do not save unencrypted passwords on disk at any point,
+however Windows unattend files do have obscured passwords in them. This
 is unavoidable as the Windows installer does not support encrypted
 passwords.
 
