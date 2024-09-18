@@ -246,12 +246,12 @@
                 </SynchronousCommand>
 {% endif %}
                 <SynchronousCommand wcm:action="add">
-                    <CommandLine>cmd.exe /c powershell -ExecutionPolicy Bypass -File {{ win_src_disk }}\customize-system.ps1</CommandLine>
+                    <CommandLine>cmd.exe /c powershell -ExecutionPolicy Bypass -File {{ win_src_disk }}\custom.ps1</CommandLine>
                     <Description>Customize system</Description>
                     <Order>7</Order>
                 </SynchronousCommand>
                 <SynchronousCommand wcm:action="add">
-                    <CommandLine>cmd.exe /c powershell -ExecutionPolicy Bypass -File {{ win_src_disk }}\configure-winrm.ps1</CommandLine>
+                    <CommandLine>cmd.exe /c powershell -ExecutionPolicy Bypass -File {{ win_src_disk }}\remote.ps1</CommandLine>
                     <Description>Configure WinRM service</Description>
                     <Order>8</Order>
                 </SynchronousCommand>

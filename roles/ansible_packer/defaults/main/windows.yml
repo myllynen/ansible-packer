@@ -54,7 +54,7 @@ win_locale_input: en-US
 # System customization script, runs before enabling WinRM
 #win_customize_script: |
 
-# configure-winrm.ps1 always ensures the service is running,
+# Default remote.ps1 always ensures the service is running,
 # this part should configure WinRM per the local requirements
 win_winrm_setup: |
   Set-Item -Path WSMan:\localhost\Service\Auth\Basic -Value $true
