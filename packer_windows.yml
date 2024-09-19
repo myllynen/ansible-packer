@@ -89,18 +89,82 @@
     # List of tasks or roles to run on the VM,
     # all roles must be included with full path
     win_provisioner_playbook: |2
+        gather_facts: false
         vars:
+          accounts_local_administrator_enable: true
+          accounts_local_ansible_user_password_expires: false
+          accounts_local_ansible_user_hide_in_welcome: true
           dotnet_optimize_all_assemblies: true
+          dns_client_adapter_names: '*'
+          dns_client_dns_servers:
+            - 1.1.1.1
+            - 8.8.8.8
+          network_configuration_ipv6_enable: false
+          network_configuration_netbios_enable: false
+          network_configuration_reboot: false
+          sshd_configuration_enable: true
+          sshd_configuration_install: true
+          sshd_configuration_shell: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+          sshd_configuration_admins_keys:
+            present:
+              - ssh-ed25519 ... id_ed25519.pub
+          sshd_configuration_start_mode: auto
+          sshd_configuration_firewall_profiles:
+            - domain
+            - private
+            - public
+          # Not possible before initial startup
+          sshd_configuration_config_validate: false
+          sshd_configuration_config_file: files/default_config
+          system_init_file: C:\Windows\init_info_image.txt
+          system_init_msg_file: "This image was created on {{ '%Y-%m-%d %H:%M:%S %Z' | strftime }}.\r\n"
+          system_time_ntp_servers:
+            - time.windows.com
+          system_time_timezone: FLE Standard Time
+          system_update_categories: '*'
+          system_update_state: installed
+          system_update_reboot: true
+          system_update_reboot_timeout: 1200
+          system_update_compile_assemblies: true
+          system_update_compile_filter: '.*'
+          user_experience_server_manager_disable: true
+          user_experience_network_location_wizard_disable: true
+          user_experience_hide_last_user_name: true
+          windows_recovery_enable: false
+          winrm_configuration_enable: true
+          winrm_configuration_https_enable: true
+          winrm_configuration_http_block: false
+          winrm_configuration_start_mode: auto
+          winrm_configuration_firewall_profiles:
+            - domain
+            - private
+            - public
         #tasks:
         #  - win_ping:
         roles:
+          - /tmp/roles/etc_hosts
+          - /tmp/roles/dns_client
+          - /tmp/roles/system_time
           - /tmp/roles/accounts_local
-          #- /tmp/roles/system_update
-          - /tmp/roles/dotnet_optimize
+          - /tmp/roles/boot_configuration
+          - /tmp/roles/winrm_configuration
+          - /tmp/roles/network_configuration
+          - /tmp/roles/sshd_configuration
+          - /tmp/roles/rdp_configuration
+          - /tmp/roles/system_update
+          #- /tmp/roles/dotnet_optimize
+          - /tmp/roles/windows_recovery
           - /tmp/roles/performance_tuning
           - /tmp/roles/service_enablement
           - /tmp/roles/service_recovery
+          - /tmp/roles/user_experience
           - /tmp/roles/system_reboot
+          - /tmp/roles/system_init
+        post_tasks:
+          - name: Remove all SSH host keys
+            ansible.windows.win_powershell:
+              script: |
+                Remove-Item -Path C:\ProgramData\ssh\ssh_host_* -Force
 
     #win_custom_partitioning_create: |
     #    <CreatePartition wcm:action="add">
