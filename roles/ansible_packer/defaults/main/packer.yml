@@ -14,15 +14,15 @@ communicator: "none"
 shutdown_timeout: 15m
 
 # Example Packer Ansible provisioner conf for RHEL
-# NB. Writes cleartext root password in build.json
 #
 #communicator: "ssh"
 #
 ## Needs to have root_permit_ssh set accordingly
 #custom_json_builder_section: |
-#  "ssh_username": "root",
-#  "ssh_password": "{{ image_password }}",
+#  "pause_before_connecting": "10s",
 #  "ssh_timeout": "15m",
+#  "ssh_username": "root",
+#  "ssh_private_key_file": "{{ ssh_private_key_file }}",
 #
 #custom_json_provisioner: |
 #  {
