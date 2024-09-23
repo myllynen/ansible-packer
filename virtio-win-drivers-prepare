@@ -1,21 +1,21 @@
 #!/bin/sh
 
 if [ "$VIRTIO_ISO" = "" ]; then
-  echo "VIRTIO_ISO not set, defaulting to './virtio-win.iso'."
   VIRTIO_ISO=./virtio-win.iso
+  echo "VIRTIO_ISO not set, defaulting to './virtio-win.iso'."
 fi
 if [ "$VIRTIO_DRIVERS" = "" ]; then
-  echo "VIRTIO_DRIVERS not set, using driver directory './drivers'."
   VIRTIO_DRIVERS=./drivers
+  echo "VIRTIO_DRIVERS not set, using driver directory './drivers'."
 fi
 if [ ! -f $VIRTIO_ISO -a "$VIRTIO_URL" = "" ]; then
+  VIRTIO_URL=https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/stable-virtio/virtio-win.iso
   echo "VIRTIO_URL not set, defaulting to:"
   echo $VIRTIO_URL
-  VIRTIO_URL=https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/stable-virtio/virtio-win.iso
 fi
 if [ "$WIN_VER" = "" ]; then
-  echo "WIN_VER not set, defaulting to '2k22'."
   WIN_VER=2k25
+  echo "WIN_VER not set, defaulting to '2k22'."
 fi
 
 if [ ! -f $VIRTIO_ISO ]; then
