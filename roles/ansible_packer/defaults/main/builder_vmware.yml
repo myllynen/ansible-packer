@@ -1,5 +1,6 @@
 ---
 # https://www.packer.io/docs/builders/vsphere/vsphere-iso
+# These should come from vault
 #vcenter_credentials:
 #  vcenter_server:
 #  vcenter_username:

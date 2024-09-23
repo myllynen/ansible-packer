@@ -1,6 +1,6 @@
 {
   "variables": {
-    "vcenter_password": "{% raw %}{{env `VCENTER_PASSWORD`}}{% endraw %}"
+    "vcenter_password": "{% raw %}{{ env `VCENTER_PASSWORD` }}{% endraw %}"
   },
   "sensitive-variables": ["vcenter_password"],
   "builders": [
@@ -9,7 +9,7 @@
 
       "vcenter_server": "{{ vcenter_credentials.vcenter_server }}",
       "username": "{{ vcenter_credentials.vcenter_username | replace('\\', '\\\\') }}",
-      "password": "{% raw %}{{user `vcenter_password`}}{% endraw %}",
+      "password": "{% raw %}{{ user `vcenter_password` }}{% endraw %}",
       "insecure_connection": {{ vcenter_insecure_connection | string | lower }},
 
       "datacenter": "{{ vcenter_datacenter }}",
