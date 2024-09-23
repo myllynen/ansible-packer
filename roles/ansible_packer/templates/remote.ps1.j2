@@ -1,15 +1,3 @@
-Write-Host Configuring WinRM service...
+Write-Host Configuring remote access...
 
-# Set connection profile
-Get-NetConnectionProfile | Select InterfaceAlias | Set-NetConnectionProfile -NetworkCategory Private
-
-# Enable WinRM
-Enable-PSRemoting -Force
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Force
-
-# StartupType AutomaticDelayedStart needs PowerShell 6.0+
-#Set-Service -Name WinRM –Status Running
-#Set-Service -Name WinRM –StartupType AutomaticDelayedStart
-sc.exe config winrm start= auto
-
-{{ win_winrm_setup | default('', true) }}
+{{ win_remote_setup | default('Exit 0', true) }}
