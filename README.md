@@ -25,7 +25,7 @@ Currently (2024-09) tested Packer builders (platforms) are:
 
 Currently (2024-09) tested OS variants and versions are:
 
-* [RHEL](https://www.redhat.com/en/technologies/linux-platforms/enterprise-linux) 7, 8, 9
+* [RHEL](https://www.redhat.com/en/technologies/linux-platforms/enterprise-linux) 8, 9
 * [RHEL Edge](https://www.redhat.com/en/technologies/linux-platforms/enterprise-linux/edge-computing) 9 (experimental)
 * [Windows Server](https://www.microsoft.com/en-us/windows-server) 2019, 2022, 2025
 * [Windows](https://www.microsoft.com/en-us/windows/) 10, 11
@@ -40,13 +40,12 @@ VM images (templates) can also be further customized and updated
 automatically at the end of the installation either by using custom
 installer directives or by using the Packer
 [Ansible provisioner](https://www.packer.io/plugins/provisioners/ansible/ansible).
-VMware VM images are
-[VMware Tools](https://docs.vmware.com/en/VMware-Tools) enabled so the
-hypervisor can customize the OS in VMs created from these images.
+Guest tools for both KVM/Qemu and VMware VM images will be installed
+automatically during the installation process.
 
 Both RHEL and Windows custom ISO installer images embed and load the
 installer configuration automatically on boot to proceed to install the
-OS completely unattended.
+OS completely unattended. Don't boot from the ISO on an existing system!
 
 Less tested but verified to work in the past OS variants include:
 
@@ -80,6 +79,7 @@ This is a basic playbook for building an image with Qemu:
     disk_size: 8192
 
     root_password: "{{ image_password }}"
+
     partitioning: auto
 
     hostname: localhost.localdomain
@@ -131,7 +131,9 @@ This is a more complete playbook for building an image on VMware:
     #
     boot_password: "{{ image_password }}"
     root_password: "{{ image_password }}"
+
     partitioning: auto
+
     disable_ipv6: true
     #fips_enable: true
     #security_profile: cis
@@ -151,7 +153,7 @@ This is a more complete playbook for building an image on VMware:
       groups: wheel
       home: /home/admin
       gecos: Admin User
-      ssh_key: "ssh-rsa ... admin@image"
+      ssh_key: "ssh-ed25519 ... admin@image"
       passwordless_sudo: true
 
     root_permit_local: true
@@ -254,6 +256,7 @@ the above playbooks used to build VM images with Packer:
     image_name: custom.iso
 
     root_password: "{{ image_password }}"
+
     partitioning: auto
 
     hostname: localhost.localdomain
@@ -297,7 +300,7 @@ is unavoidable as the Windows installer does not support encrypted
 passwords.
 
 Three paramaters, _packer\_builder_, _packer\_target_ and
-_root\_password_ for Linux or _win\_winrm\_password_ for Windows are
+_root\_password_ for Linux or _win\_admin\_password_ for Windows are
 mandatory, the rest are optional. See
 [roles/ansible_packer/defaults/main](roles/ansible_packer/defaults/main)
 for all the supported variables.
@@ -329,8 +332,8 @@ The value of _security\_profile_ is passed as-is to the Linux installer
 To create local admin user on the VM for Ansible etc, see
 [roles/ansible_packer/defaults/main/os.yml](roles/ansible_packer/defaults/main/os.yml)
 for admin user data specification (Linux). Windows admin user is
-_winrm_, see
-[roles/ansible_packer/defaults/main/windows.yml](roles/ansible_packer/defaults/main/windows.yml)
+set with _win\_remote\_user_, see the Windows files in
+[roles/ansible_packer/defaults/main/](roles/ansible_packer/defaults/main/)
 for details.
 
 Vaulted password variables are supported. Note that the provided CentOS
