@@ -7,10 +7,12 @@ boot_wait: 10s
 #boot_command: <up><wait><tab><wait> inst.ks=hd:/dev/sr1:/inst.cfg inst.geoloc=0 inst.nosave=all ip=dhcp
 # RHEL-compatible boot_command on UEFI
 boot_command: <up><wait>e<wait><down><down><leftCtrlOn>e<leftCtrlOff> inst.ks=cdrom:/inst.cfg inst.geoloc=0 inst.nosave=all ip=dhcp
+
+# Custom boot parameters to append
+boot_parameters: net.ifnames.prefix=net quiet
+
 # NB. With RHEL on BIOS use '<enter>' to boot, on UEFI must use '<leftCtrlOn>x<leftCtrlOff>'
 boot_start: <leftCtrlOn>x<leftCtrlOff><wait>
-
-boot_parameters: net.ifnames.prefix=net quiet
 
 boot_password:
 #root_password:
@@ -27,6 +29,7 @@ fips_enable: false
 
 serial_console_setup: false
 kdump_update_disable: false
+
 # Ask installer to setup DHCP networking for the image
 network_setup_dhcp: true
 # Remove static network configuration setup by installer
@@ -49,13 +52,13 @@ create_admin: false
 #  group: admin
 #  groups: wheel
 #  gecos: Admin User
-#  ssh_key: ssh-rsa ... admin@image
+#  ssh_key: ssh-ed25519 ... admin@image
 #  passwordless_sudo: false
 
 root_permit_local: true
 root_permit_ssh: "prohibit-password"
 root_permit_override_security_policy: false
-#root_ssh_key: "ssh-rsa ... root@image"
+#root_ssh_key: "ssh-ed25519 ... root@image"
 
 # Define to temporarily register and update RHEL
 # To be replaced with rhsm directive once available
