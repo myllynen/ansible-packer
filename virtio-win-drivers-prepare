@@ -15,7 +15,7 @@ if [ ! -f $VIRTIO_ISO -a "$VIRTIO_URL" = "" ]; then
 fi
 if [ "$WIN_VER" = "" ]; then
   WIN_VER=2k25
-  echo "WIN_VER not set, defaulting to '2k22'."
+  echo "WIN_VER not set, defaulting to '2k25'."
 fi
 
 if [ ! -f $VIRTIO_ISO ]; then
