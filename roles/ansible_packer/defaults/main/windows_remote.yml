@@ -8,8 +8,9 @@ win_remote_user: winrm
 # Setup SSH for remote access
 win_remote_setup_ssh: |
   Get-NetConnectionProfile | Set-NetConnectionProfile -NetworkCategory Private
-  if (Get-WindowsCapability -Name OpenSSH.Server -Online | ? State -ne 'Installed') {
-    Add-WindowsCapability -Name OpenSSH.Server -Online
+  $missing = Get-WindowsCapability -Name 'OpenSSH.Server*' -Online | ? State -ne 'Installed'
+  if ($missing) {
+    Add-WindowsCapability -Name $missing.Name -Online
   }
   Start-Service sshd
   Set-Service -Name sshd -StartupType Automatic
