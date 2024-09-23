@@ -19,6 +19,7 @@ galaxy_info:
       versions:
         - "2019"
         - "2022"
+        - "2025"
   galaxy_tags:
     - packer
     - build

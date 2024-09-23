@@ -80,29 +80,25 @@ iso:
     url: file:///VirtualMachines/boot/CentOS-Stream-9-latest-x86_64-dvd1.iso
     checksum: sha256:6ca7523a8e06d404d08c80075004fbdb4a1546e13dcb6f6f34f3e8c6e585fe3a
 
-  rhel_7:
-    url: file:///VirtualMachines/boot/rhel-server-7.9-x86_64-dvd.iso
-    checksum: sha256:2cb36122a74be084c551bc7173d2d38a1cfb75c8ffbc1489c630c916d1b31b25
-
   rhel_8:
-    url: file:///VirtualMachines/boot/rhel-8.9-x86_64-dvd.iso
-    checksum: sha256:c4fd0632ce15a7d56e1d174176456943bd48306f9d35bcecbcb0a1dc49088e23
-
-  rhel_8_8:
-    url: file:///VirtualMachines/boot/rhel-8.8-x86_64-dvd.iso
-    checksum: sha256:517abcc67ee3b7212f57e180f5d30be3e8269e7a99e127a3399b7935c7e00a09
+    url: file:///VirtualMachines/boot/rhel-8.10-x86_64-dvd.iso
+    checksum: sha256:6ced368628750ff3ea8a2fc52a371ba368d3377b8307caafda69070849a9e4e7
 
   rhel_8_9:
     url: file:///VirtualMachines/boot/rhel-8.9-x86_64-dvd.iso
     checksum: sha256:c4fd0632ce15a7d56e1d174176456943bd48306f9d35bcecbcb0a1dc49088e23
 
-  rhel_9:
-    url: file:///VirtualMachines/boot/rhel-9.3-x86_64-dvd.iso
-    checksum: sha256:5c802147aa58429b21e223ee60e347e850d6b0d8680930c4ffb27340ffb687a8
+  rhel_8_10:
+    url: file:///VirtualMachines/boot/rhel-8.10-x86_64-dvd.iso
+    checksum: sha256:6ced368628750ff3ea8a2fc52a371ba368d3377b8307caafda69070849a9e4e7
 
-  rhel_9_3:
-    url: file:///VirtualMachines/boot/rhel-9.3-x86_64-dvd.iso
-    checksum: sha256:5c802147aa58429b21e223ee60e347e850d6b0d8680930c4ffb27340ffb687a8
+  rhel_9:
+    url: file:///VirtualMachines/boot/rhel-9.4-x86_64-dvd.iso
+    checksum: sha256:6ced368628750ff3ea8a2fc52a371ba368d3377b8307caafda69070849a9e4e7
+
+  rhel_9_4:
+    url: file:///VirtualMachines/boot/rhel-9.4-x86_64-dvd.iso
+    checksum: sha256:6ced368628750ff3ea8a2fc52a371ba368d3377b8307caafda69070849a9e4e7
 
 ---
 # https://www.packer.io/plugins/builders/qemu#boot-configuration
@@ -113,10 +109,12 @@ boot_wait: 10s
 #boot_command: <up><wait><tab><wait> inst.ks=hd:/dev/sr1:/inst.cfg inst.geoloc=0 inst.nosave=all ip=dhcp
 # RHEL-compatible boot_command on UEFI
 boot_command: <up><wait>e<wait><down><down><leftCtrlOn>e<leftCtrlOff> inst.ks=cdrom:/inst.cfg inst.geoloc=0 inst.nosave=all ip=dhcp
+
+# Custom boot parameters to append
+boot_parameters: net.ifnames.prefix=net quiet
+
 # NB. With RHEL on BIOS use '<enter>' to boot, on UEFI must use '<leftCtrlOn>x<leftCtrlOff>'
 boot_start: <leftCtrlOn>x<leftCtrlOff><wait>
-
-boot_parameters: net.ifnames.prefix=net quiet
 
 boot_password:
 #root_password:
@@ -133,6 +131,7 @@ fips_enable: false
 
 serial_console_setup: false
 kdump_update_disable: false
+
 # Ask installer to setup DHCP networking for the image
 network_setup_dhcp: true
 # Remove static network configuration setup by installer
@@ -155,13 +154,13 @@ create_admin: false
 #  group: admin
 #  groups: wheel
 #  gecos: Admin User
-#  ssh_key: ssh-rsa ... admin@image
+#  ssh_key: ssh-ed25519 ... admin@image
 #  passwordless_sudo: false
 
 root_permit_local: true
 root_permit_ssh: "prohibit-password"
 root_permit_override_security_policy: false
-#root_ssh_key: "ssh-rsa ... root@image"
+#root_ssh_key: "ssh-ed25519 ... root@image"
 
 # Define to temporarily register and update RHEL
 # To be replaced with rhsm directive once available
@@ -214,15 +213,15 @@ communicator: "none"
 shutdown_timeout: 15m
 
 # Example Packer Ansible provisioner conf for RHEL
-# NB. Writes cleartext root password in build.json
 #
 #communicator: "ssh"
 #
 ## Needs to have root_permit_ssh set accordingly
 #custom_json_builder_section: |
-#  "ssh_username": "root",
-#  "ssh_password": "{{ image_password }}",
+#  "pause_before_connecting": "10s",
 #  "ssh_timeout": "15m",
+#  "ssh_username": "root",
+#  "ssh_private_key_file": "{{ ssh_private_key_file }}",
 #
 #custom_json_provisioner: |
 #  {
@@ -234,6 +233,7 @@ shutdown_timeout: 15m
 
 ---
 vm_name: "{{ image_name | default(__target_fullname + '_image.qcow2', true) }}"
+
 # Either bios, uefi, or uefi-secure
 vm_type: uefi-secure
 vm_tpm: true
@@ -266,14 +266,6 @@ win_pss_disk: "{{ 'A:' if packer_builder == 'vmware' else 'E:' }}"
 win_src_disk: "{{ win_pss_disk if packer_builder != 'iso' else 'D:' }}"
 win_vm_tools_disk: "{{ 'E:' if packer_builder == 'vmware' else win_src_disk }}"
 
-# Password for the 'winrm' remote management account that will be
-# created during installation. The built-in Administrator account
-# will also use this password with ISO but that account will be
-# disabled and its password reset during the VM sysprep phase.
-# NB! This variable is used to determine whether to build RHEL
-#     or Windows ISOs/VMs and for building RHEL must be unset.
-#win_winrm_password:
-
 # Either bios, uefi, or custom
 # See below for custom example
 win_partitioning: uefi
@@ -286,43 +278,19 @@ win_locale_system: en-US
 win_locale_ui: en-US
 # User locale setting
 win_locale_user: en-US
-# Input locale setting
-# https://docs.microsoft.com/windows-hardware/manufacture/desktop/default-input-locales-for-windows-language-packs
-win_locale_input: en-US
+# Input locale (language and keyboard) setting, see
+# https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/default-input-locales-for-windows-language-packs
+win_locale_input: 0409:00000409
+
+# Password for Windows Administrator and remote management
+# account that will be created during installation, see below.
+# NB! This variable is used to determine whether to build RHEL
+#     or Windows ISOs/VMs and for building RHEL must be unset.
+#win_admin_password:
 
 #win_product_key:
 #win_registered_owner:
 #win_registered_organization:
-
-# System customization script, runs before enabling WinRM
-#win_customize_script: |
-
-# Default remote.ps1 always ensures the service is running,
-# this part should configure WinRM per the local requirements
-win_winrm_setup: |
-  Set-Item -Path WSMan:\localhost\Service\Auth\Basic -Value $true
-  Set-Item -Path WSMan:\localhost\Service\AllowUnencrypted -Value $true
-
-# Additional Packer ansible-playbook call parameters with VM template
-win_ansible_arguments: '"--extra-vars", "ansible_winrm_scheme=http"'
-
-# List of tasks or roles to run on the VM,
-# all roles must be included with full path
-win_provisioner_playbook: |2
-    #vars:
-    #  boot_configuration_timeout: 5
-    #  dotnet_optimize_all_assemblies: true
-    tasks:
-      - win_ping:
-    #roles:
-    #  - /tmp/roles/accounts_local
-    #  - /tmp/roles/boot_configuration
-    #  #- /tmp/roles/system_update
-    #  - /tmp/roles/dotnet_optimize
-    #  - /tmp/roles/performance_tuning
-    #  - /tmp/roles/performance_tuning
-    #  - /tmp/roles/service_enablement
-    #  - /tmp/roles/service_recovery
 
 #win_custom_partitioning_create: |
 #    <CreatePartition wcm:action="add">
@@ -341,6 +309,133 @@ win_provisioner_playbook: |2
 #    </ModifyPartition>
 
 #win_custom_partitioning_install_to: 1
+
+# Customization script, runs before enabling remote access
+#win_customize_script: |
+
+---
+# Additional Packer Ansible parameters
+# These are arguments to use with WinRM
+# NB. These will be visible in ps(1) output
+win_ansible_arguments: >
+  "--extra-vars", "ansible_winrm_scheme=https",
+  "--extra-vars", "ansible_winrm_transport=basic",
+  "--extra-vars", "ansible_winrm_server_cert_validation=ignore",
+  "--extra-vars", "ansible_shell_type=powershell",
+  "--extra-vars", "ansible_become_method=runas"
+
+# These are arguments to use with SSH/key
+# NB. These will be visible in ps(1) output
+# NB. Removing SSH host keys will not work using SSH
+#win_ansible_arguments: >
+#  "--extra-vars", "ansible_shell_type=powershell",
+#  "--extra-vars", "ansible_become_method=runas"
+
+# Private SSH key to use during VM installation
+#ssh_private_key_file: ~/.ssh/id_ed25519_packer
+
+# These are arguments to use with SSH/password
+# NB. These will be visible in ps(1) output
+# NB. Removing SSH host keys will not work using SSH
+#win_ansible_arguments: >
+#  "--extra-vars", "ansible_ssh_pass={% raw %}{{ user `win_admin_password` }}{% endraw %}",
+#  "--extra-vars", "ansible_shell_type=powershell",
+#  "--extra-vars", "ansible_become_method=runas"
+
+
+# List of tasks or roles to run on the VM,
+# all roles must be included with full path
+# See packer_windows.yml for complete example
+win_provisioner_playbook: |2
+    #gather_facts: false
+    #vars:
+    #  system_update_categories: '*'
+    #  system_update_state: installed
+    #  system_update_reboot: true
+    #  system_update_reboot_timeout: 1200
+    #  system_update_compile_assemblies: true
+    #  system_update_compile_filter: '.*'
+    tasks:
+      - ansible.windows.win_ping:
+    #roles:
+    #  - /tmp/roles/system_update
+
+---
+# Remote management account name
+win_remote_user: winrm
+
+# Optional administrators SSH key to install
+#win_admin_ssh_key:
+
+# Setup SSH for remote access
+win_remote_setup_ssh: |
+  Get-NetConnectionProfile | Set-NetConnectionProfile -NetworkCategory Private
+  if (Get-WindowsCapability -Name OpenSSH.Server -Online | ? State -ne 'Installed') {
+    Add-WindowsCapability -Name OpenSSH.Server -Online
+  }
+  Start-Service sshd
+  Set-Service -Name sshd -StartupType Automatic
+  Set-ItemProperty -Path HKLM:\SOFTWARE\OpenSSH -Name DefaultShell -Value C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+  if (!(Get-NetFirewallRule -Name OpenSSH-Server-In-TCP | Select-Object Name, Enabled)) {
+    New-NetFirewallRule `
+      -Enabled True `
+      -Name OpenSSH-Server-In-TCP `
+      -DisplayName 'OpenSSH SSH Server (sshd)' `
+      -Description 'Inbound rule for OpenSSH SSH Server (sshd)' `
+      -Group 'OpenSSH Server' `
+      -LocalPort 22 `
+      -Action Allow `
+      -Direction Inbound `
+      -Protocol TCP `
+      -Profile @('Domain', 'Private')
+  }
+  $keyFile = 'C:\ProgramData\ssh\administrators_authorized_keys'
+  $publicKey = '{{ win_admin_ssh_key | default("", true) }}'
+  New-Item $keyFile
+  icacls.exe $keyFile /inheritance:r /grant ""Administrators:F"" /grant ""SYSTEM:F""
+  if ($publicKey.StartsWith('ssh')) {
+    Add-Content -Path $keyFile -Value $publicKey
+  }
+
+# Setup WinRM for remote access
+win_remote_setup_winrm: |
+  Get-NetConnectionProfile | Set-NetConnectionProfile -NetworkCategory Private
+  Start-Service WinRM
+  Set-Service -Name WinRM -StartupType Automatic
+  Remove-Item -Path WSMan:\localhost\Listener\Listener* -Recurse
+  Set-Item -Path WSMan:\localhost\Service\AllowUnencrypted -Value $false
+  Set-Item -Path WSMan:\localhost\Service\Auth\Basic -Value $true
+  Set-ExecutionPolicy -ExecutionPolicy RemoteSigned
+  $friendlyName = 'WinRM over HTTPS'
+  $cert = New-SelfSignedCertificate -CertStoreLocation Cert:\LocalMachine\My `
+            -DnsName $env:COMPUTERNAME -NotAfter (get-date).AddYears(10) `
+            -Provider 'Microsoft Enhanced RSA and AES Cryptographic Provider' `
+            -KeyLength 4096
+  $cert.FriendlyName = $friendlyName
+  New-Item -Path WSMan:\localhost\Listener -Transport HTTPS `
+    -Address * -CertificateThumbPrint $cert.Thumbprint -Force
+  if (!(Get-NetFirewallRule -Name WINRM-HTTPS-In-TCP -ErrorAction SilentlyContinue | Select-Object Name, Enabled)) {
+    New-NetFirewallRule `
+      -Enabled True `
+      -Name WINRM-HTTPS-In-TCP `
+      -DisplayName 'Windows Remote Management (HTTPS-In)' `
+      -Description 'Inbound rule for Windows Remote Management via WS-Management. [TCP 5986]' `
+      -Group '@FirewallAPI.dll,-30267' `
+      -LocalPort 5986 `
+      -Action Allow `
+      -Direction Inbound `
+      -Protocol TCP `
+      -Profile @('Domain', 'Private')
+  }
+  Set-ItemProperty -Path HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System `
+    -Name EnableRemoteMgmt -Value 1
+
+# Remote access method to configure
+# By default both SSH and WinRM are enabled
+win_remote_setup: |
+  {{ win_remote_setup_ssh }}
+
+  {{ win_remote_setup_winrm }}
 </pre>
 
 ## License
