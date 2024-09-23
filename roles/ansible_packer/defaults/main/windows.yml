@@ -23,14 +23,6 @@ win_pss_disk: "{{ 'A:' if packer_builder == 'vmware' else 'E:' }}"
 win_src_disk: "{{ win_pss_disk if packer_builder != 'iso' else 'D:' }}"
 win_vm_tools_disk: "{{ 'E:' if packer_builder == 'vmware' else win_src_disk }}"
 
-# Password for the 'winrm' remote management account that will be
-# created during installation. The built-in Administrator account
-# will also use this password with ISO but that account will be
-# disabled and its password reset during the VM sysprep phase.
-# NB! This variable is used to determine whether to build RHEL
-#     or Windows ISOs/VMs and for building RHEL must be unset.
-#win_winrm_password:
-
 # Either bios, uefi, or custom
 # See below for custom example
 win_partitioning: uefi
@@ -43,43 +35,19 @@ win_locale_system: en-US
 win_locale_ui: en-US
 # User locale setting
 win_locale_user: en-US
-# Input locale setting
-# https://docs.microsoft.com/windows-hardware/manufacture/desktop/default-input-locales-for-windows-language-packs
-win_locale_input: en-US
+# Input locale (language and keyboard) setting, see
+# https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/default-input-locales-for-windows-language-packs
+win_locale_input: 0409:00000409
+
+# Password for Windows Administrator and remote management
+# account that will be created during installation, see below.
+# NB! This variable is used to determine whether to build RHEL
+#     or Windows ISOs/VMs and for building RHEL must be unset.
+#win_admin_password:
 
 #win_product_key:
 #win_registered_owner:
 #win_registered_organization:
-
-# System customization script, runs before enabling WinRM
-#win_customize_script: |
-
-# Default remote.ps1 always ensures the service is running,
-# this part should configure WinRM per the local requirements
-win_winrm_setup: |
-  Set-Item -Path WSMan:\localhost\Service\Auth\Basic -Value $true
-  Set-Item -Path WSMan:\localhost\Service\AllowUnencrypted -Value $true
-
-# Additional Packer ansible-playbook call parameters with VM template
-win_ansible_arguments: '"--extra-vars", "ansible_winrm_scheme=http"'
-
-# List of tasks or roles to run on the VM,
-# all roles must be included with full path
-win_provisioner_playbook: |2
-    #vars:
-    #  boot_configuration_timeout: 5
-    #  dotnet_optimize_all_assemblies: true
-    tasks:
-      - win_ping:
-    #roles:
-    #  - /tmp/roles/accounts_local
-    #  - /tmp/roles/boot_configuration
-    #  #- /tmp/roles/system_update
-    #  - /tmp/roles/dotnet_optimize
-    #  - /tmp/roles/performance_tuning
-    #  - /tmp/roles/performance_tuning
-    #  - /tmp/roles/service_enablement
-    #  - /tmp/roles/service_recovery
 
 #win_custom_partitioning_create: |
 #    <CreatePartition wcm:action="add">
@@ -98,3 +66,6 @@ win_provisioner_playbook: |2
 #    </ModifyPartition>
 
 #win_custom_partitioning_install_to: 1
+
+# Customization script, runs before enabling remote access
+#win_customize_script: |

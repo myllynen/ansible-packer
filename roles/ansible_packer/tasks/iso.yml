@@ -41,13 +41,13 @@
     path: "{{ tempdir.path + '/iso-build/drivers' }}"
     mode: '0700'
   register: iso_drivers_dir
-  when: win_winrm_password is defined and win_drivers_path is defined
+  when: win_admin_password is defined and win_drivers_path is defined
 
 - name: Copy OS ISO files to custom ISO build directory
   vars:
     iso_command: bsdtar -xf {{ os_iso_path }} -C {{ iso_build_dir.path }}
     udf_command: 7z x -o{{ iso_build_dir.path }} {{ os_iso_path }}
-    run_command: "{{ iso_command if win_winrm_password is not defined else udf_command }}"
+    run_command: "{{ iso_command if win_admin_password is not defined else udf_command }}"
   command: "{{ run_command }}"
   changed_when: true
 
@@ -62,14 +62,14 @@
     - { src: isolinux.cfg.j2, dest: isolinux/isolinux.cfg, mode: '0644' }
   loop_control:
     label: "{{ item.dest }}"
-  when: win_winrm_password is not defined
+  when: win_admin_password is not defined
 
 - name: Copy installer configuration
   copy:
     src: "{{ tempdir.path + '/inst.cfg' }}"
     dest: "{{ iso_build_dir.path + '/inst.cfg' }}"
     mode: '0600'
-  when: win_winrm_password is not defined
+  when: win_admin_password is not defined
 
 - name: Copy Windows installer configurations
   copy:
@@ -81,7 +81,7 @@
     - sysprep.xml
     - custom.ps1
     - remote.ps1
-  when: win_winrm_password is defined
+  when: win_admin_password is defined
 
 - name: Copy Windows drivers directory
   ansible.posix.synchronize:
@@ -89,7 +89,7 @@
     dest: "{{ iso_drivers_dir.path }}"
     owner: false
     group: false
-  when: win_winrm_password is defined and win_drivers_path is defined
+  when: win_admin_password is defined and win_drivers_path is defined
 
 - name: Remove existing custom ISO file
   file:
@@ -106,7 +106,7 @@
     umount {{ iso_build_dir.path }}/isolinux
   changed_when: true
   when:
-    - win_winrm_password is not defined
+    - win_admin_password is not defined
     - iso_boot_usb_fix | bool
 
 - name: Build custom ISO file
@@ -127,7 +127,7 @@
       -o {{ image_path }} .
     chdir: "{{ iso_build_dir.path }}"
   changed_when: true
-  when: win_winrm_password is not defined
+  when: win_admin_password is not defined
 
 - name: Build custom Windows ISO file
   command:
@@ -146,17 +146,17 @@
       -o {{ image_path }} .
     chdir: "{{ iso_build_dir.path }}"
   changed_when: true
-  when: win_winrm_password is defined
+  when: win_admin_password is defined
 
 - name: Make custom ISO hybrid bootable
   command: isohybrid --uefi {{ image_path }}
   changed_when: true
-  when: win_winrm_password is not defined
+  when: win_admin_password is not defined
 
 - name: Implant MD5 checksum into custom ISO
   command: implantisomd5 {{ image_path }}
   changed_when: true
-  when: win_winrm_password is not defined
+  when: win_admin_password is not defined
 
 - name: Calculate custom ISO SHA256 checksum
   command: sha256sum {{ image_path }}

@@ -32,7 +32,7 @@
     src: cfg-{{ __target_config }}.j2
     dest: "{{ tempdir.path }}/inst.cfg"
     mode: '0600'
-  when: win_winrm_password is not defined
+  when: win_admin_password is not defined
 
 - name: Create Windows installer configuration files
   template:
@@ -45,7 +45,7 @@
     - custom.ps1
     - remote.ps1
     - win_packer.yml
-  when: win_winrm_password is defined
+  when: win_admin_password is defined
 
 - name: Include ISO tasks
   include_tasks: iso.yml

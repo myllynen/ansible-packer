@@ -1,0 +1,46 @@
+---
+# Additional Packer Ansible parameters
+# These are arguments to use with WinRM
+# NB. These will be visible in ps(1) output
+win_ansible_arguments: >
+  "--extra-vars", "ansible_winrm_scheme=https",
+  "--extra-vars", "ansible_winrm_transport=basic",
+  "--extra-vars", "ansible_winrm_server_cert_validation=ignore",
+  "--extra-vars", "ansible_shell_type=powershell",
+  "--extra-vars", "ansible_become_method=runas"
+
+# These are arguments to use with SSH/key
+# NB. These will be visible in ps(1) output
+# NB. Removing SSH host keys will not work using SSH
+#win_ansible_arguments: >
+#  "--extra-vars", "ansible_shell_type=powershell",
+#  "--extra-vars", "ansible_become_method=runas"
+
+# Private SSH key to use during VM installation
+#ssh_private_key_file: ~/.ssh/id_ed25519_packer
+
+# These are arguments to use with SSH/password
+# NB. These will be visible in ps(1) output
+# NB. Removing SSH host keys will not work using SSH
+#win_ansible_arguments: >
+#  "--extra-vars", "ansible_ssh_pass={% raw %}{{ user `win_admin_password` }}{% endraw %}",
+#  "--extra-vars", "ansible_shell_type=powershell",
+#  "--extra-vars", "ansible_become_method=runas"
+
+
+# List of tasks or roles to run on the VM,
+# all roles must be included with full path
+# See packer_windows.yml for complete example
+win_provisioner_playbook: |2
+    #gather_facts: false
+    #vars:
+    #  system_update_categories: '*'
+    #  system_update_state: installed
+    #  system_update_reboot: true
+    #  system_update_reboot_timeout: 1200
+    #  system_update_compile_assemblies: true
+    #  system_update_compile_filter: '.*'
+    tasks:
+      - ansible.windows.win_ping:
+    #roles:
+    #  - /tmp/roles/system_update

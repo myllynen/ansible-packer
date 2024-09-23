@@ -164,19 +164,19 @@
             <TimeZone>{{ win_timezone }}</TimeZone>
             <UserAccounts>
                 <AdministratorPassword>
-                    <Value>{{ (win_winrm_password + 'AdministratorPassword') | b64encode(encoding='utf-16-le') }}</Value>
+                    <Value>{{ (win_admin_password + 'AdministratorPassword') | b64encode(encoding='utf-16-le') }}</Value>
                     <PlainText>false</PlainText>
                 </AdministratorPassword>
                 <LocalAccounts>
                     <LocalAccount wcm:action="add">
-                        <Name>winrm</Name>
+                        <Name>{{ win_remote_user }}</Name>
                         <Group>Administrators</Group>
                         <Password>
-                            <Value>{{ (win_winrm_password + 'Password') | b64encode(encoding='utf-16-le') }}</Value>
+                            <Value>{{ (win_admin_password + 'Password') | b64encode(encoding='utf-16-le') }}</Value>
                             <PlainText>false</PlainText>
                         </Password>
-                        <DisplayName>WinRM User</DisplayName>
-                        <Description>WinRM User for Ansible</Description>
+                        <DisplayName>Remote Admin</DisplayName>
+                        <Description>Remote Admin for Ansible</Description>
                     </LocalAccount>
                 </LocalAccounts>
             </UserAccounts>
@@ -185,7 +185,7 @@
                 <LogonCount>1</LogonCount>
                 <Username>Administrator</Username>
                 <Password>
-                    <Value>{{ (win_winrm_password + 'Password') | b64encode(encoding='utf-16-le') }}</Value>
+                    <Value>{{ (win_admin_password + 'Password') | b64encode(encoding='utf-16-le') }}</Value>
                     <PlainText>false</PlainText>
                 </Password>
             </AutoLogon>
@@ -214,21 +214,19 @@
                     <Description>Disable network location wizard</Description>
                     <Order>2</Order>
                 </SynchronousCommand>
-{% if packer_builder != 'iso' %}
                 <SynchronousCommand wcm:action="add">
-                    <CommandLine>cmd.exe /c powershell -Command Disable-LocalUser -Name Administrator</CommandLine>
-                    <Description>Disable built-in Administrator account</Description>
+                    <CommandLine>cmd.exe /c powershell -Command Set-LocalUser -Name {{ win_remote_user }} -PasswordNeverExpires $true</CommandLine>
+                    <Description>Disable password expiration for Remote Admin user</Description>
                     <Order>3</Order>
                 </SynchronousCommand>
-{% endif %}
                 <SynchronousCommand wcm:action="add">
-                    <CommandLine>cmd.exe /c powershell -Command Set-LocalUser -Name winrm -PasswordNeverExpires $true</CommandLine>
-                    <Description>Disable password expiration for WinRM user</Description>
+                    <CommandLine>cmd.exe /c powershell -Command "New-Item -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\SpecialAccounts\UserList' -Force | New-ItemProperty -Name {{ win_remote_user }} -PropertyType DWord -Value 0 -Force"</CommandLine>
+                    <Description>Hide Remote Admin user</Description>
                     <Order>4</Order>
                 </SynchronousCommand>
                 <SynchronousCommand wcm:action="add">
-                    <CommandLine>cmd.exe /c powershell -Command "New-Item -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\SpecialAccounts\UserList' -Force | New-ItemProperty -Name winrm -PropertyType DWord -Value 0 -Force"</CommandLine>
-                    <Description>Hide WinRM user</Description>
+                    <CommandLine>cmd.exe /c powershell -Command "New-Item -Path HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System -Force | New-ItemProperty -Name DontDisplayLastUserName -PropertyType DWord -Value 1 -Force"</CommandLine>
+                    <Description>Hide last user in Welcome Screen</Description>
                     <Order>5</Order>
                 </SynchronousCommand>
 {% if packer_builder == 'qemu' %}
@@ -252,11 +250,11 @@
                 </SynchronousCommand>
                 <SynchronousCommand wcm:action="add">
                     <CommandLine>cmd.exe /c powershell -ExecutionPolicy Bypass -File {{ win_src_disk }}\remote.ps1</CommandLine>
-                    <Description>Configure WinRM service</Description>
+                    <Description>Configure remote access</Description>
                     <Order>8</Order>
                 </SynchronousCommand>
 {% if packer_builder != 'iso' %}
-                <!-- Finalize VM installation over WinRM -->
+                <!-- Finalize VM installation with Ansible -->
                 <SynchronousCommand wcm:action="add">
                     <CommandLine>cmd.exe /c logoff</CommandLine>
                     <Description>Logoff</Description>

@@ -1,16 +1,16 @@
 {
   "variables": {
-    "vcenter_password": "{% raw %}{{env `VCENTER_PASSWORD`}}{% endraw %}",
-    "win_winrm_password": "{% raw %}{{env `WIN_WINRM_PASSWORD`}}{% endraw %}"
+    "vcenter_password": "{% raw %}{{ env `VCENTER_PASSWORD` }}{% endraw %}",
+    "win_admin_password": "{% raw %}{{ env `WIN_ADMIN_PASSWORD` }}{% endraw %}"
   },
-  "sensitive-variables": ["vcenter_password", "win_winrm_password"],
+  "sensitive-variables": ["vcenter_password", "win_admin_password"],
   "builders": [
     {
       "type": "vsphere-iso",
 
       "vcenter_server": "{{ vcenter_credentials.vcenter_server }}",
       "username": "{{ vcenter_credentials.vcenter_username | replace('\\', '\\\\') }}",
-      "password": "{% raw %}{{user `vcenter_password`}}{% endraw %}",
+      "password": "{% raw %}{{ user `vcenter_password` }}{% endraw %}",
       "insecure_connection": {{ vcenter_insecure_connection | string | lower }},
 
       "datacenter": "{{ vcenter_datacenter }}",
@@ -90,14 +90,30 @@
 {{ custom_json_builder_section }}
 {% endif %}
 
+{% if "Start-Service WinRM" in win_remote_setup %}
       "communicator": "winrm",
+      "pause_before_connecting": "10s",
       "winrm_timeout": "{{ shutdown_timeout }}",
-      "winrm_username": "winrm",
-      "winrm_password": "{% raw %}{{user `win_winrm_password`}}{% endraw %}",
+      "winrm_username": "{{ win_remote_user }}",
+      "winrm_password": "{% raw %}{{ user `win_admin_password` }}{% endraw %}",
       "winrm_no_proxy": true,
-      "winrm_use_ssl": false,
+      "winrm_use_ssl": true,
+      "winrm_insecure": true,
+{% elif "Start-Service sshd" in win_remote_setup %}
+      "communicator": "ssh",
+      "pause_before_connecting": "10s",
+      "ssh_timeout": "{{ shutdown_timeout }}",
+      "ssh_username": "{{ win_remote_user }}",
+{% if ssh_private_key_file | default(false) %}
+      "ssh_private_key_file": "{{ ssh_private_key_file }}",
+{% else %}
+      "ssh_password": "{% raw %}{{ user `win_admin_password` }}{% endraw %}",
+{% endif %}
+      "ssh_disable_agent_forwarding": true,
+{% endif %}
 
-      "shutdown_command": "\\Windows\\System32\\Sysprep\\sysprep /oobe /generalize /mode:vm /shutdown /quiet /unattend:{{ win_src_disk }}\\sysprep.xml"
+      "shutdown_command": "\\Windows\\System32\\Sysprep\\sysprep /oobe /generalize /mode:vm /shutdown /quiet /unattend:{{ win_src_disk }}\\sysprep.xml",
+      "shutdown_timeout": "10m"
     }
   ],
   "provisioners": [
@@ -105,9 +121,9 @@
       "type": "ansible",
       "use_proxy": false,
       "playbook_file": "./win_packer.yml",
-      "user": "winrm",
+      "user": "{{ win_remote_user }}",
       "extra_arguments": [
-{{ win_ansible_arguments }}
+        {{ win_ansible_arguments }}
       ]
 {% if custom_json_provisioner is not defined %}
     }
