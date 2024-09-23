@@ -8,8 +8,8 @@
     # Using packer_ variables for compatibility,
     # xorrisofs not Packer is used to build image
     packer_builder: iso
-    packer_target: rhel_9_3
-    packer_target_pretty: Custom RHEL 9.3
+    packer_target: rhel_9_4
+    packer_target_pretty: Custom RHEL 9.4
     image_name: custom.iso
 
     # Build options
@@ -21,11 +21,13 @@
     #
     boot_password: "{{ image_password }}"
     root_password: "{{ image_password }}"
+
     # Autopartitioning does not support
     # creating BIOS/UEFI-compatible images
     bios_uefi_boot: true
     # One of: auto/custom/default/single
     partitioning: default
+
     disable_ipv6: true
     selinux: enforcing
     #fips_enable: true
@@ -46,13 +48,13 @@
       groups: wheel
       home: /home/admin
       gecos: Admin User
-      #ssh_key: "ssh-rsa ... admin@image"
+      #ssh_key: "ssh-ed25519 ... admin@image"
       passwordless_sudo: true
 
     root_permit_local: true
     root_permit_ssh: "prohibit-password"
     root_permit_override_security_policy: false
-    #root_ssh_key: "ssh-rsa ... root@image"
+    #root_ssh_key: "ssh-ed25519 ... root@image"
 
     #
     # Builder configurations
@@ -72,12 +74,12 @@
     # OS installer configuration
     #
     iso:
-      rhel_8_9:
-        url: file:///VirtualMachines/boot/rhel-8.9-x86_64-dvd.iso
-        checksum: sha256:c4fd0632ce15a7d56e1d174176456943bd48306f9d35bcecbcb0a1dc49088e23
-      rhel_9_3:
-        url: file:///VirtualMachines/boot/rhel-9.3-x86_64-dvd.iso
-        checksum: sha256:5c802147aa58429b21e223ee60e347e850d6b0d8680930c4ffb27340ffb687a8
+      rhel_8_10:
+        url: file:///VirtualMachines/boot/rhel-8.10-x86_64-dvd.iso
+        checksum: "none"
+      rhel_9_4:
+        url: file:///VirtualMachines/boot/rhel-9.4-x86_64-dvd.iso
+        checksum: "none"
 
   roles:
     - myllynen.ansible_packer.ansible_packer

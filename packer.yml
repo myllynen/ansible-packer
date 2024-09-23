@@ -7,7 +7,7 @@
     #
     packer_binary: packer.io
     packer_builder: qemu
-    packer_target: rhel_9_3
+    packer_target: rhel_9_4
     image_name: packer_image.qcow2
 
     vm_type: uefi-secure
@@ -25,11 +25,13 @@
     #
     boot_password: "{{ image_password }}"
     root_password: "{{ image_password }}"
+
     # Autopartitioning does not support
     # creating BIOS/UEFI-compatible images
     bios_uefi_boot: true
     # One of: auto/custom/default/single
     partitioning: default
+
     disable_ipv6: true
     selinux: enforcing
     #fips_enable: true
@@ -51,13 +53,13 @@
       groups: wheel
       home: /home/admin
       gecos: Admin User
-      #ssh_key: "ssh-rsa ... admin@image"
+      #ssh_key: "ssh-ed25519 ... admin@image"
       passwordless_sudo: true
 
     root_permit_local: true
     root_permit_ssh: "prohibit-password"
     root_permit_override_security_policy: false
-    #root_ssh_key: "ssh-rsa ... root@image"
+    #root_ssh_key: "ssh-ed25519 ... root@image"
 
     #custom_partitioning: |
     #  reqpart
@@ -124,20 +126,14 @@
     #
     iso:
       rhel_8:
-        url: file:///VirtualMachines/boot/rhel-8.9-x86_64-dvd.iso
-        checksum: sha256:c4fd0632ce15a7d56e1d174176456943bd48306f9d35bcecbcb0a1dc49088e23
-      rhel_8_8:
-        url: file:///VirtualMachines/boot/rhel-8.8-x86_64-dvd.iso
-        checksum: sha256:517abcc67ee3b7212f57e180f5d30be3e8269e7a99e127a3399b7935c7e00a09
-      rhel_8_9:
-        url: file:///VirtualMachines/boot/rhel-8.9-x86_64-dvd.iso
-        checksum: sha256:c4fd0632ce15a7d56e1d174176456943bd48306f9d35bcecbcb0a1dc49088e23
+        url: file:///VirtualMachines/boot/rhel-8.10-x86_64-dvd.iso
+        checksum: "none"
       rhel_9:
-        url: file:///VirtualMachines/boot/rhel-9.3-x86_64-dvd.iso
-        checksum: sha256:5c802147aa58429b21e223ee60e347e850d6b0d8680930c4ffb27340ffb687a8
-      rhel_9_3:
-        url: file:///VirtualMachines/boot/rhel-9.3-x86_64-dvd.iso
-        checksum: sha256:5c802147aa58429b21e223ee60e347e850d6b0d8680930c4ffb27340ffb687a8
+        url: file:///VirtualMachines/boot/rhel-9.4-x86_64-dvd.iso
+        checksum: "none"
+      rhel_9_4:
+        url: file:///VirtualMachines/boot/rhel-9.4-x86_64-dvd.iso
+        checksum: "none"
 
     # The OS installer boot_command will be appended by boot_parameters and boot_start
     # RHEL-compatible boot_command on BIOS
