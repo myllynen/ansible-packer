@@ -1,5 +1,5 @@
 ---
-- name: Build custom Windows ISO
+- name: Build custom Windows UEFI ISO
   hosts: all
   vars:
     #
@@ -8,9 +8,9 @@
     # Using packer_ variables for compatibility,
     # xorrisofs not Packer is used to build image
     packer_builder: iso
-    packer_target: win_2k22
-    image_name: custom_w2k22.iso
-    win_iso_volume_id: WINDOWS_SERVER_2022
+    packer_target: win_2k25
+    image_name: custom_w2k25.iso
+    win_iso_volume_id: WINDOWS_SERVER_2025
 
     # Windows OS edition to install from the ISO
     # Interactive installation will show editions
@@ -29,13 +29,11 @@
     #
     # OS configuration
     #
-    # Password for the 'winrm' remote management account that will be
-    # created during installation. The built-in Administrator account
-    # will also use this password with ISO but that account will be
-    # disabled and its password reset during the VM sysprep phase.
+    # Password for Windows Administrator and remote management
+    # account that will be created during installation, see below.
     # NB! This variable is used to determine whether to build RHEL
     #     or Windows ISOs/VMs and for building RHEL must be unset.
-    win_winrm_password: "{{ image_password }}"
+    win_admin_password: "{{ image_password }}"
 
     # Either bios, uefi, or custom
     # See below for custom example
@@ -45,38 +43,35 @@
 
     # System locale setting
     win_locale_system: en-US
+    # UI locale setting
+    win_locale_ui: en-US
     # User locale setting
     win_locale_user: en-US
     # Input locale (language and keyboard) setting, see
-    # https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/default-input-locales-for-windows-language-packs
+    # https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/default-input-locales-for-windows-language-packs
     win_locale_input: 0409:0000040B
-    # UI locale setting
-    win_locale_ui: en-US
 
     #win_product_key:
     win_registered_owner: "Ansible Packer"
     win_registered_organization: "Test Department"
 
-    # System customization script, runs before enabling WinRM
+    #win_admin_ssh_key: ssh-ed25519 ... id_ed25519.pub
+
+    # Customization script, runs before enabling remote access
     win_customize_script: |
+      # Set system location
+      # https://docs.microsoft.com/windows/win32/intl/table-of-geographical-locations
+      #Set-WinHomeLocation -GeoId 77
       # Disable IPv6
-      Get-NetAdapter | foreach { Disable-NetAdapterBinding -InterfaceAlias $_.Name -ComponentID ms_tcpip6 }
+      Get-NetAdapter | Disable-NetAdapterBinding -ComponentID ms_tcpip6
       # Disable NetBIOS
       $i = 'HKLM:\SYSTEM\CurrentControlSet\Services\NetBT\Parameters\Interfaces'
-      Get-ChildItem $i | ForEach-Object {
+      Get-ChildItem $i | % {
         Set-ItemProperty -Path "$i\$($_.pschildname)" -Name NetbiosOptions -Value 2
       }
-      # Remove Azure Arc
-      Remove-WindowsCapability -Name AzureArcSetup -Online
       # Don't display last user name
-      $d = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System'
-      Set-ItemProperty -Path "$d" -Name DontDisplayLastUserName -Type DWord -Value 1 -Force
-
-    # Default remote.ps1 always ensures the service is running,
-    # this part should configure WinRM per the local requirements
-    win_winrm_setup: |
-      Set-Item -Path WSMan:\localhost\Service\Auth\Basic -Value $true
-      Set-Item -Path WSMan:\localhost\Service\AllowUnencrypted -Value $true
+      $p = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System'
+      Set-ItemProperty -Path $p -Name DontDisplayLastUserName -Type DWord -Value 1 -Force
 
     #
     # Builder configurations
@@ -89,9 +84,9 @@
     # OS installer configuration
     #
     iso:
-      win_2k22:
-        url: file:///VirtualMachines/boot/SERVER_EVAL_x64FRE_en-us.iso
-        checksum: sha256:3e4fa6d8507b554856fc9ca6079cc402df11a8b79344871669f0251535255325
+      win_2k25:
+        url: file:///VirtualMachines/boot/SERVER_EVAL_x64FRE_en-us-26100.iso
+        checksum: "none"
 
   roles:
     - myllynen.ansible_packer.ansible_packer

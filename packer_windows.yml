@@ -7,8 +7,8 @@
     #
     packer_binary: packer.io
     packer_builder: qemu
-    packer_target: win_2k22
-    image_name: w2k22_image.qcow2
+    packer_target: win_2k25
+    image_name: w2k25_image.qcow2
 
     vm_type: uefi-secure
     vm_tpm: true
@@ -34,13 +34,11 @@
     #
     # OS configuration
     #
-    # Password for the 'winrm' remote management account that will be
-    # created during installation. The built-in Administrator account
-    # will also use this password with ISO but that account will be
-    # disabled and its password reset during the VM sysprep phase.
+    # Password for Windows Administrator and remote management
+    # account that will be created during installation, see below.
     # NB! This variable is used to determine whether to build RHEL
     #     or Windows ISOs/VMs and for building RHEL must be unset.
-    win_winrm_password: "{{ image_password }}"
+    win_admin_password: "{{ image_password }}"
 
     # Either bios, uefi, or custom
     # See below for custom example
@@ -50,41 +48,25 @@
 
     # System locale setting
     win_locale_system: en-US
+    # UI locale setting
+    win_locale_ui: en-US
     # User locale setting
     win_locale_user: en-US
     # Input locale (language and keyboard) setting, see
-    # https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/default-input-locales-for-windows-language-packs
+    # https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/default-input-locales-for-windows-language-packs
     win_locale_input: 0409:0000040B
-    # UI locale setting
-    win_locale_ui: en-US
 
     #win_product_key:
     win_registered_owner: "Ansible Packer"
     win_registered_organization: "Test Department"
 
-    # System customization script, runs before enabling WinRM
-    win_customize_script: |
-      # Disable IPv6
-      Get-NetAdapter | foreach { Disable-NetAdapterBinding -InterfaceAlias $_.Name -ComponentID ms_tcpip6 }
-      # Disable NetBIOS
-      $i = 'HKLM:\SYSTEM\CurrentControlSet\Services\NetBT\Parameters\Interfaces'
-      Get-ChildItem $i | ForEach-Object {
-        Set-ItemProperty -Path "$i\$($_.pschildname)" -Name NetbiosOptions -Value 2
-      }
-      # Remove Azure Arc
-      Remove-WindowsCapability -Name AzureArcSetup -Online
-      # Don't display last user name
-      $d = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System'
-      Set-ItemProperty -Path "$d" -Name DontDisplayLastUserName -Type DWord -Value 1 -Force
+    #win_admin_ssh_key: ssh-ed25519 ... id_ed25519.pub
 
-    # Default remote.ps1 always ensures the service is running,
-    # this part should configure WinRM per the local requirements
-    win_winrm_setup: |
-      Set-Item -Path WSMan:\localhost\Service\Auth\Basic -Value $true
-      Set-Item -Path WSMan:\localhost\Service\AllowUnencrypted -Value $true
-
-    # Additional Packer ansible-playbook call parameters with VM template
-    win_ansible_arguments: '"--extra-vars", "ansible_winrm_scheme=http"'
+    # Customization script, runs before enabling remote access
+    #win_customize_script: |
+      # Set system location
+      # https://docs.microsoft.com/windows/win32/intl/table-of-geographical-locations
+      #Set-WinHomeLocation -GeoId 77
 
     # List of tasks or roles to run on the VM,
     # all roles must be included with full path
@@ -93,8 +75,7 @@
         vars:
           accounts_local_administrator_enable: true
           accounts_local_ansible_user_password_expires: false
-          accounts_local_ansible_user_hide_in_welcome: true
-          dotnet_optimize_all_assemblies: true
+          accounts_local_ansible_user_show_in_welcome: false
           dns_client_adapter_names: '*'
           dns_client_dns_servers:
             - 1.1.1.1
@@ -102,6 +83,7 @@
           network_configuration_ipv6_enable: false
           network_configuration_netbios_enable: false
           network_configuration_reboot: false
+          ntfs_last_access_time_update: false
           sshd_configuration_enable: true
           sshd_configuration_install: true
           sshd_configuration_shell: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
@@ -113,7 +95,7 @@
             - domain
             - private
             - public
-          # Not possible before initial startup
+          # Not possible before initial sshd start
           sshd_configuration_config_validate: false
           sshd_configuration_config_file: files/default_config
           system_init_file: C:\Windows\init_info_image.txt
@@ -127,32 +109,32 @@
           system_update_reboot_timeout: 1200
           system_update_compile_assemblies: true
           system_update_compile_filter: '.*'
-          user_experience_server_manager_disable: true
-          user_experience_network_location_wizard_disable: true
-          user_experience_hide_last_user_name: true
+          user_experience_server_manager_at_logon: false
+          user_experience_network_location_wizard: false
+          user_experience_show_last_user_name: false
           windows_recovery_enable: false
           winrm_configuration_enable: true
           winrm_configuration_https_enable: true
-          winrm_configuration_http_block: false
+          winrm_configuration_http_block: true
           winrm_configuration_start_mode: auto
           winrm_configuration_firewall_profiles:
             - domain
             - private
             - public
         #tasks:
-        #  - win_ping:
+        #  - ansible.windows.win_ping:
         roles:
+          - /tmp/roles/dotnet_optimize
           - /tmp/roles/etc_hosts
           - /tmp/roles/dns_client
           - /tmp/roles/system_time
+          - /tmp/roles/system_update
           - /tmp/roles/accounts_local
           - /tmp/roles/boot_configuration
-          - /tmp/roles/winrm_configuration
           - /tmp/roles/network_configuration
+          - /tmp/roles/winrm_configuration
           - /tmp/roles/sshd_configuration
           - /tmp/roles/rdp_configuration
-          - /tmp/roles/system_update
-          #- /tmp/roles/dotnet_optimize
           - /tmp/roles/windows_recovery
           - /tmp/roles/performance_tuning
           - /tmp/roles/service_enablement
@@ -165,6 +147,7 @@
             ansible.windows.win_powershell:
               script: |
                 Remove-Item -Path C:\ProgramData\ssh\ssh_host_* -Force
+            when: ansible_connection != 'ssh'
 
     #win_custom_partitioning_create: |
     #    <CreatePartition wcm:action="add">
@@ -223,9 +206,9 @@
     # OS installer configuration
     #
     iso:
-      win_2k22:
-        url: file:///VirtualMachines/boot/SERVER_EVAL_x64FRE_en-us.iso
-        checksum: sha256:3e4fa6d8507b554856fc9ca6079cc402df11a8b79344871669f0251535255325
+      win_2k25:
+        url: file:///VirtualMachines/boot/SERVER_EVAL_x64FRE_en-us-26100.iso
+        checksum: "none"
 
     win_boot_wait: 2s
     # Must be set when using UEFI, use '<enter>' on BIOS
