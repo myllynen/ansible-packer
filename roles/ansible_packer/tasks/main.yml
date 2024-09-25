@@ -14,8 +14,8 @@
 
 - name: Remove old outputs
   file:
-    state: absent
     path: "{{ item.path }}"
+    state: absent
   loop: "{{ old_outputs.files }}"
   loop_control:
     label: "{{ item.path }}"
@@ -57,5 +57,5 @@
 
 - name: Remove temporary work directory
   file:
-    state: absent
     path: "{{ tempdir.path }}"
+    state: absent

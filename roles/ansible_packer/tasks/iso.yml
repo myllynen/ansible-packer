@@ -24,21 +24,21 @@
 
 - name: Create output directory
   file:
-    state: directory
     path: "{{ output_directory }}"
+    state: directory
     mode: '0700'
 
 - name: Create custom ISO build directory
   file:
-    state: directory
     path: "{{ tempdir.path + '/iso-build' }}"
+    state: directory
     mode: '0700'
   register: iso_build_dir
 
 - name: Create custom Windows ISO drivers directory
   file:
-    state: directory
     path: "{{ tempdir.path + '/iso-build/drivers' }}"
+    state: directory
     mode: '0700'
   register: iso_drivers_dir
   when: win_admin_password is defined and win_drivers_path is defined
@@ -93,8 +93,8 @@
 
 - name: Remove existing custom ISO file
   file:
-    state: absent
     path: "{{ image_path }}"
+    state: absent
   when: use_force | bool and iso_image.stat.exists
 
 - name: Update custom ISO boot loader files for USB
