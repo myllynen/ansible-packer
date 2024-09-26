@@ -75,7 +75,7 @@
         vars:
           accounts_local_administrator_enable: true
           accounts_local_ansible_user_password_expires: false
-          accounts_local_ansible_user_show_in_welcome: false
+          accounts_local_ansible_user_show_on_welcome: false
           dns_client_adapter_names: '*'
           dns_client_dns_servers:
             - 1.1.1.1
