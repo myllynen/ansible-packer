@@ -373,10 +373,10 @@ win_remote_setup_ssh: |
   if (Get-WindowsCapability -Name OpenSSH.Server -Online | ? State -ne 'Installed') {
     Add-WindowsCapability -Name OpenSSH.Server -Online
   }
-  Start-Service sshd
+  Start-Service -Name sshd
   Set-Service -Name sshd -StartupType Automatic
   Set-ItemProperty -Path HKLM:\SOFTWARE\OpenSSH -Name DefaultShell -Value C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
-  if (!(Get-NetFirewallRule -Name OpenSSH-Server-In-TCP | Select-Object Name, Enabled)) {
+  if (!(Get-NetFirewallRule -Name OpenSSH-Server-In-TCP | Select-Object -Property Name, Enabled)) {
     New-NetFirewallRule `
       -Enabled True `
       -Name OpenSSH-Server-In-TCP `
@@ -391,7 +391,9 @@ win_remote_setup_ssh: |
   }
   $keyFile = 'C:\ProgramData\ssh\administrators_authorized_keys'
   $publicKey = '{{ win_admin_ssh_key | default("", true) }}'
-  New-Item $keyFile
+  if (!(Test-Path -Path $keyFile)) {
+    New-Item -Path $keyFile
+  }
   icacls.exe $keyFile /inheritance:r /grant ""Administrators:F"" /grant ""SYSTEM:F""
   if ($publicKey.StartsWith('ssh')) {
     Add-Content -Path $keyFile -Value $publicKey
@@ -400,7 +402,7 @@ win_remote_setup_ssh: |
 # Setup WinRM for remote access
 win_remote_setup_winrm: |
   Get-NetConnectionProfile | Set-NetConnectionProfile -NetworkCategory Private
-  Start-Service WinRM
+  Start-Service -Name WinRM
   Set-Service -Name WinRM -StartupType Automatic
   Remove-Item -Path WSMan:\localhost\Listener\Listener* -Recurse
   Set-Item -Path WSMan:\localhost\Service\AllowUnencrypted -Value $false
@@ -414,7 +416,7 @@ win_remote_setup_winrm: |
   $cert.FriendlyName = $friendlyName
   New-Item -Path WSMan:\localhost\Listener -Transport HTTPS `
     -Address * -CertificateThumbPrint $cert.Thumbprint -Force
-  if (!(Get-NetFirewallRule -Name WINRM-HTTPS-In-TCP -ErrorAction SilentlyContinue | Select-Object Name, Enabled)) {
+  if (!(Get-NetFirewallRule -Name WINRM-HTTPS-In-TCP -ErrorAction SilentlyContinue | Select-Object -Property Name, Enabled)) {
     New-NetFirewallRule `
       -Enabled True `
       -Name WINRM-HTTPS-In-TCP `

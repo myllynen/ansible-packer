@@ -205,7 +205,7 @@
             </OOBE>
             <FirstLogonCommands>
                 <SynchronousCommand wcm:action="add">
-                    <CommandLine>cmd.exe /c powershell -Command Stop-Service wuauserv -Force</CommandLine>
+                    <CommandLine>cmd.exe /c powershell -Command Stop-Service -Name wuauserv -Force</CommandLine>
                     <Description>Stop wuauserv service temporarily</Description>
                     <Order>1</Order>
                 </SynchronousCommand>

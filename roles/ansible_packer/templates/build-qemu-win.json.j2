@@ -54,7 +54,7 @@
 {{ custom_json_builder_section }}
 {% endif %}
 
-{% if "Start-Service WinRM" in win_remote_setup %}
+{% if "Start-Service -Name WinRM" in win_remote_setup %}
       "communicator": "winrm",
       "pause_before_connecting": "10s",
       "winrm_timeout": "{{ shutdown_timeout }}",
@@ -63,7 +63,7 @@
       "winrm_no_proxy": true,
       "winrm_use_ssl": true,
       "winrm_insecure": true,
-{% elif "Start-Service sshd" in win_remote_setup %}
+{% elif "Start-Service -Name sshd" in win_remote_setup %}
       "communicator": "ssh",
       "pause_before_connecting": "10s",
       "ssh_timeout": "{{ shutdown_timeout }}",
