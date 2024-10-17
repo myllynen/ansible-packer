@@ -70,6 +70,7 @@
 
     # List of tasks or roles to run on the VM,
     # all roles must be included with full path
+    # See https://github.com/myllynen/windows-ansible-roles
     win_provisioner_playbook: |2
         gather_facts: false
         vars:
@@ -84,13 +85,14 @@
           network_configuration_netbios_enable: false
           network_configuration_reboot: false
           ntfs_last_access_time_update: false
+          power_scheme: high_performance
           sshd_configuration_enable: true
           sshd_configuration_install: true
+          sshd_configuration_start_mode: auto
           sshd_configuration_shell: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
           sshd_configuration_admins_keys:
             present:
               - ssh-ed25519 ... id_ed25519.pub
-          sshd_configuration_start_mode: auto
           sshd_configuration_firewall_profiles:
             - domain
             - private
@@ -105,6 +107,7 @@
           system_time_timezone: FLE Standard Time
           system_update_categories: '*'
           system_update_state: installed
+          system_update_display_results: true
           system_update_reboot: true
           system_update_reboot_timeout: 1200
           system_update_compile_assemblies: true
@@ -114,13 +117,25 @@
           user_experience_show_last_user_name: false
           windows_recovery_enable: false
           winrm_configuration_enable: true
-          winrm_configuration_https_enable: true
-          winrm_configuration_http_block: true
           winrm_configuration_start_mode: auto
+          winrm_configuration_https_enable: true
+          winrm_configuration_http_block: false
+          winrm_configuration_service_config:
+            AllowUnencrypted: false
+            Auth:
+              Basic: true
+              Kerberos: true
+              Negotiate: true
+              Certificate: false
+              CredSSP: true
+              CbtHardeningLevel: Strict
+            IPv4Filter: '*'
+            IPv6Filter: '*'
           winrm_configuration_firewall_profiles:
             - domain
             - private
             - public
+          winrm_configuration_display_config: false
         #tasks:
         #  - ansible.windows.win_ping:
         roles:
