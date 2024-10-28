@@ -43,6 +43,21 @@ win_remote_setup_winrm: |
   Get-NetConnectionProfile | Set-NetConnectionProfile -NetworkCategory Private
   Start-Service -Name WinRM
   Set-Service -Name WinRM -StartupType Automatic
+
+  $user = '{{ win_remote_user }}'
+  $sid = (New-Object -TypeName System.Security.Principal.NTAccount -ArgumentList $user).Translate([System.Security.Principal.SecurityIdentifier])
+  $sddl = (Get-Item -Path WSMan:\localhost\Service\RootSDDL).Value
+  $sd = New-Object -TypeName System.Security.AccessControl.CommonSecurityDescriptor -ArgumentList $false, $false, $sddl
+  $sd.DiscretionaryAcl.AddAccess(
+    [System.Security.AccessControl.AccessControlType]::Allow,
+    $sid,
+    [int]0x10000000,
+    [System.Security.AccessControl.InheritanceFlags]::None,
+    [System.Security.AccessControl.PropagationFlags]::None
+    )
+  $sddl = $sd.GetSddlForm([System.Security.AccessControl.AccessControlSections]::All)
+  Set-Item -Path WSMan:\localhost\Service\RootSDDL -Value $sddl -Force
+
   Set-Item -Path WSMan:\localhost\Service\AllowUnencrypted -Value $false
   Set-Item -Path WSMan:\localhost\Service\Auth\Basic -Value $true
   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned
