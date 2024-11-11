@@ -14,7 +14,7 @@
     vm_tpm: true
     vm_cpus: 8
     vm_memory: 16384
-    disk_size: 61440
+    disk_size: 30720
 
     # Windows OS edition to install from the ISO
     # Interactive installation will show editions
