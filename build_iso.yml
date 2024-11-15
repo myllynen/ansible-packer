@@ -8,8 +8,8 @@
     # Using packer_ variables for compatibility,
     # xorrisofs not Packer is used to build image
     packer_builder: iso
-    packer_target: rhel_9_4
-    packer_target_pretty: Custom RHEL 9.4
+    packer_target: rhel_9_5
+    packer_target_pretty: Custom RHEL 9.5
     image_name: custom.iso
 
     # Build options
@@ -48,13 +48,13 @@
       groups: wheel
       home: /home/admin
       gecos: Admin User
-      #ssh_key: "ssh-ed25519 ... admin@image"
+      #ssh_key: ssh-ed25519 ... admin@image
       passwordless_sudo: true
 
     root_permit_local: true
     root_permit_ssh: "prohibit-password"
     root_permit_override_security_policy: false
-    #root_ssh_key: "ssh-ed25519 ... root@image"
+    #root_ssh_key: ssh-ed25519 ... root@image
 
     #
     # Builder configurations
@@ -77,8 +77,8 @@
       rhel_8_10:
         url: file:///VirtualMachines/boot/rhel-8.10-x86_64-dvd.iso
         checksum: "none"
-      rhel_9_4:
-        url: file:///VirtualMachines/boot/rhel-9.4-x86_64-dvd.iso
+      rhel_9_5:
+        url: file:///VirtualMachines/boot/rhel-9.5-x86_64-dvd.iso
         checksum: "none"
 
   roles:
