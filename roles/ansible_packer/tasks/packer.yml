@@ -14,6 +14,7 @@
     export PACKER_LOG=1
     export CHECKPOINT_DISABLE=1
     export TMPDIR="{{ tempdir.path }}"
+    export ANSIBLE_ROLES_PATH="{{ win_provisioner_role_path | default('roles', true) }}"
     export VCENTER_PASSWORD='{{ vcenter_credentials.vcenter_password | default("", true) }}'
     export WIN_ADMIN_PASSWORD='{{ win_admin_password | default("", true) }}'
     {{ packer_binary }} build -color=false {{ '-force' if use_force | bool else '' }} build.json

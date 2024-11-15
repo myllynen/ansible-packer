@@ -28,14 +28,18 @@ win_ansible_arguments: >
 #  "--extra-vars", "ansible_become_method=runas"
 
 
-# List of tasks or roles to run on the VM,
-# all roles must be included with full path
+# List of tasks or roles to run on the VM
 # See packer_windows.yml for complete example
+#win_provisioner_role_path: /src/roles.git/roles
 win_provisioner_playbook: |2
     #gather_facts: false
     #vars:
+    #  system_update_retry_count: 3
+    #  system_update_retry_delay: 30
     #  system_update_categories: '*'
+    #  system_update_skip_optional: true
     #  system_update_state: installed
+    #  system_update_display_results: true
     #  system_update_reboot: true
     #  system_update_reboot_timeout: 1200
     #  system_update_compile_assemblies: true
@@ -43,4 +47,4 @@ win_provisioner_playbook: |2
     tasks:
       - ansible.windows.win_ping:
     #roles:
-    #  - /tmp/roles/system_update
+    #  - system_update
