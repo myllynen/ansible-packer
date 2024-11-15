@@ -57,8 +57,8 @@
     win_locale_input: 0409:0000040B
 
     #win_product_key:
-    win_registered_owner: "Ansible Packer"
-    win_registered_organization: "Test Department"
+    win_registered_owner: Ansible Packer
+    win_registered_organization: Test Department
 
     #win_admin_ssh_key: ssh-ed25519 ... id_ed25519.pub
 
@@ -68,9 +68,9 @@
       # https://docs.microsoft.com/windows/win32/intl/table-of-geographical-locations
       #Set-WinHomeLocation -GeoId 77
 
-    # List of tasks or roles to run on the VM,
-    # all roles must be included with full path
+    # List of tasks or roles to run on the VM
     # See https://github.com/myllynen/windows-ansible-roles
+    win_provisioner_role_path: /src/roles.git/roles
     win_provisioner_playbook: |2
         gather_facts: false
         vars:
@@ -105,7 +105,10 @@
           system_time_ntp_servers:
             - time.windows.com
           system_time_timezone: FLE Standard Time
+          system_update_retry_count: 3
+          system_update_retry_delay: 30
           system_update_categories: '*'
+          system_update_skip_optional: true
           system_update_state: installed
           system_update_display_results: true
           system_update_reboot: true
@@ -139,24 +142,24 @@
         #tasks:
         #  - ansible.windows.win_ping:
         roles:
-          - /tmp/roles/dotnet_optimize
-          - /tmp/roles/etc_hosts
-          - /tmp/roles/dns_client
-          - /tmp/roles/system_time
-          - /tmp/roles/system_update
-          - /tmp/roles/accounts_local
-          - /tmp/roles/boot_configuration
-          - /tmp/roles/network_configuration
-          - /tmp/roles/winrm_configuration
-          - /tmp/roles/sshd_configuration
-          - /tmp/roles/rdp_configuration
-          - /tmp/roles/windows_recovery
-          - /tmp/roles/performance_tuning
-          - /tmp/roles/service_enablement
-          - /tmp/roles/service_recovery
-          - /tmp/roles/user_experience
-          - /tmp/roles/system_reboot
-          - /tmp/roles/system_init
+          - dotnet_optimize
+          - etc_hosts
+          - dns_client
+          - system_time
+          - system_update
+          - accounts_local
+          - boot_configuration
+          - network_configuration
+          - winrm_configuration
+          - sshd_configuration
+          - rdp_configuration
+          - windows_recovery
+          - performance_tuning
+          - service_enablement
+          - service_recovery
+          - user_experience
+          - system_reboot
+          - system_init
         post_tasks:
           - name: Remove all SSH host keys
             ansible.windows.win_powershell:
