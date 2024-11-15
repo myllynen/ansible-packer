@@ -18,12 +18,12 @@ unattended BIOS/UEFI-compatible ISO installer images.
 
 See [this example](packer.yml) how a playbook could look like.
 
-Currently (2024-09) tested Packer builders (platforms) are:
+Currently (2024-11) tested Packer builders (platforms) are:
 
 * [QEMU](https://www.packer.io/plugins/builders/qemu) (for KVM/libvirt/RHV/etc)
 * [VMware vSphere](https://www.packer.io/plugins/builders/vsphere/vsphere-iso)
 
-Currently (2024-09) tested OS variants and versions are:
+Currently (2024-11) tested OS variants and versions are:
 
 * [RHEL](https://www.redhat.com/en/technologies/linux-platforms/enterprise-linux) 8, 9
 * [RHEL Edge](https://www.redhat.com/en/technologies/linux-platforms/enterprise-linux/edge-computing) 9 (experimental)
@@ -97,7 +97,7 @@ This is a basic playbook for building an image with Qemu:
     #
     iso:
       rhel_9:
-        url: file:///VirtualMachines/boot/rhel-9.4-x86_64-dvd.iso
+        url: file:///VirtualMachines/boot/rhel-9-x86_64-dvd.iso
         checksum: "none"
 
   roles:
@@ -116,7 +116,7 @@ This is a more complete playbook for building an image on VMware:
     #
     packer_binary: /usr/local/sbin/packer.io
     packer_builder: vmware
-    packer_target: rhel_9_4
+    packer_target: rhel_9
     image_name: rhel9-template
 
     vm_type: uefi-secure
@@ -182,8 +182,8 @@ This is a more complete playbook for building an image on VMware:
     # OS installer configuration
     #
     iso:
-      rhel_9_4:
-        url: file:///VirtualMachines/boot/rhel-9.4-x86_64-dvd.iso
+      rhel_9:
+        url: file:///VirtualMachines/boot/rhel-9-x86_64-dvd.iso
         checksum: "none"
 
   roles:
@@ -200,7 +200,7 @@ This example has additional options for building RHEL Edge image:
 
     iso:
       rhel_edge_9:
-        url: file:///VirtualMachines/rhel-9.4-x86_64-dvd.iso
+        url: file:///VirtualMachines/rhel-9-x86_64-dvd.iso
         checksum: "none"
 ```
 
@@ -215,9 +215,9 @@ Finally, build image on a build host:
 ansible-playbook -c local -i localhost, packer.yml \
   -e packer_target=rhel_9
 
-# Build RHEL 9.4 image on VMware vSphere with customizations
+# Build RHEL 9 image on VMware vSphere with customizations
 ansible-playbook -i 192.168.122.123, -u builder packer.yml \
-  -e packer_builder=vmware -e packer_target=rhel_9_4 \
+  -e packer_builder=vmware -e packer_target=rhel_9 \
   -e bios_uefi_boot=true -e partitioning=single \
   -e disable_ipv6=true -e security_profile=cis \
   -e fips_enable=true -e image_name=test_image
@@ -251,8 +251,8 @@ the above playbooks used to build VM images with Packer:
     # Using packer_ variables for compatibility,
     # xorrisofs not Packer is used to build image
     packer_builder: iso
-    packer_target: rhel_9_4
-    packer_target_pretty: Custom RHEL 9.4
+    packer_target: rhel_9
+    packer_target_pretty: Custom RHEL 9
     image_name: custom.iso
 
     root_password: "{{ image_password }}"
@@ -269,8 +269,8 @@ the above playbooks used to build VM images with Packer:
     output_directory: /tmp/iso_images
 
     iso:
-      rhel_9_4:
-        url: file:///VirtualMachines/boot/rhel-9.4-x86_64-dvd.iso
+      rhel_9:
+        url: file:///VirtualMachines/boot/rhel-9-x86_64-dvd.iso
         checksum: "none"
 
   roles:

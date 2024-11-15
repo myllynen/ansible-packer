@@ -72,33 +72,17 @@ vcenter_convert_to_template: true
 ---
 # Set checksum to "none" to skip installation media checksum check by Packer
 iso:
-  centos_8:
-    url: file:///VirtualMachines/boot/CentOS-Stream-8-x86_64-latest-dvd1.iso
-    checksum: sha256:7120e48d53471713f0ec41c5193c01edcbf84843b81073b09e33925361c3adbc
-
   centos_9:
     url: file:///VirtualMachines/boot/CentOS-Stream-9-latest-x86_64-dvd1.iso
-    checksum: sha256:6ca7523a8e06d404d08c80075004fbdb4a1546e13dcb6f6f34f3e8c6e585fe3a
+    checksum: "none"
 
   rhel_8:
-    url: file:///VirtualMachines/boot/rhel-8.10-x86_64-dvd.iso
-    checksum: sha256:6ced368628750ff3ea8a2fc52a371ba368d3377b8307caafda69070849a9e4e7
-
-  rhel_8_9:
-    url: file:///VirtualMachines/boot/rhel-8.9-x86_64-dvd.iso
-    checksum: sha256:c4fd0632ce15a7d56e1d174176456943bd48306f9d35bcecbcb0a1dc49088e23
-
-  rhel_8_10:
-    url: file:///VirtualMachines/boot/rhel-8.10-x86_64-dvd.iso
-    checksum: sha256:6ced368628750ff3ea8a2fc52a371ba368d3377b8307caafda69070849a9e4e7
+    url: file:///VirtualMachines/boot/rhel-8-x86_64-dvd.iso
+    checksum: "none"
 
   rhel_9:
-    url: file:///VirtualMachines/boot/rhel-9.4-x86_64-dvd.iso
-    checksum: sha256:6ced368628750ff3ea8a2fc52a371ba368d3377b8307caafda69070849a9e4e7
-
-  rhel_9_4:
-    url: file:///VirtualMachines/boot/rhel-9.4-x86_64-dvd.iso
-    checksum: sha256:6ced368628750ff3ea8a2fc52a371ba368d3377b8307caafda69070849a9e4e7
+    url: file:///VirtualMachines/boot/rhel-9-x86_64-dvd.iso
+    checksum: "none"
 
 ---
 # https://www.packer.io/plugins/builders/qemu#boot-configuration
@@ -343,14 +327,18 @@ win_ansible_arguments: >
 #  "--extra-vars", "ansible_become_method=runas"
 
 
-# List of tasks or roles to run on the VM,
-# all roles must be included with full path
+# List of tasks or roles to run on the VM
 # See packer_windows.yml for complete example
+#win_provisioner_role_path: /src/roles.git/roles
 win_provisioner_playbook: |2
     #gather_facts: false
     #vars:
+    #  system_update_retry_count: 3
+    #  system_update_retry_delay: 30
     #  system_update_categories: '*'
+    #  system_update_skip_optional: true
     #  system_update_state: installed
+    #  system_update_display_results: true
     #  system_update_reboot: true
     #  system_update_reboot_timeout: 1200
     #  system_update_compile_assemblies: true
@@ -358,7 +346,7 @@ win_provisioner_playbook: |2
     tasks:
       - ansible.windows.win_ping:
     #roles:
-    #  - /tmp/roles/system_update
+    #  - system_update
 
 ---
 # Remote management account name
@@ -391,7 +379,7 @@ win_remote_setup_ssh: |
   }
   $keyFile = 'C:\ProgramData\ssh\administrators_authorized_keys'
   $publicKey = '{{ win_admin_ssh_key | default("", true) }}'
-  if (!(Test-Path -Path $keyFile)) {
+  if (-not (Test-Path -Path $keyFile)) {
     New-Item -Path $keyFile -ItemType File
   }
   icacls.exe $keyFile /inheritance:r /grant ""Administrators:F"" /grant ""SYSTEM:F""
