@@ -30,7 +30,7 @@ win_remote_setup_ssh: |
   }
   $keyFile = 'C:\ProgramData\ssh\administrators_authorized_keys'
   $publicKey = '{{ win_admin_ssh_key | default("", true) }}'
-  if (!(Test-Path -Path $keyFile)) {
+  if (-not (Test-Path -Path $keyFile)) {
     New-Item -Path $keyFile -ItemType File
   }
   icacls.exe $keyFile /inheritance:r /grant ""Administrators:F"" /grant ""SYSTEM:F""
