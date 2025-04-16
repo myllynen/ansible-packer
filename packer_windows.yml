@@ -70,7 +70,7 @@
 
     # List of tasks or roles to run on the VM
     # See https://github.com/myllynen/windows-ansible-roles
-    win_provisioner_role_path: /src/roles.git/roles
+    win_provisioner_role_path: /src/git/windows-ansible-roles.git/roles
     win_provisioner_playbook: |2
         gather_facts: false
         vars:
@@ -107,6 +107,7 @@
           system_time_timezone: FLE Standard Time
           system_update_retry_count: 3
           system_update_retry_delay: 30
+          system_update_retry_after_install: true
           system_update_categories: '*'
           system_update_skip_optional: true
           system_update_state: installed
@@ -130,7 +131,7 @@
               Kerberos: true
               Negotiate: true
               Certificate: false
-              CredSSP: true
+              CredSSP: false
               CbtHardeningLevel: Strict
             IPv4Filter: '*'
             IPv6Filter: '*'
@@ -143,10 +144,10 @@
         #  - ansible.windows.win_ping:
         roles:
           - dotnet_optimize
-          - etc_hosts
-          - dns_client
+          #- etc_hosts
+          #- dns_client
           - system_time
-          - system_update
+          #- system_update
           - accounts_local
           - boot_configuration
           - network_configuration
@@ -154,6 +155,8 @@
           - sshd_configuration
           - rdp_configuration
           - windows_recovery
+          - dsc_settings
+          - registry_settings
           - performance_tuning
           - service_enablement
           - service_recovery
