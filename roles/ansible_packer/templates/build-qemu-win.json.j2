@@ -68,7 +68,7 @@
       "pause_before_connecting": "10s",
       "ssh_timeout": "{{ shutdown_timeout }}",
       "ssh_username": "{{ win_remote_user }}",
-{% if ssh_private_key_file | default(false) %}
+{% if ssh_private_key_file | default(false, true) %}
       "ssh_private_key_file": "{{ ssh_private_key_file }}",
 {% else %}
       "ssh_password": "{% raw %}{{ user `win_admin_password` }}{% endraw %}",
