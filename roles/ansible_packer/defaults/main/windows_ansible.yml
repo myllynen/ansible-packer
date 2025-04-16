@@ -6,7 +6,6 @@ win_ansible_arguments: >
   "--extra-vars", "ansible_winrm_scheme=https",
   "--extra-vars", "ansible_winrm_transport=basic",
   "--extra-vars", "ansible_winrm_server_cert_validation=ignore",
-  "--extra-vars", "ansible_shell_type=powershell",
   "--extra-vars", "ansible_become_method=runas"
 
 # These are arguments to use with SSH/key
@@ -36,6 +35,7 @@ win_provisioner_playbook: |2
     #vars:
     #  system_update_retry_count: 3
     #  system_update_retry_delay: 30
+    #  system_update_retry_after_install: true
     #  system_update_categories: '*'
     #  system_update_skip_optional: true
     #  system_update_state: installed

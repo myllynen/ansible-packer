@@ -11,11 +11,16 @@ win_remote_setup_ssh: |
   $missing = Get-WindowsCapability -Name 'OpenSSH.Server*' -Online | ? State -ne 'Installed'
   if ($missing) {
     Add-WindowsCapability -Name $missing.Name -Online
+    if ((Get-WindowsCapability -Name $missing.Name -Online | ? State -ne 'Installed')) {
+      Write-Host 'Failed to install OpenSSH.Server capability.'
+      Exit 1
+    }
   }
   Start-Service -Name sshd
   Set-Service -Name sshd -StartupType Automatic
   Set-ItemProperty -Path HKLM:\SOFTWARE\OpenSSH -Name DefaultShell -Value C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
-  if (!(Get-NetFirewallRule -Name OpenSSH-Server-In-TCP | Select-Object -Property Name, Enabled)) {
+  $rule = Get-NetFirewallRule -Name OpenSSH-Server-In-TCP -ErrorAction SilentlyContinue
+  if (-not $rule) {
     New-NetFirewallRule `
       -Enabled True `
       -Name OpenSSH-Server-In-TCP `
@@ -27,6 +32,9 @@ win_remote_setup_ssh: |
       -Direction Inbound `
       -Protocol TCP `
       -Profile @('Domain', 'Private')
+  }
+  if ($rule -and ($rule.Enabled -ne $true -or $rule.Action -ne 'Allow')) {
+    Set-NetFirewallRule -Name OpenSSH-Server-In-TCP -Enabled True -Profile @('Domain', 'Private') -Action Allow
   }
   $keyFile = 'C:\ProgramData\ssh\administrators_authorized_keys'
   $publicKey = '{{ win_admin_ssh_key | default("", true) }}'
@@ -43,8 +51,11 @@ win_remote_setup_winrm: |
   Get-NetConnectionProfile | Set-NetConnectionProfile -NetworkCategory Private
   Start-Service -Name WinRM
   Set-Service -Name WinRM -StartupType Automatic
-
+  Set-Item -Path WSMan:\localhost\Service\AllowUnencrypted -Value $false
+  Set-Item -Path WSMan:\localhost\Service\Auth\Basic -Value $true
+  Set-ExecutionPolicy -ExecutionPolicy RemoteSigned
   $user = '{{ win_remote_user }}'
+  Set-ItemProperty -Path HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System -Name LocalAccountTokenFilterPolicy -Value 1
   $sid = (New-Object -TypeName System.Security.Principal.NTAccount -ArgumentList $user).Translate([System.Security.Principal.SecurityIdentifier])
   $sddl = (Get-Item -Path WSMan:\localhost\Service\RootSDDL).Value
   $sd = New-Object -TypeName System.Security.AccessControl.CommonSecurityDescriptor -ArgumentList $false, $false, $sddl
@@ -57,19 +68,36 @@ win_remote_setup_winrm: |
     )
   $sddl = $sd.GetSddlForm([System.Security.AccessControl.AccessControlSections]::All)
   Set-Item -Path WSMan:\localhost\Service\RootSDDL -Value $sddl -Force
-
-  Set-Item -Path WSMan:\localhost\Service\AllowUnencrypted -Value $false
-  Set-Item -Path WSMan:\localhost\Service\Auth\Basic -Value $true
-  Set-ExecutionPolicy -ExecutionPolicy RemoteSigned
+  $rule = Get-NetFirewallRule -Name WINRM-HTTP-In-TCP -ErrorAction SilentlyContinue
+  if (-not $rule) {
+    New-NetFirewallRule `
+      -Enabled True `
+      -Name WINRM-HTTP-In-TCP `
+      -DisplayName 'Windows Remote Management (HTTP-In)' `
+      -Description 'Inbound rule for Windows Remote Management via WS-Management. [TCP 5985]' `
+      -Group '@FirewallAPI.dll,-30267' `
+      -LocalPort 5985 `
+      -Action Allow `
+      -Direction Inbound `
+      -Protocol TCP `
+      -Profile @('Domain', 'Private')
+  }
+  if ($rule -and ($rule.Enabled -ne $true -or $rule.Action -ne 'Allow')) {
+    Set-NetFirewallRule -Name WINRM-HTTP-In-TCP -Enabled True -Profile @('Domain', 'Private') -Action Allow
+  }
   $friendlyName = 'WinRM over HTTPS'
   $cert = New-SelfSignedCertificate -CertStoreLocation Cert:\LocalMachine\My `
             -DnsName $env:COMPUTERNAME -NotAfter (get-date).AddYears(10) `
             -Provider 'Microsoft Enhanced RSA and AES Cryptographic Provider' `
             -KeyLength 4096
   $cert.FriendlyName = $friendlyName
-  New-Item -Path WSMan:\localhost\Listener -Transport HTTPS `
-    -Address * -CertificateThumbPrint $cert.Thumbprint -Force
-  if (!(Get-NetFirewallRule -Name WINRM-HTTPS-In-TCP -ErrorAction SilentlyContinue | Select-Object -Property Name, Enabled)) {
+  $listener = Get-WSManInstance winrm/config/Listener -Enumerate | ? Transport -eq HTTPS
+  $command = if ($listener) { 'Set-WSManInstance' } else { 'New-WSManInstance' }
+  & $command -ResourceURI winrm/config/Listener `
+    -SelectorSet @{Address='*';Transport='HTTPS'} `
+    -ValueSet @{CertificateThumbprint=$cert.Thumbprint;Enabled=$true}
+  $rule = Get-NetFirewallRule -Name WINRM-HTTPS-In-TCP -ErrorAction SilentlyContinue
+  if (-not $rule) {
     New-NetFirewallRule `
       -Enabled True `
       -Name WINRM-HTTPS-In-TCP `
@@ -81,6 +109,9 @@ win_remote_setup_winrm: |
       -Direction Inbound `
       -Protocol TCP `
       -Profile @('Domain', 'Private')
+  }
+  if ($rule -and ($rule.Enabled -ne $true -or $rule.Action -ne 'Allow')) {
+    Set-NetFirewallRule -Name WINRM-HTTPS-In-TCP -Enabled True -Profile @('Domain', 'Private') -Action Allow
   }
 
 # Remote access method to configure
