@@ -328,7 +328,7 @@ win_ansible_arguments: >
 
 # List of tasks or roles to run on the VM
 # See packer_windows.yml for complete example
-#win_provisioner_role_path: /src/roles.git/roles
+#win_provisioner_role_path: /src/git/windows-ansible-roles.git/roles
 win_provisioner_playbook: |2
     #gather_facts: false
     #vars:
@@ -383,7 +383,7 @@ win_remote_setup_ssh: |
       -Protocol TCP `
       -Profile @('Domain', 'Private')
   }
-  if ($rule -and ($rule.Enabled -ne $true -or $rule.Action -ne 'Allow')) {
+  if ($rule -and ($rule.Enabled -ne 'True' -or $rule.Action -ne 'Allow')) {
     Set-NetFirewallRule -Name OpenSSH-Server-In-TCP -Enabled True -Profile @('Domain', 'Private') -Action Allow
   }
   $keyFile = 'C:\ProgramData\ssh\administrators_authorized_keys'
@@ -432,16 +432,18 @@ win_remote_setup_winrm: |
       -Protocol TCP `
       -Profile @('Domain', 'Private')
   }
-  if ($rule -and ($rule.Enabled -ne $true -or $rule.Action -ne 'Allow')) {
+  if ($rule -and ($rule.Enabled -ne 'True' -or $rule.Action -ne 'Allow')) {
     Set-NetFirewallRule -Name WINRM-HTTP-In-TCP -Enabled True -Profile @('Domain', 'Private') -Action Allow
   }
   $friendlyName = 'WinRM over HTTPS'
-  $cert = New-SelfSignedCertificate -CertStoreLocation Cert:\LocalMachine\My `
-            -DnsName $env:COMPUTERNAME -NotAfter (get-date).AddYears(10) `
-            -Provider 'Microsoft Enhanced RSA and AES Cryptographic Provider' `
-            -KeyLength 4096
-  $cert.FriendlyName = $friendlyName
-  $listener = Get-WSManInstance winrm/config/Listener -Enumerate | ? Transport -eq HTTPS
+  $cert = Get-ChildItem -Path Cert:\LocalMachine\My | ? FriendlyName -eq $friendlyName
+  if (-not $cert) {
+    $cert = New-SelfSignedCertificate -CertStoreLocation Cert:\LocalMachine\My `
+              -DnsName $env:COMPUTERNAME -NotAfter (get-date).AddYears(10) `
+              -Provider 'Microsoft Software Key Storage Provider'
+    $cert.FriendlyName = $friendlyName
+  }
+  $listener = Get-WSManInstance winrm/config/Listener -Enumerate | ? Transport -eq 'HTTPS'
   $command = if ($listener) { 'Set-WSManInstance' } else { 'New-WSManInstance' }
   & $command -ResourceURI winrm/config/Listener `
     -SelectorSet @{Address='*';Transport='HTTPS'} `
@@ -460,7 +462,7 @@ win_remote_setup_winrm: |
       -Protocol TCP `
       -Profile @('Domain', 'Private')
   }
-  if ($rule -and ($rule.Enabled -ne $true -or $rule.Action -ne 'Allow')) {
+  if ($rule -and ($rule.Enabled -ne 'True' -or $rule.Action -ne 'Allow')) {
     Set-NetFirewallRule -Name WINRM-HTTPS-In-TCP -Enabled True -Profile @('Domain', 'Private') -Action Allow
   }
 

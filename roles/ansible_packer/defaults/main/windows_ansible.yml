@@ -29,7 +29,7 @@ win_ansible_arguments: >
 
 # List of tasks or roles to run on the VM
 # See packer_windows.yml for complete example
-#win_provisioner_role_path: /src/roles.git/roles
+#win_provisioner_role_path: /src/git/windows-ansible-roles.git/roles
 win_provisioner_playbook: |2
     #gather_facts: false
     #vars:
