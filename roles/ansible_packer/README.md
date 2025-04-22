@@ -339,6 +339,7 @@ win_provisioner_playbook: |2
     #  system_update_skip_optional: true
     #  system_update_state: installed
     #  system_update_display_results: true
+    #  system_update_display_results_full: true
     #  system_update_reboot: true
     #  system_update_reboot_timeout: 1200
     #  system_update_compile_assemblies: true
@@ -360,9 +361,9 @@ win_remote_setup_ssh: |
   Get-NetConnectionProfile | Set-NetConnectionProfile -NetworkCategory Private
   $missing = Get-WindowsCapability -Name 'OpenSSH.Server*' -Online | ? State -ne 'Installed'
   if ($missing) {
-    Add-WindowsCapability -Name $missing.Name -Online
+    $result = Add-WindowsCapability -Name $missing.Name -Online
     if ((Get-WindowsCapability -Name $missing.Name -Online | ? State -ne 'Installed')) {
-      Write-Host 'Failed to install OpenSSH.Server capability.'
+      Write-Host "Failed to install OpenSSH.Server capability: $result"
       Exit 1
     }
   }

@@ -112,6 +112,7 @@
           system_update_skip_optional: true
           system_update_state: installed
           system_update_display_results: true
+          system_update_display_results_full: true
           system_update_reboot: true
           system_update_reboot_timeout: 1200
           system_update_compile_assemblies: true

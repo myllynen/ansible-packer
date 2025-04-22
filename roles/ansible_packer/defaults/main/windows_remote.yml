@@ -10,9 +10,9 @@ win_remote_setup_ssh: |
   Get-NetConnectionProfile | Set-NetConnectionProfile -NetworkCategory Private
   $missing = Get-WindowsCapability -Name 'OpenSSH.Server*' -Online | ? State -ne 'Installed'
   if ($missing) {
-    Add-WindowsCapability -Name $missing.Name -Online
+    $result = Add-WindowsCapability -Name $missing.Name -Online
     if ((Get-WindowsCapability -Name $missing.Name -Online | ? State -ne 'Installed')) {
-      Write-Host 'Failed to install OpenSSH.Server capability.'
+      Write-Host "Failed to install OpenSSH.Server capability: $result"
       Exit 1
     }
   }
