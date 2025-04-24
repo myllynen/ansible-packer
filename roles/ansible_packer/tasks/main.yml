@@ -2,7 +2,7 @@
 - name: Locate old outputs
   vars:
     sys_temp: "{{ lookup('env', 'TMPDIR') | default('/tmp', true) }}"
-  find:
+  ansible.builtin.find:
     paths: "{{ [sys_temp, output_directory | default(sys_temp + '/.nothing') | dirname] | unique }}"
     file_type: any
     patterns:
@@ -13,7 +13,7 @@
   when: do_cleanup | bool
 
 - name: Remove old outputs
-  file:
+  ansible.builtin.file:
     path: "{{ item.path }}"
     state: absent
   loop: "{{ old_outputs.files }}"
@@ -22,20 +22,20 @@
   when: do_cleanup | bool
 
 - name: Create temporary work directory
-  tempfile:
+  ansible.builtin.tempfile:
     state: directory
     suffix: _packer_build_{{ packer_builder }}_{{ __target_fullname }}
   register: tempdir
 
 - name: Create installer configuration file
-  template:
+  ansible.builtin.template:
     src: cfg-{{ __target_config }}.j2
     dest: "{{ tempdir.path }}/inst.cfg"
     mode: '0600'
   when: win_admin_password is not defined
 
 - name: Create Windows installer configuration files
-  template:
+  ansible.builtin.template:
     src: "{{ item }}.j2"
     dest: "{{ tempdir.path + '/' + item }}"
     mode: '0600'
@@ -48,14 +48,14 @@
   when: win_admin_password is defined
 
 - name: Include ISO tasks
-  include_tasks: iso.yml
+  ansible.builtin.include_tasks: iso.yml
   when: packer_builder == 'iso'
 
 - name: Include Packer tasks
-  include_tasks: packer.yml
+  ansible.builtin.include_tasks: packer.yml
   when: packer_builder != 'iso'
 
 - name: Remove temporary work directory
-  file:
+  ansible.builtin.file:
     path: "{{ tempdir.path }}"
     state: absent

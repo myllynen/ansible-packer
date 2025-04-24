@@ -2,14 +2,14 @@
 - name: Create Packer build file
   vars:
     win_str: "{{ '-win' if win_admin_password is defined else '' }}"
-  template:
+  ansible.builtin.template:
     src: build-{{ packer_builder }}{{ win_str }}.json.j2
     dest: "{{ tempdir.path }}/build.json"
     mode: '0600'
 
 - name: Run Packer to build target image (this will take a while)
   no_log: "{{ packer_build_no_log }}"
-  shell: |
+  ansible.builtin.shell: |
     cd {{ tempdir.path }}
     export PACKER_LOG=1
     export CHECKPOINT_DISABLE=1
@@ -23,5 +23,5 @@
   changed_when: true
 
 - name: Display Packer command output
-  debug:
+  ansible.builtin.debug:
     var: packer_result.stdout

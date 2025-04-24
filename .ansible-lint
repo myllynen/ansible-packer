@@ -12,8 +12,8 @@ enable_list:
   - yaml
 
 skip_list:
-  - fqcn[action-core]
   - galaxy[no-changelog]
   - no-handler
+  - meta-runtime[unsupported-version]
   - var-naming[no-role-prefix]
   - yaml[comments]
