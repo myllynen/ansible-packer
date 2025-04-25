@@ -405,8 +405,9 @@ win_remote_setup_winrm: |
   Set-Item -Path WSMan:\localhost\Service\AllowUnencrypted -Value $false
   Set-Item -Path WSMan:\localhost\Service\Auth\Basic -Value $true
   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned
-  $user = '{{ win_remote_user }}'
   Set-ItemProperty -Path HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System -Name LocalAccountTokenFilterPolicy -Value 1
+  $user = '{{ win_remote_user }}'
+  Add-LocalGroupMember -Group 'Remote Management Users' -Member $user
   $sid = (New-Object -TypeName System.Security.Principal.NTAccount -ArgumentList $user).Translate([System.Security.Principal.SecurityIdentifier])
   $sddl = (Get-Item -Path WSMan:\localhost\Service\RootSDDL).Value
   $sd = New-Object -TypeName System.Security.AccessControl.CommonSecurityDescriptor -ArgumentList $false, $false, $sddl
