@@ -121,6 +121,7 @@ perl-File-Temp
 %end
 
 %post
+grub2-editenv - unset menu_auto_hide
 sed -i -e '/cockpit/d' /etc/firewalld/zones/public.xml
 rm -f /etc/firewalld/zones/public.xml.old
 {% if install_single_lang | bool %}
