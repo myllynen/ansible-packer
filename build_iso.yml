@@ -8,8 +8,8 @@
     # Using packer_ variables for compatibility,
     # xorrisofs not Packer is used to build image
     packer_builder: iso
-    packer_target: rhel_9_5
-    packer_target_pretty: Custom RHEL 9.5
+    packer_target: rhel_9_6
+    packer_target_pretty: Custom RHEL 9.6
     image_name: custom.iso
 
     # Build options
@@ -78,7 +78,10 @@
         url: file:///VirtualMachines/boot/rhel-8.10-x86_64-dvd.iso
         checksum: "none"
       rhel_9_5:
-        url: file:///VirtualMachines/boot/rhel-9.5-x86_64-dvd.iso
+        url: file:///VirtualMachines/boot/rhel-9.6-x86_64-dvd.iso
+        checksum: "none"
+      rhel_10_0:
+        url: file:///VirtualMachines/boot/rhel-10.0-x86_64-dvd.iso
         checksum: "none"
 
   roles:
