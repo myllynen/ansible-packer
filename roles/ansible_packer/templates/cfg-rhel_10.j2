@@ -1,0 +1,310 @@
+# RHEL 10 base image kickstart file
+
+cmdline
+zerombr
+clearpart --all --initlabel --disklabel gpt
+
+{% set boot_parameters_full = __console_boot_string + __fips_boot_parameter + boot_parameters %}
+{% if __boot_pw_encrypted == '' %}
+bootloader --timeout 1 --append "{{ boot_parameters_full }}"
+{% else %}
+bootloader --timeout 1 --append "{{ boot_parameters_full }}" --iscrypted --password {{ __boot_pw_encrypted }}
+{% endif %}
+
+{% if partitioning is defined and partitioning == 'auto' %}
+autopart
+{% elif partitioning is defined and partitioning == 'single' %}
+reqpart
+part /         --fstype xfs      --size 1024 --grow
+{% elif partitioning is defined and partitioning == 'custom' %}
+{{ custom_partitioning }}
+{% else %}
+reqpart
+part /boot     --fstype xfs      --size 1024
+part pv.01                       --size 1024 --grow
+volgroup vg_rhel pv.01
+logvol swap           --vgname vg_rhel --fstype swap --size 4096  --name lv_swap
+logvol /              --vgname vg_rhel --fstype xfs  --size 6144  --name lv_root
+logvol /home          --vgname vg_rhel --fstype xfs  --size 2048  --name lv_home
+logvol /tmp           --vgname vg_rhel --fstype xfs  --size 2048  --name lv_tmp
+logvol /var           --vgname vg_rhel --fstype xfs  --size 8192  --name lv_var
+logvol /var/log       --vgname vg_rhel --fstype xfs  --size 2048  --name lv_var_log
+logvol /var/log/audit --vgname vg_rhel --fstype xfs  --size 2048  --name lv_var_log_audit
+logvol /var/tmp       --vgname vg_rhel --fstype xfs  --size 2048  --name lv_var_tmp
+{% endif %}
+
+selinux --{{ selinux }}
+authselect select minimal without-nullok with-pamaccess
+rootpw --iscrypted {{ __root_pw_encrypted }}
+
+{% if packer_builder != 'iso' %}
+{% if network_setup_dhcp | bool %}
+{% if not disable_ipv6 | bool %}
+network --device net0 --bootproto dhcp --onboot yes --hostname {{ hostname }}
+{% else %}
+network --device net0 --bootproto dhcp --onboot yes --hostname {{ hostname }} --noipv6
+{% endif %}
+{% endif %}
+{% endif %}
+
+firewall --enabled --service ssh
+firstboot --disabled
+lang C.UTF-8
+timezone --utc {{ timezone }}
+{% for ntp_server in ntp_servers.split(',') %}
+timesource --ntp-server {{ ntp_server }}
+{% endfor %}
+keyboard {{ keyboard }}
+services --enabled tuned
+{% if communicator == 'none' %}
+poweroff
+{% else %}
+reboot
+{% endif %}
+
+%packages{% if install_single_lang | bool %} --inst-langs en_US{% endif %}{% if install_exclude_docs | bool %} --excludedocs{% endif %}{% if install_exclude_weak_deps | bool %} --exclude-weakdeps{% endif %}{{''}}
+bash-completion
+bind-utils
+#cloud-init
+#cloud-utils-growpart
+glibc-langpack-en
+glibc-minimal-langpack
+#insights-client
+man-pages
+nano
+NetworkManager-config-server
+policycoreutils-python-utils
+prefixdevname
+psmisc
+python3
+python3-libselinux
+setools-console
+#sos
+tar
+#unzip
+#vim-enhanced
+yum-utils
+zstd
+
+tuned
+
+{% if packer_builder == 'vmware' %}
+# https://bugzilla.redhat.com/show_bug.cgi?id=2041424
+perl-File-Temp
+{% endif %}
+
+{% if install_single_lang | bool %}
+-gawk-all-langpacks
+-langpacks-*
+{% endif %}
+
+{% if packer_builder != 'iso' %}
+-linux-firmware
+-n*firmware*
+{% endif %}
+
+-a*firmware*
+-dracut-config-rescue
+-i*firmware*
+-lib*firmware*
+-llvm-libs
+-NetworkManager-tui
+-parted
+-plymouth
+-rhc*
+-sqlite
+-sssd*
+
+{% if custom_packages is defined %}
+{{ custom_packages }}
+{% endif %}
+%end
+
+%post
+sed -i -e '/cockpit/d' /etc/firewalld/zones/public.xml
+rm -f /etc/firewalld/zones/public.xml.old
+{% if install_single_lang | bool %}
+echo "%_install_langs en_US" > /etc/rpm/macros.install-langs-conf
+{% endif %}
+{% if install_exclude_docs | bool %}
+echo "%_excludedocs 1" > /etc/rpm/macros.excludedocs-conf
+{% endif %}
+{% if install_exclude_weak_deps | bool %}
+echo "install_weak_deps=False" >> /etc/dnf/dnf.conf
+{% endif %}
+%end
+
+{% if serial_console_setup | bool %}
+%post
+systemctl enable serial-getty@ttyS0.service
+%end
+{% endif %}
+
+{% if disable_ipv6 | bool %}
+%post
+echo "net.ipv6.conf.all.disable_ipv6 = 1" > /etc/sysctl.d/50-ipv6.conf
+echo "net.ipv6.conf.default.disable_ipv6 = 1" >> /etc/sysctl.d/50-ipv6.conf
+echo "net.ipv6.conf.lo.disable_ipv6 = 1" >> /etc/sysctl.d/50-ipv6.conf
+for netconf in $(ls -1 /etc/NetworkManager/system-connections/*.nmconnection); do
+  sed -i -e '/^\[ipv6\]$/,/^\[/ s/method=.*/method=disabled/' $netconf
+done
+sed -i -e '/^::1/d' /etc/hosts
+echo "AddressFamily inet" > /etc/ssh/sshd_config.d/50-ipv6.conf
+chmod 0600 /etc/ssh/sshd_config.d/50-ipv6.conf
+sed -i -e 's,^OPTIONS=",OPTIONS="-4 ,g' -e 's, ",",' /etc/sysconfig/chronyd
+sed -i -e 's,^IPv6_rpfilter=.*,IPv6_rpfilter=no,' /etc/firewalld/firewalld.conf
+sed -i -e '/dhcpv6-client/d' /etc/firewalld/zones/public.xml
+if [ -d /etc/vmware-tools ]; then
+  echo "[guestinfo]" > /etc/vmware-tools/tools.conf
+  echo "max-ipv6-routes=0" >> /etc/vmware-tools/tools.conf
+fi
+%end
+{% else %}
+%post
+echo "net.ipv6.conf.all.disable_ipv6 = 0" > /etc/sysctl.d/50-ipv6.conf
+echo "net.ipv6.conf.default.disable_ipv6 = 0" >> /etc/sysctl.d/50-ipv6.conf
+echo "net.ipv6.conf.lo.disable_ipv6 = 0" >> /etc/sysctl.d/50-ipv6.conf
+%end
+{% endif %}
+
+{% if root_ssh_key is defined %}
+%post
+mkdir -m 0700 /root/.ssh
+echo "{{ root_ssh_key }}" > /root/.ssh/authorized_keys
+chmod 0600 /root/.ssh/authorized_keys
+restorecon -R /root/.ssh
+%end
+{% endif %}
+
+{% if packer_builder == 'vmware' %}
+%post --erroronfail
+vmtoolsd -b /run/vmtoolsd.pid
+%end
+{% endif %}
+
+{% if custom_section_early is defined %}
+{{ custom_section_early }}
+{% endif %}
+
+%post --erroronfail
+# Import Red Hat RPM GPG key
+rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+
+# Remote execution directory if tmp dirs are noexec
+mkdir -p -m 0700 /var/lib/exec
+
+{% if rh_register_command is defined %}
+# Update to latest packages
+{{ rh_register_command }} || exit 1
+dnf -y update
+{% if rh_satellite_tools_install | bool %}
+dnf -y install katello-host-tools-tracer || exit 1
+{% endif %}
+subscription-manager unregister || exit 1
+subscription-manager clean
+dnf --disableplugin=product-id,subscription-manager -C remove -y 'katello-ca-consumer-*'
+mv /etc/rhsm/rhsm.conf.kat-backup /etc/rhsm/rhsm.conf
+sed -i -e 's,^package_profile_on_trans = .*,package_profile_on_trans = 1,' /etc/rhsm/rhsm.conf
+rm -f /etc/rhsm/syspurpose/syspurpose.json /etc/rhsm/ca/katello-*-ca.pem /var/lib/rhsm/cache/* \
+  /var/lib/rhsm/facts/*.json /var/lib/rhsm/repo*/*.repo /var/lib/rhsm/*_name
+{% endif %}
+
+{% if create_admin | bool %}
+# Create admin group and user
+groupadd -g {{ admin_user.gid }} {{ admin_user.group }}
+useradd -c "{{ admin_user.gecos }}" -d {{ admin_user.home }} -g {{ admin_user.gid }} -G {{ admin_user.groups }} -m -u {{ admin_user.uid }} {{ admin_user.name }}
+{% if admin_user.ssh_key is defined %}
+mkdir -m 0700 {{ admin_user.home }}/.ssh
+echo "{{ admin_user.ssh_key }}" > {{ admin_user.home }}/.ssh/authorized_keys
+chmod 0600 {{ admin_user.home }}/.ssh/authorized_keys
+chown -R {{ admin_user.uid }}:{{ admin_user.gid }} {{ admin_user.home }}/.ssh
+restorecon -R {{ admin_user.home }}/.ssh
+{% endif %}
+chown -R {{ admin_user.uid }}:{{ admin_user.gid }} /var/lib/exec
+{% if admin_user.passwordless_sudo is defined and admin_user.passwordless_sudo | bool %}
+{% if admin_user.groups is not defined or 'wheel' not in admin_user.groups %}
+usermod -a -G wheel {{ admin_user.name }}
+{% endif %}
+echo '{{ admin_user.name }} ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/{{ admin_user.name }}
+chmod 0440 /etc/sudoers.d/{{ admin_user.name }}
+restorecon /etc/sudoers.d/{{ admin_user.name }}
+{% endif %}
+
+{% if not root_permit_local | bool %}
+{% if root_permit_override_security_policy | bool %}
+# Lock root account - caution needed
+passwd -l root
+{% endif %}
+{% endif %}
+{% endif %}
+
+# Configure root SSH access
+{% if security_policy is not defined or
+  (security_policy is defined and root_permit_override_security_policy | bool) %}
+echo "PermitRootLogin {{ root_permit_ssh }}" > /etc/ssh/sshd_config.d/90-rootlogin.conf
+chmod 0600 /etc/ssh/sshd_config.d/90-rootlogin.conf
+{% endif %}
+
+# Services
+systemctl disable dnf-makecache.timer nis-domainname.service remote-fs.target
+
+# Watchdog
+mkdir -p -m 0644 /etc/systemd/system.conf.d
+printf '[Manager]\nRuntimeWatchdogSec=60s\n' > /etc/systemd/system.conf.d/50-watchdog.conf
+
+{% if packer_builder == 'iso' %}
+# Clean up permanent network configuration file
+for netdev in $(nmcli -t dev | cut -d: -f1 | grep -v lo); do
+  sed -i -e '/dhcp-/d' /etc/NetworkManager/system-connections/$netdev.nmconnection
+  sed -i -e '/origin/d' /etc/NetworkManager/system-connections/$netdev.nmconnection
+done
+{% endif %}
+
+{% if packer_builder != 'iso' %}
+# Remove machine identification and state
+for netdev in $(nmcli -t dev | cut -d: -f1 | grep -v lo); do
+  sed -i -e '/uuid=/d' /etc/NetworkManager/system-connections/$netdev.nmconnection
+  sed -i -e '/dhcp-/d' /etc/NetworkManager/system-connections/$netdev.nmconnection
+  sed -i -e '/origin/d' /etc/NetworkManager/system-connections/$netdev.nmconnection
+  sed -i -e '/timestamp/d' /etc/NetworkManager/system-connections/$netdev.nmconnection
+{% if network_setup_purge | bool %}
+  sed -i -e '/dns-/d' /etc/NetworkManager/system-connections/$netdev.nmconnection
+  sed -i -e '/address/d' /etc/NetworkManager/system-connections/$netdev.nmconnection
+{% endif %}
+done
+truncate -s 0 /etc/machine-id /etc/resolv.conf
+/bin/rm -rf /etc/systemd/network/7* /etc/udev/rules.d/7* /etc/ssh/ssh_host_*
+/bin/rm -rf /var/lib/systemd/random-seed
+
+# Clear caches, files, and logs
+/bin/rm -rf /root/* /tmp/* /tmp/.[a-zA-Z]* /var/tmp/*
+/bin/rm -rf /etc/*- /etc/*.bak /etc/*~ /etc/sysconfig/*~
+/bin/rm -rf /var/cache/dnf/* /var/lib/dnf/* /var/log/rhsm/*
+/bin/rm -rf /var/lib/NetworkManager/* /var/lib/unbound/*.key
+/bin/rm -rf /var/log/*debug /var/log/anaconda /var/log/dmesg*
+/bin/rm -rf /var/lib/cloud/* /var/log/cloud-init*.log
+/bin/rm -rf /var/lib/authselect/backups/*
+truncate -s 0 /var/log/cron /var/log/tuned/tuned.log
+truncate -s 0 /var/log/audit/audit.log /var/log/messages /var/log/secure
+truncate -s 0 /var/log/btmp /var/log/wtmp /var/log/lastlog
+{% endif %}
+
+# Update initramfs
+dracut -f --regenerate-all
+
+{% if not kdump_update_disable | bool %}
+# Create kdump initramfs for all kernels
+for kver in $(rpm -q --qf "%{version}-%{release}.%{arch}\n" kernel); do
+  sed -i -e "s,^KDUMP_KERNELVER=.*,KDUMP_KERNELVER=$kver," /etc/sysconfig/kdump
+  kdumpctl rebuild
+  sed -i -e 's,^KDUMP_KERNELVER=.*,KDUMP_KERNELVER="",' /etc/sysconfig/kdump
+done
+{% endif %}
+
+# Ensure everything is written to the disk
+sync ; echo 3 > /proc/sys/vm/drop_caches ;
+%end
+
+{% if custom_section_late is defined %}
+{{ custom_section_late }}
+{% endif %}

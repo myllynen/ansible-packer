@@ -19,12 +19,14 @@ boot_password:
 
 # Autopartitioning does not support
 # creating BIOS/UEFI-compatible images
+# NB. RHEL 10+ is UEFI only
 bios_uefi_boot: true
 # One of: auto/custom/default/single
 #partitioning:
 disable_ipv6: false
 selinux: enforcing
 fips_enable: false
+# Not supported on RHEL 10 and later
 #security_profile:
 
 serial_console_setup: false
