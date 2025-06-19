@@ -6,8 +6,6 @@ Ansible role for building VM images with Packer.
 
 The role also supports creating custom ISO installer images.
 
-Support for RHEL Edge is currently under development.
-
 ## Introduction
 
 This role builds custom Linux and Windows VM template images using
@@ -18,15 +16,14 @@ unattended BIOS/UEFI-compatible ISO installer images.
 
 See [this example](packer.yml) how a playbook could look like.
 
-Currently (2024-11) tested Packer builders (platforms) are:
+Currently (2025-06) tested Packer builders (platforms) are:
 
 * [QEMU](https://www.packer.io/plugins/builders/qemu) (for KVM/libvirt/RHV/etc)
 * [VMware vSphere](https://www.packer.io/plugins/builders/vsphere/vsphere-iso)
 
-Currently (2024-11) tested OS variants and versions are:
+Currently (2025-06) tested OS variants and versions are:
 
-* [RHEL](https://www.redhat.com/en/technologies/linux-platforms/enterprise-linux) 8, 9
-* [RHEL Edge](https://www.redhat.com/en/technologies/linux-platforms/enterprise-linux/edge-computing) 9 (experimental)
+* [RHEL](https://www.redhat.com/en/technologies/linux-platforms/enterprise-linux) 8, 9, 10
 * [Windows Server](https://www.microsoft.com/en-us/windows-server) 2019, 2022, 2025
 * [Windows](https://www.microsoft.com/en-us/windows/) 10, 11
 
@@ -188,20 +185,6 @@ This is a more complete playbook for building an image on VMware:
 
   roles:
     - myllynen.ansible_packer.ansible_packer
-```
-
-This example has additional options for building RHEL Edge image:
-
-```
-    packer_target: rhel_edge_9
-    packer_target_pretty: RHEL 9 Edge
-    ostree_url: http://10.1.1.10/repo/
-    ostree_href: rhel/9/x86_64/edge
-
-    iso:
-      rhel_edge_9:
-        url: file:///VirtualMachines/rhel-9-x86_64-dvd.iso
-        checksum: "none"
 ```
 
 See the example [playbook](packer.yml) for a more complete example and
