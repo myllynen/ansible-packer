@@ -103,6 +103,7 @@ tar
 #unzip
 #vim-enhanced
 yum-utils
+zstd
 
 {% if bios_uefi_boot | bool %}
 efibootmgr
@@ -247,7 +248,7 @@ dnf -y install katello-host-tools-tracer || exit 1
 {% endif %}
 subscription-manager unregister || exit 1
 subscription-manager clean
-dnf -C remove -y 'katello-ca-consumer-*'
+dnf --disableplugin=product-id,subscription-manager -C remove -y 'katello-ca-consumer-*'
 mv /etc/rhsm/rhsm.conf.kat-backup /etc/rhsm/rhsm.conf
 sed -i -e 's,^package_profile_on_trans = .*,package_profile_on_trans = 1,' /etc/rhsm/rhsm.conf
 rm -f /etc/rhsm/syspurpose/syspurpose.json /etc/rhsm/ca/katello-*-ca.pem /var/lib/rhsm/cache/* \
