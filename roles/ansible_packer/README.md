@@ -179,10 +179,6 @@ rh_satellite_tools_install: true
 #  touch /.unconfigured
 #  %end
 
-# RHEL Edge parameters
-ostree_url: http://builder.example.com/repo/
-ostree_href: rhel/9/x86_64/edge
-
 ---
 do_cleanup: true
 use_force: false

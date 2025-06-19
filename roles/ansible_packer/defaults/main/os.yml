@@ -92,7 +92,3 @@ rh_satellite_tools_install: true
 #  %post --erroronfail
 #  touch /.unconfigured
 #  %end
-
-# RHEL Edge parameters
-ostree_url: http://builder.example.com/repo/
-ostree_href: rhel/9/x86_64/edge

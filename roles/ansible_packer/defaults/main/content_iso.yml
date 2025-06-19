@@ -1,14 +1,14 @@
 ---
 # Set checksum to "none" to skip installation media checksum check by Packer
 iso:
-  centos_9:
-    url: file:///VirtualMachines/boot/CentOS-Stream-9-latest-x86_64-dvd1.iso
-    checksum: "none"
-
   rhel_8:
     url: file:///VirtualMachines/boot/rhel-8-x86_64-dvd.iso
     checksum: "none"
 
   rhel_9:
     url: file:///VirtualMachines/boot/rhel-9-x86_64-dvd.iso
+    checksum: "none"
+
+  rhel_10:
+    url: file:///VirtualMachines/boot/rhel-10-x86_64-dvd.iso
     checksum: "none"
