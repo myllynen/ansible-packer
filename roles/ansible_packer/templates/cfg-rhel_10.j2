@@ -232,25 +232,22 @@ restorecon /etc/sudoers.d/{{ admin_user.name }}
 {% endif %}
 
 {% if not root_permit_local | bool %}
-{% if root_permit_override_security_policy | bool %}
 # Lock root account - caution needed
 passwd -l root
 {% endif %}
 {% endif %}
-{% endif %}
 
 # Configure root SSH access
-{% if security_policy is not defined or
-  (security_policy is defined and root_permit_override_security_policy | bool) %}
-echo "PermitRootLogin {{ root_permit_ssh }}" > /etc/ssh/sshd_config.d/90-rootlogin.conf
-chmod 0600 /etc/ssh/sshd_config.d/90-rootlogin.conf
+{% if root_permit_ssh | bool %}
+echo "PermitRootLogin {{ root_permit_ssh }}" > /etc/ssh/sshd_config.d/01-permitrootlogin.conf
+chmod 0600 /etc/ssh/sshd_config.d/01-permitrootlogin.conf
 {% endif %}
 
 # Services
 systemctl disable dnf-makecache.timer nis-domainname.service remote-fs.target
 
 # Watchdog
-mkdir -p -m 0644 /etc/systemd/system.conf.d
+mkdir -p -m 0755 /etc/systemd/system.conf.d
 printf '[Manager]\nRuntimeWatchdogSec=60s\n' > /etc/systemd/system.conf.d/50-watchdog.conf
 
 {% if packer_builder == 'iso' %}

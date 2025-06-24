@@ -31,6 +31,7 @@
     disable_ipv6: true
     selinux: enforcing
     #fips_enable: true
+    # NB. Not supported on RHEL 10+
     #security_profile: cis
     boot_parameters: net.ifnames.prefix=net quiet
 
@@ -53,6 +54,7 @@
 
     root_permit_local: true
     root_permit_ssh: "prohibit-password"
+    # NB. Not supported on RHEL 10+
     root_permit_override_security_policy: false
     #root_ssh_key: ssh-ed25519 ... root@image
 
