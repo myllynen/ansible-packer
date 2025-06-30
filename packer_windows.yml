@@ -77,11 +77,16 @@
           accounts_local_administrator_enable: true
           accounts_local_ansible_user_password_expires: false
           accounts_local_ansible_user_show_on_welcome: false
-          dns_client_adapter_names: '*'
-          dns_client_dns_servers:
-            - 1.1.1.1
-            - 8.8.8.8
+          disk_cleanup_windows_update_files: true
+          disk_cleanup_windows_update_reset: true
+          disk_cleanup_event_logs: true
+          dns_client_configurations:
+            - adapter_names: '*'
+              dns_servers:
+                - 1.1.1.1
+                - 8.8.8.8
           network_configuration_ipv6_enable: false
+          network_configuration_lmhosts_enable: false
           network_configuration_netbios_enable: false
           network_configuration_reboot: false
           ntfs_last_access_time_update: false
@@ -112,7 +117,7 @@
           system_update_skip_optional: true
           system_update_state: installed
           system_update_display_results: true
-          system_update_display_results_full: true
+          system_update_display_results_full: false
           system_update_reboot: true
           system_update_reboot_timeout: 1200
           system_update_compile_assemblies: true
@@ -150,7 +155,7 @@
           - system_time
           #- system_update
           - accounts_local
-          - boot_configuration
+          #- boot_configuration
           - network_configuration
           - winrm_configuration
           - sshd_configuration
@@ -158,11 +163,15 @@
           - windows_recovery
           - dsc_settings
           - registry_settings
+          - environment_settings
+          #- packages_chocolatey
           - performance_tuning
           - service_enablement
           - service_recovery
           - user_experience
+          - user_settings
           - system_reboot
+          - disk_cleanup
           - system_init
         post_tasks:
           - name: Remove all SSH host keys
