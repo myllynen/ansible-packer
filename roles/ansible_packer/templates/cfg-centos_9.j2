@@ -97,7 +97,7 @@ vmtoolsd -b /run/vmtoolsd.pid
 systemctl disable kdump.service
 
 # Update to latest packages
-dnf -y update
+dnf -y upgrade
 
 # Configure root SSH access
 echo "PermitRootLogin {{ root_permit_ssh }}" > /etc/ssh/sshd_config.d/99-permitrootlogin.conf
