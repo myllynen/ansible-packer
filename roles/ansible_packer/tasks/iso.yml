@@ -57,9 +57,9 @@
     dest: "{{ iso_build_dir.path + '/' + item.dest }}"
     mode: "{{ item.mode }}"
   loop:
-    - { src: grub.efi.j2, dest: EFI/BOOT/grub.cfg, mode: '0700' }
-    - { src: grub.iso.j2, dest: isolinux/grub.conf, mode: '0644' }
-    - { src: isolinux.cfg.j2, dest: isolinux/isolinux.cfg, mode: '0644' }
+    - {src: grub.efi.j2, dest: EFI/BOOT/grub.cfg, mode: '0700'}
+    - {src: grub.iso.j2, dest: isolinux/grub.conf, mode: '0644'}
+    - {src: isolinux.cfg.j2, dest: isolinux/isolinux.cfg, mode: '0644'}
   loop_control:
     label: "{{ item.dest }}"
   when: win_admin_password is not defined
