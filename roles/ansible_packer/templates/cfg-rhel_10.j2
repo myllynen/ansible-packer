@@ -34,7 +34,7 @@ logvol /var/tmp       --vgname vg_rhel --fstype xfs  --size 2048  --name lv_var_
 {% endif %}
 
 selinux --{{ selinux }}
-authselect select minimal without-nullok with-pamaccess
+authselect select local without-nullok with-pamaccess
 rootpw --iscrypted {{ __root_pw_encrypted }}
 
 {% if packer_builder != 'iso' %}
@@ -84,6 +84,7 @@ setools-console
 tar
 #unzip
 #vim-enhanced
+#zsh
 zstd
 
 tuned
@@ -108,10 +109,10 @@ perl-File-Temp
 -b*firmware*
 -dracut-config-rescue
 -i*firmware*
--llvm-libs
 -NetworkManager-tui
 -parted
 -plymouth
+-python3-perf
 -rhc*
 -sqlite
 -sssd*
