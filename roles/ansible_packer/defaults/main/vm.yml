@@ -1,5 +1,5 @@
 ---
-vm_name: "{{ image_name | default(__target_fullname + '_image.qcow2', true) }}"
+vm_name: "{{ image_name | default(__apc_target_fullname + '_image.qcow2', true) }}"
 
 # Either bios, uefi, or uefi-secure
 vm_type: uefi-secure

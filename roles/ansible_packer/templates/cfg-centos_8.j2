@@ -9,7 +9,7 @@ bootloader --timeout 1 --append "{{ boot_parameters }}"
 autopart
 selinux --enforcing
 authselect select minimal without-nullok with-pamaccess
-rootpw --iscrypted {{ __root_pw_encrypted }}
+rootpw --iscrypted {{ __apc_root_pw_encrypted }}
 network --device net0 --bootproto dhcp --onboot yes --hostname {{ hostname }}
 firewall --enabled --service ssh
 firstboot --disabled

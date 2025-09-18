@@ -24,12 +24,12 @@
 - name: Create temporary work directory
   ansible.builtin.tempfile:
     state: directory
-    suffix: _packer_build_{{ packer_builder }}_{{ __target_fullname }}
+    suffix: _packer_build_{{ packer_builder }}_{{ __apc_target_fullname }}
   register: __apc_tempdir
 
 - name: Create installer configuration file
   ansible.builtin.template:
-    src: cfg-{{ __target_config }}.j2
+    src: cfg-{{ __apc_target_config }}.j2
     dest: "{{ __apc_tempdir.path }}/inst.cfg"
     mode: '0600'
   when: win_admin_password is not defined

@@ -1,7 +1,7 @@
 ---
 # ISO builder configuration which is not using Packer
 
-packer_target_pretty: Custom {{ __target_fullname }}
+packer_target_pretty: Custom {{ __apc_target_fullname }}
 
 iso_boot_parameters: inst.geoloc=0 ip=
 
@@ -11,6 +11,6 @@ iso_boot_usb_fix: false
 
 output_directory: /tmp/iso_images
 
-image_checksum_file: "{{ image_name | default(__target_fullname + '.iso', true) + '.sha256' }}"
+image_checksum_file: "{{ image_name | default(__apc_target_fullname + '.iso', true) + '.sha256' }}"
 
 iso_volume_id: "{{ packer_target | upper | replace('_', '-') + '-0-BaseOS-' + ansible_facts.architecture }}"

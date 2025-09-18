@@ -10,7 +10,7 @@
 
 - name: Set custom ISO full path
   ansible.builtin.set_fact:
-    __apc_image_path: "{{ output_directory + '/' + image_name | default(__target_fullname + '.iso', true) }}"
+    __apc_image_path: "{{ output_directory + '/' + image_name | default(__apc_target_fullname + '.iso', true) }}"
 
 - name: Check existing custom ISO file
   ansible.builtin.stat:

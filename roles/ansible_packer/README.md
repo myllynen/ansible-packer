@@ -12,7 +12,7 @@ Below are the role default values from defaults/main/:
 ---
 # ISO builder configuration which is not using Packer
 
-packer_target_pretty: Custom {{ __target_fullname }}
+packer_target_pretty: Custom {{ __apc_target_fullname }}
 
 iso_boot_parameters: inst.geoloc=0 ip=
 
@@ -22,7 +22,7 @@ iso_boot_usb_fix: false
 
 output_directory: /tmp/iso_images
 
-image_checksum_file: "{{ image_name | default(__target_fullname + '.iso', true) + '.sha256' }}"
+image_checksum_file: "{{ image_name | default(__apc_target_fullname + '.iso', true) + '.sha256' }}"
 
 iso_volume_id: "{{ packer_target | upper | replace('_', '-') + '-0-BaseOS-' + ansible_facts.architecture }}"
 
@@ -59,7 +59,7 @@ vcenter_cluster:
 vcenter_datastore:
 vcenter_network:
 
-vm_guest_os_type: "{{ __base_target.split('-')[0] + __base_version }}_64Guest"
+vm_guest_os_type: "{{ __apc_base_target.split('-')[0] + __apc_base_version }}_64Guest"
 
 # https://www.packer.io/plugins/builders/vsphere/vsphere-iso#content-library-import-configuration
 vcenter_convert_to_template: true
@@ -215,7 +215,7 @@ shutdown_timeout: 15m
 #  }
 
 ---
-vm_name: "{{ image_name | default(__target_fullname + '_image.qcow2', true) }}"
+vm_name: "{{ image_name | default(__apc_target_fullname + '_image.qcow2', true) }}"
 
 # Either bios, uefi, or uefi-secure
 vm_type: uefi-secure
