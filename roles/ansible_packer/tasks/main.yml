@@ -1,22 +1,22 @@
 ---
 - name: Locate old outputs
   vars:
-    sys_temp: "{{ lookup('env', 'TMPDIR') | default('/tmp', true) }}"
+    __apc_sys_temp: "{{ lookup('env', 'TMPDIR') | default('/tmp', true) }}"
   ansible.builtin.find:
-    paths: "{{ [sys_temp, output_directory | default(sys_temp + '/.nothing') | dirname] | unique }}"
+    paths: "{{ [__apc_sys_temp, output_directory | default(__apc_sys_temp + '/.nothing') | dirname] | unique }}"
     file_type: any
     patterns:
       - 'ansible*_packer_build_*'
-      - "{{ output_directory | default(sys_temp + '/.nothing') | basename }}"
+      - "{{ output_directory | default(__apc_sys_temp + '/.nothing') | basename }}"
     recurse: false
-  register: old_outputs
+  register: __apc_old_outputs
   when: do_cleanup | bool
 
 - name: Remove old outputs
   ansible.builtin.file:
     path: "{{ item.path }}"
     state: absent
-  loop: "{{ old_outputs.files }}"
+  loop: "{{ __apc_old_outputs.files }}"
   loop_control:
     label: "{{ item.path }}"
   when: do_cleanup | bool
@@ -25,19 +25,19 @@
   ansible.builtin.tempfile:
     state: directory
     suffix: _packer_build_{{ packer_builder }}_{{ __target_fullname }}
-  register: tempdir
+  register: __apc_tempdir
 
 - name: Create installer configuration file
   ansible.builtin.template:
     src: cfg-{{ __target_config }}.j2
-    dest: "{{ tempdir.path }}/inst.cfg"
+    dest: "{{ __apc_tempdir.path }}/inst.cfg"
     mode: '0600'
   when: win_admin_password is not defined
 
 - name: Create Windows installer configuration files
   ansible.builtin.template:
     src: "{{ item }}.j2"
-    dest: "{{ tempdir.path + '/' + item }}"
+    dest: "{{ __apc_tempdir.path + '/' + item }}"
     mode: '0600'
   loop:
     - autounattend.xml
@@ -57,5 +57,5 @@
 
 - name: Remove temporary work directory
   ansible.builtin.file:
-    path: "{{ tempdir.path }}"
+    path: "{{ __apc_tempdir.path }}"
     state: absent

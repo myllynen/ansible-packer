@@ -6,21 +6,21 @@
 
 - name: Set OS ISO path
   ansible.builtin.set_fact:
-    os_iso_path: "{{ iso[packer_target].url | regex_replace('^file://', '') }}"
+    __apc_os_iso_path: "{{ iso[packer_target].url | regex_replace('^file://', '') }}"
 
 - name: Set custom ISO full path
   ansible.builtin.set_fact:
-    image_path: "{{ output_directory + '/' + image_name | default(__target_fullname + '.iso', true) }}"
+    __apc_image_path: "{{ output_directory + '/' + image_name | default(__target_fullname + '.iso', true) }}"
 
 - name: Check existing custom ISO file
   ansible.builtin.stat:
-    path: "{{ image_path }}"
-  register: iso_image
+    path: "{{ __apc_image_path }}"
+  register: __apc_iso_image
 
 - name: Fail if custom ISO file exists and not allowed to overwrite
   ansible.builtin.fail:
     msg: "Custom ISO file already exists and use_force not enabled."
-  when: not use_force | bool and iso_image.stat.exists
+  when: not use_force | bool and __apc_iso_image.stat.exists
 
 - name: Create output directory
   ansible.builtin.file:
@@ -30,31 +30,31 @@
 
 - name: Create custom ISO build directory
   ansible.builtin.file:
-    path: "{{ tempdir.path + '/iso-build' }}"
+    path: "{{ __apc_tempdir.path + '/iso-build' }}"
     state: directory
     mode: '0700'
-  register: iso_build_dir
+  register: __apc_iso_build_dir
 
 - name: Create custom Windows ISO drivers directory
   ansible.builtin.file:
-    path: "{{ tempdir.path + '/iso-build/drivers' }}"
+    path: "{{ __apc_tempdir.path + '/iso-build/drivers' }}"
     state: directory
     mode: '0700'
-  register: iso_drivers_dir
+  register: __apc_iso_drivers_dir
   when: win_admin_password is defined and win_drivers_path is defined
 
 - name: Copy OS ISO files to custom ISO build directory
   vars:
-    iso_command: bsdtar -xf {{ os_iso_path }} -C {{ iso_build_dir.path }}
-    udf_command: 7z x -o{{ iso_build_dir.path }} {{ os_iso_path }}
-    run_command: "{{ iso_command if win_admin_password is not defined else udf_command }}"
-  ansible.builtin.command: "{{ run_command }}"
+    __apc_iso_command: bsdtar -xf {{ __apc_os_iso_path }} -C {{ __apc_iso_build_dir.path }}
+    __apc_udf_command: 7z x -o{{ __apc_iso_build_dir.path }} {{ __apc_os_iso_path }}
+    __apc_run_command: "{{ __apc_iso_command if win_admin_password is not defined else __apc_udf_command }}"
+  ansible.builtin.command: "{{ __apc_run_command }}"
   changed_when: true
 
 - name: Create custom ISO boot loader files
   ansible.builtin.template:
     src: "{{ item.src }}"
-    dest: "{{ iso_build_dir.path + '/' + item.dest }}"
+    dest: "{{ __apc_iso_build_dir.path + '/' + item.dest }}"
     mode: "{{ item.mode }}"
   loop:
     - {src: grub.efi.j2, dest: EFI/BOOT/grub.cfg, mode: '0700'}
@@ -66,15 +66,15 @@
 
 - name: Copy installer configuration
   ansible.builtin.copy:
-    src: "{{ tempdir.path + '/inst.cfg' }}"
-    dest: "{{ iso_build_dir.path + '/inst.cfg' }}"
+    src: "{{ __apc_tempdir.path + '/inst.cfg' }}"
+    dest: "{{ __apc_iso_build_dir.path + '/inst.cfg' }}"
     mode: '0600'
   when: win_admin_password is not defined
 
 - name: Copy Windows installer configurations
   ansible.builtin.copy:
-    src: "{{ tempdir.path + '/' + item }}"
-    dest: "{{ iso_build_dir.path + '/' + item }}"
+    src: "{{ __apc_tempdir.path + '/' + item }}"
+    dest: "{{ __apc_iso_build_dir.path + '/' + item }}"
     mode: '0600'
   loop:
     - autounattend.xml
@@ -86,24 +86,24 @@
 - name: Copy Windows drivers directory
   ansible.posix.synchronize:
     src: "{{ win_drivers_path + '/' }}"
-    dest: "{{ iso_drivers_dir.path }}"
+    dest: "{{ __apc_iso_drivers_dir.path }}"
     owner: false
     group: false
   when: win_admin_password is defined and win_drivers_path is defined
 
 - name: Remove existing custom ISO file
   ansible.builtin.file:
-    path: "{{ image_path }}"
+    path: "{{ __apc_image_path }}"
     state: absent
-  when: use_force | bool and iso_image.stat.exists
+  when: use_force | bool and __apc_iso_image.stat.exists
 
 - name: Update custom ISO boot loader files for USB
   become: true
   # noqa: command-instead-of-module
   ansible.builtin.shell: |
-    mount -o loop {{ iso_build_dir.path }}/images/efiboot.img {{ iso_build_dir.path }}/isolinux
-    cat {{ iso_build_dir.path }}/EFI/BOOT/grub.cfg > {{ iso_build_dir.path }}/isolinux/EFI/BOOT/grub.cfg
-    umount {{ iso_build_dir.path }}/isolinux
+    mount -o loop {{ __apc_iso_build_dir.path }}/images/efiboot.img {{ __apc_iso_build_dir.path }}/isolinux
+    cat {{ __apc_iso_build_dir.path }}/EFI/BOOT/grub.cfg > {{ __apc_iso_build_dir.path }}/isolinux/EFI/BOOT/grub.cfg
+    umount {{ __apc_iso_build_dir.path }}/isolinux
   changed_when: true
   when:
     - win_admin_password is not defined
@@ -124,8 +124,8 @@
       -input-charset UTF-8
       -J -joliet-long -l -r -T
       -V "{{ iso_volume_id }}"
-      -o {{ image_path }} .
-    chdir: "{{ iso_build_dir.path }}"
+      -o {{ __apc_image_path }} .
+    chdir: "{{ __apc_iso_build_dir.path }}"
   changed_when: true
   when: win_admin_password is not defined
 
@@ -143,28 +143,28 @@
       -J -joliet-long -l -iso-level 3
       -V "{{ win_iso_volume_id }}"
       -volset "{{ win_iso_volume_id }}"
-      -o {{ image_path }} .
-    chdir: "{{ iso_build_dir.path }}"
+      -o {{ __apc_image_path }} .
+    chdir: "{{ __apc_iso_build_dir.path }}"
   changed_when: true
   when: win_admin_password is defined
 
 - name: Make custom ISO hybrid bootable
-  ansible.builtin.command: isohybrid --uefi {{ image_path }}
+  ansible.builtin.command: isohybrid --uefi {{ __apc_image_path }}
   changed_when: true
   when: win_admin_password is not defined
 
 - name: Implant MD5 checksum into custom ISO
-  ansible.builtin.command: implantisomd5 {{ image_path }}
+  ansible.builtin.command: implantisomd5 {{ __apc_image_path }}
   changed_when: true
   when: win_admin_password is not defined
 
 - name: Calculate custom ISO SHA256 checksum
-  ansible.builtin.command: sha256sum {{ image_path }}
+  ansible.builtin.command: sha256sum {{ __apc_image_path }}
   changed_when: false
-  register: sha256sum_result
+  register: __apc_sha256sum_result
 
 - name: Write SHA256 checksum to image checksum file
   ansible.builtin.copy:
-    content: "{{ sha256sum_result.stdout + '\n' }}"
+    content: "{{ __apc_sha256sum_result.stdout + '\n' }}"
     dest: "{{ output_directory + '/' + image_checksum_file }}"
     mode: '0644'
