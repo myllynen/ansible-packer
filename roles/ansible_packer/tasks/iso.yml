@@ -51,18 +51,30 @@
   ansible.builtin.command: "{{ __apc_run_command }}"
   changed_when: true
 
+- name: Check OS ISO directory structure
+  ansible.builtin.stat:
+    path: "{{ __apc_iso_build_dir.path + '/isolinux' }}"
+  register: __apc_isolinux_dir
+
 - name: Create custom ISO boot loader files
+  vars:
+    __apc_efi_grub: "{{ 'efi' if 'EFI' in item.dest else '' }}"
   ansible.builtin.template:
     src: "{{ item.src }}"
     dest: "{{ __apc_iso_build_dir.path + '/' + item.dest }}"
     mode: "{{ item.mode }}"
   loop:
+    - {src: grub.efi.j2, dest: boot/grub2/grub.cfg, mode: '0644'}
     - {src: grub.efi.j2, dest: EFI/BOOT/grub.cfg, mode: '0700'}
     - {src: grub.iso.j2, dest: isolinux/grub.conf, mode: '0644'}
     - {src: isolinux.cfg.j2, dest: isolinux/isolinux.cfg, mode: '0644'}
   loop_control:
     label: "{{ item.dest }}"
-  when: win_admin_password is not defined
+  when:
+    - win_admin_password is not defined
+    - (__apc_isolinux_dir.stat.exists and 'isolinux' in item.dest) or
+      (not __apc_isolinux_dir.stat.exists and 'boot' in item.dest) or
+      ('EFI/BOOT' in item.dest)
 
 - name: Copy installer configuration
   ansible.builtin.copy:
@@ -99,6 +111,7 @@
 
 - name: Update custom ISO boot loader files for USB
   become: true
+  # mkefiboot from lorax.rpm would require sudo as well, this avoids the need to install lorax
   # noqa: command-instead-of-module
   ansible.builtin.shell: |
     mount -o loop {{ __apc_iso_build_dir.path }}/images/efiboot.img {{ __apc_iso_build_dir.path }}/isolinux
@@ -109,7 +122,7 @@
     - win_admin_password is not defined
     - iso_boot_usb_fix | bool
 
-- name: Build custom ISO file
+- name: Build custom RHEL 7/8/9 ISO file
   ansible.builtin.command:
     cmd: >
       xorrisofs
@@ -127,7 +140,38 @@
       -o {{ __apc_image_path }} .
     chdir: "{{ __apc_iso_build_dir.path }}"
   changed_when: true
-  when: win_admin_password is not defined
+  when:
+    - win_admin_password is not defined
+    - __apc_isolinux_dir.stat.exists
+
+- name: Build custom RHEL ISO file
+  ansible.builtin.command:
+    cmd: >
+      xorrisofs
+      --grub2-mbr boot/grub2/i386-pc/boot_hybrid.img
+      -partition_offset 16
+      -appended_part_as_gpt
+      -append_partition 2 C12A7328-F81F-11D2-BA4B-00A0C93EC93B images/efiboot.img
+      -iso_mbr_part_type EBD0A0A2-B9E5-4433-87C0-68B6B72699C7
+      -c boot.cat
+      --boot-catalog-hide
+      -b images/eltorito.img
+      -no-emul-boot
+      -boot-load-size 4
+      -boot-info-table
+      --grub2-boot-info
+      -eltorito-alt-boot
+      -e --interval:appended_partition_2:all::
+      -no-emul-boot
+      -input-charset UTF-8
+      -J -joliet-long -l -r
+      -V "{{ iso_volume_id }}"
+      -o {{ __apc_image_path }} .
+    chdir: "{{ __apc_iso_build_dir.path }}"
+  changed_when: true
+  when:
+    - win_admin_password is not defined
+    - not __apc_isolinux_dir.stat.exists
 
 - name: Build custom Windows ISO file
   ansible.builtin.command:
@@ -151,7 +195,9 @@
 - name: Make custom ISO hybrid bootable
   ansible.builtin.command: isohybrid --uefi {{ __apc_image_path }}
   changed_when: true
-  when: win_admin_password is not defined
+  when:
+    - win_admin_password is not defined
+    - __apc_isolinux_dir.stat.exists
 
 - name: Implant MD5 checksum into custom ISO
   ansible.builtin.command: implantisomd5 {{ __apc_image_path }}
