@@ -240,10 +240,8 @@ passwd -l root
 {% endif %}
 
 # Configure root SSH access
-{% if root_permit_ssh | bool %}
 echo "PermitRootLogin {{ root_permit_ssh }}" > /etc/ssh/sshd_config.d/01-permitrootlogin.conf
 chmod 0600 /etc/ssh/sshd_config.d/01-permitrootlogin.conf
-{% endif %}
 
 # Services
 systemctl disable dnf-makecache.timer nis-domainname.service remote-fs.target
