@@ -7,7 +7,7 @@
     #
     packer_binary: packer.io
     packer_builder: qemu
-    packer_target: rhel_9_6
+    packer_target: rhel_10
     image_name: packer_image.qcow2
 
     vm_type: uefi-secure
@@ -127,20 +127,14 @@
     # OS installer configuration
     #
     iso:
-      rhel_8:
-        url: file:///VirtualMachines/boot/rhel-8.10-x86_64-dvd.iso
-        checksum: "none"
       rhel_9:
-        url: file:///VirtualMachines/boot/rhel-9.6-x86_64-dvd.iso
-        checksum: "none"
-      rhel_9_6:
-        url: file:///VirtualMachines/boot/rhel-9.6-x86_64-dvd.iso
+        url: file:///VirtualMachines/boot/rhel-9.7-x86_64-dvd.iso
         checksum: "none"
       rhel_10:
-        url: file:///VirtualMachines/boot/rhel-10.0-x86_64-dvd.iso
+        url: file:///VirtualMachines/boot/rhel-10.1-x86_64-dvd.iso
         checksum: "none"
-      rhel_10_0:
-        url: file:///VirtualMachines/boot/rhel-10.0-x86_64-dvd.iso
+      rhel_10_1:
+        url: file:///VirtualMachines/boot/rhel-10.1-x86_64-dvd.iso
         checksum: "none"
 
     # The OS installer boot_command will be appended by boot_parameters and boot_start

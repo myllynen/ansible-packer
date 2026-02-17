@@ -14,7 +14,7 @@
     vm_tpm: true
     vm_cpus: 8
     vm_memory: 16384
-    disk_size: 30720
+    disk_size: 40960
 
     # Windows OS edition to install from the ISO
     # Interactive installation will show editions
@@ -238,7 +238,7 @@
     #
     iso:
       win_2k25:
-        url: file:///VirtualMachines/boot/SERVER_EVAL_x64FRE_en-us-26100.iso
+        url: file:///VirtualMachines/boot/SERVER_EVAL_x64FRE_en-us_26100.iso
         checksum: "none"
 
     win_boot_wait: 2s

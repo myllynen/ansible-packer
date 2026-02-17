@@ -9,17 +9,17 @@ The role also supports creating custom ISO installer images.
 ## Introduction
 
 This role builds custom Linux and Windows VM template images using
-[Packer](https://www.packer.io/). Many OS installation parameters can be
-set as Ansible variables to allow for a high degree of customization.
-Same customizations can be applied to both VM template images and
-unattended BIOS/UEFI-compatible ISO installer images.
+[Packer](https://developer.hashicorp.com/packer). Many OS installation
+parameters can be set as Ansible variables to allow for a high degree of
+customization. Same customizations can be applied to both VM template
+images and unattended BIOS/UEFI-compatible ISO installer images.
 
 See [this example](packer.yml) how a playbook could look like.
 
 Currently (2025-06) tested Packer builders (platforms) are:
 
-* [QEMU](https://www.packer.io/plugins/builders/qemu) (for KVM/libvirt/RHV/etc)
-* [VMware vSphere](https://www.packer.io/plugins/builders/vsphere/vsphere-iso)
+* [QEMU](https://developer.hashicorp.com/packer/integrations/hashicorp/qemu/latest/components/builder/qemu) (for KVM/libvirt/RHV/etc)
+* [VMware vSphere](https://developer.hashicorp.com/packer/integrations/hashicorp/vsphere/latest/components/builder/vsphere-iso)
 
 Currently (2025-06) tested OS variants and versions are:
 
@@ -29,14 +29,14 @@ Currently (2025-06) tested OS variants and versions are:
 
 VM images are modified to be used as templates at the end of automated
 installation, RHEL with
-[kickstart post-scripts](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html-single/performing_an_advanced_rhel_installation/index)
+[kickstart post-scripts](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10/html/automatically_installing_rhel/creating-kickstart-files)
 and Windows with
-[sysprep](https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/sysprep--system-preparation--overview).
+[sysprep](https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/sysprep--system-preparation--overview).
 
 VM images (templates) can also be further customized and updated
 automatically at the end of the installation either by using custom
 installer directives or by using the Packer
-[Ansible provisioner](https://www.packer.io/plugins/provisioners/ansible/ansible).
+[Ansible provisioner](https://developer.hashicorp.com/packer/integrations/hashicorp/ansible/latest/components/provisioner/ansible).
 Guest tools for both KVM/Qemu and VMware VM images will be installed
 automatically during the installation process.
 
@@ -47,12 +47,13 @@ OS completely unattended. Don't boot from the ISO on an existing system!
 Less tested but verified to work in the past OS variants include:
 
 * [CentOS](https://www.centos.org/) 8, 9
-* [Fedora](https://getfedora.org/) 34, 35, 36
+* [Fedora](https://fedoraproject.org/) 34, 35, 36
 
 ## Quick Usage Example
 
-To build a VM image [install Packer](https://www.packer.io/downloads) on
-a build host, install this role, and run a playbook as shown below.
+To build a VM image
+[install Packer](https://developer.hashicorp.com/packer/install)
+on a build host, install this role, and run a playbook as shown below.
 
 To install this collection from GitHub:
 
@@ -71,7 +72,7 @@ This is a basic playbook for building an image with Qemu:
   vars:
     packer_binary: packer.io
     packer_builder: qemu
-    packer_target: rhel_9
+    packer_target: rhel_10
 
     disk_size: 8192
 
@@ -93,8 +94,8 @@ This is a basic playbook for building an image with Qemu:
     # OS installer configuration
     #
     iso:
-      rhel_9:
-        url: file:///VirtualMachines/boot/rhel-9-x86_64-dvd.iso
+      rhel_10:
+        url: file:///VirtualMachines/boot/rhel-10-x86_64-dvd.iso
         checksum: "none"
 
   roles:
@@ -113,8 +114,8 @@ This is a more complete playbook for building an image on VMware:
     #
     packer_binary: /usr/local/sbin/packer.io
     packer_builder: vmware
-    packer_target: rhel_9
-    image_name: rhel9-template
+    packer_target: rhel_10
+    image_name: rhel10-template
 
     vm_type: uefi-secure
     vm_tpm: true
@@ -133,6 +134,7 @@ This is a more complete playbook for building an image on VMware:
 
     disable_ipv6: true
     #fips_enable: true
+    # NB. Not supported on RHEL 10+
     #security_profile: cis
     boot_parameters: net.ifnames.prefix=net quiet
 
@@ -179,8 +181,8 @@ This is a more complete playbook for building an image on VMware:
     # OS installer configuration
     #
     iso:
-      rhel_9:
-        url: file:///VirtualMachines/boot/rhel-9-x86_64-dvd.iso
+      rhel_10:
+        url: file:///VirtualMachines/boot/rhel-10-x86_64-dvd.iso
         checksum: "none"
 
   roles:
@@ -194,16 +196,19 @@ for all the supported variables.
 Finally, build image on a build host:
 
 ```
-# Build latest RHEL 9 image with playbook defaults
+# Build latest RHEL 10 image with playbook defaults
+# Consired reading image and other passwords from vault
 ansible-playbook -c local -i localhost, packer.yml \
-  -e packer_target=rhel_9
+  -e packer_target=rhel_10 -e image_password=Foobar_12
 
-# Build RHEL 9 image on VMware vSphere with customizations
+# Build RHEL 10 image on VMware vSphere with customizations
+# Consired reading image and other passwords from vault
 ansible-playbook -i 192.168.122.123, -u builder packer.yml \
-  -e packer_builder=vmware -e packer_target=rhel_9 \
+  -e packer_builder=vmware -e packer_target=rhel_10 \
   -e bios_uefi_boot=true -e partitioning=single \
   -e disable_ipv6=true -e security_profile=cis \
-  -e fips_enable=true -e image_name=test_image
+  -e fips_enable=true -e image_name=test_image \
+  -e image_password=Foobar_12
 ```
 
 ## Custom ISO Installer Image Creation
@@ -214,7 +219,7 @@ would then only need to provide a static IP address (RHEL) for the host
 on the boot prompt if not using DHCP (Windows). For the RHEL installer
 (Anaconda) the static network boot parameter format is
 ip=_ip::gateway:netmask:hostname:interface:none_, see
-[RHEL documentation](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html/boot_options_for_rhel_installer/kickstart-and-advanced-boot-options_boot-options-for-rhel-installer#network-boot-options_kickstart-and-advanced-boot-options)
+[RHEL documentation](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10/html/automatically_installing_rhel/boot-options-reference#network-boot-options)
 for more details. Note that the double-semicolon is required.
 
 Root privileges are not needed for building ISOs with this role except
@@ -234,8 +239,8 @@ the above playbooks used to build VM images with Packer:
     # Using packer_ variables for compatibility,
     # xorrisofs not Packer is used to build image
     packer_builder: iso
-    packer_target: rhel_9
-    packer_target_pretty: Custom RHEL 9
+    packer_target: rhel_10
+    packer_target_pretty: Custom RHEL 10
     image_name: custom.iso
 
     root_password: "{{ image_password }}"
@@ -252,8 +257,8 @@ the above playbooks used to build VM images with Packer:
     output_directory: /tmp/iso_images
 
     iso:
-      rhel_9:
-        url: file:///VirtualMachines/boot/rhel-9-x86_64-dvd.iso
+      rhel_10:
+        url: file:///VirtualMachines/boot/rhel-10-x86_64-dvd.iso
         checksum: "none"
 
   roles:
@@ -264,6 +269,7 @@ To build custom ISO on a build host:
 
 ```
 # Build latest RHEL image with playbook defaults
+# Consired reading image and other passwords from vault
 ansible-playbook -c local -i localhost, build_iso.yml \
   -e image_password=Foobar_12
 ```
@@ -272,9 +278,9 @@ ansible-playbook -c local -i localhost, build_iso.yml \
 
 [Ansible](https://www.ansible.com/) role to allow for quickly building
 of RHEL, Windows, and other OS images with
-[Packer](https://www.packer.io/) using either
-[Qemu](https://www.packer.io/docs/builders/qemu) or
-[VMware vSphere](https://www.packer.io/docs/builders/vsphere/vsphere-iso)
+[Packer](https://developer.hashicorp.com/packer) using either
+[Qemu](https://developer.hashicorp.com/packer/integrations/hashicorp/qemu/latest/components/builder/qemu) or
+[VMware vSphere](https://developer.hashicorp.com/packer/integrations/hashicorp/vsphere/latest/components/builder/vsphere-iso)
 as builders.
 
 Linux builds do not save unencrypted passwords on disk at any point,
@@ -305,7 +311,7 @@ otherwise the VM image supports only the platform used for building the
 image.
 
 See the provided partitioning alternatives in
-[roles/ansible_packer/templates/cfg-rhel_9.j2](roles/ansible_packer/templates/cfg-rhel_9.j2),
+[roles/ansible_packer/templates/cfg-rhel_10.j2](roles/ansible_packer/templates/cfg-rhel_10.j2),
 specify _custom\_partition_ and set `partitioning: custom` to use
 custom partitioning layout.
 
