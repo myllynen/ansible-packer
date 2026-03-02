@@ -89,6 +89,7 @@ bind-utils
 dnf-plugins-core
 glibc-langpack-en
 glibc-minimal-langpack
+grubby
 #insights-client
 man-pages
 nano
@@ -111,7 +112,6 @@ efibootmgr
 grub2-efi-x64
 grub2-pc
 -mdadm
-#parted
 shim-x64
 {% endif %}
 
@@ -146,8 +146,8 @@ perl-File-Temp
 -lib*firmware*
 -NetworkManager-team
 -NetworkManager-tui
--parted
 -plymouth
+-python3-perf
 -rhc*
 -sqlite
 -sssd*
@@ -158,6 +158,7 @@ perl-File-Temp
 %end
 
 %post
+grubby --remove-args="rhgb resume" --update-kernel=ALL
 grub2-editenv - unset menu_auto_hide
 sed -i -e '/cockpit/d' /etc/firewalld/zones/public.xml
 rm -f /etc/firewalld/zones/public.xml.old

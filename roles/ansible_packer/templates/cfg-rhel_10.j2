@@ -70,6 +70,7 @@ bind-utils
 dnf-plugins-core
 glibc-langpack-en
 glibc-minimal-langpack
+grubby
 #insights-client
 man-pages
 nano
@@ -110,7 +111,6 @@ perl-File-Temp
 -dracut-config-rescue
 -i*firmware*
 -NetworkManager-tui
--parted
 -plymouth
 -python3-perf
 -rhc*
@@ -123,6 +123,7 @@ perl-File-Temp
 %end
 
 %post
+grubby --remove-args="rhgb resume" --update-kernel=ALL
 grub2-editenv - unset menu_auto_hide
 sed -i -e '/cockpit/d' /etc/firewalld/zones/public.xml
 rm -f /etc/firewalld/zones/public.xml.old
