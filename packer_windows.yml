@@ -91,6 +91,7 @@
           network_configuration_reboot: false
           ntfs_last_access_time_update: false
           power_scheme: high_performance
+          hibernation: false
           sshd_configuration_enable: true
           sshd_configuration_install: true
           sshd_configuration_start_mode: auto
@@ -156,18 +157,22 @@
           #- system_update
           - accounts_local
           #- boot_configuration
+          #- audit_configuration
+          #- firewall_configuration
           - network_configuration
           - winrm_configuration
           - sshd_configuration
           - rdp_configuration
+          #- wsl_configuration
           - windows_recovery
-          - dsc_settings
+          #- dsc_settings
+          #- dsc3_settings
           - registry_settings
           - environment_settings
           #- packages_chocolatey
           - performance_tuning
-          - service_enablement
-          - service_recovery
+          - service_management
+          - task_scheduling
           - user_experience
           - user_settings
           - system_reboot
