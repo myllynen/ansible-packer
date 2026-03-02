@@ -197,12 +197,12 @@ Finally, build image on a build host:
 
 ```
 # Build latest RHEL 10 image with playbook defaults
-# Consired reading image and other passwords from vault
+# Consider reading image and other passwords from vault
 ansible-playbook -c local -i localhost, packer.yml \
   -e packer_target=rhel_10 -e image_password=Foobar_12
 
 # Build RHEL 10 image on VMware vSphere with customizations
-# Consired reading image and other passwords from vault
+# Consider reading image and other passwords from vault
 ansible-playbook -i 192.168.122.123, -u builder packer.yml \
   -e packer_builder=vmware -e packer_target=rhel_10 \
   -e bios_uefi_boot=true -e partitioning=single \
@@ -269,7 +269,7 @@ To build custom ISO on a build host:
 
 ```
 # Build latest RHEL image with playbook defaults
-# Consired reading image and other passwords from vault
+# Consider reading image and other passwords from vault
 ansible-playbook -c local -i localhost, build_iso.yml \
   -e image_password=Foobar_12
 ```
