@@ -1,7 +1,7 @@
 ---
 namespace: myllynen
 name: ansible_packer
-version: "2.4.1"
+version: "2.4.2"
 readme: README.md
 authors:
   - Marko Myllynen <myllynen@redhat.com>
@@ -18,6 +18,6 @@ tags:
   - fedora
   - windows
 dependencies:
-  ansible.posix: ">=1.5.0"
+  ansible.posix: ">=1.5.4"
 repository: https://www.github.com/myllynen/ansible-packer
 issues: https://www.github.com/myllynen/ansible-packer/issues
