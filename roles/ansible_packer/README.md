@@ -20,14 +20,15 @@ iso_boot_parameters: inst.geoloc=0 ip=
 # images booting from USB sticks. This requires sudo.
 iso_boot_usb_fix: false
 
-output_directory: /tmp/iso_images
+output_directory: /var/tmp/iso_images
 
 image_checksum_file: "{{ image_name | default(__apc_target_fullname + '.iso', true) + '.sha256' }}"
 
 iso_volume_id: "{{ packer_target | upper | replace('_', '-') + '-0-BaseOS-' + ansible_facts.architecture }}"
 
 ---
-# https://www.packer.io/docs/builders/qemu
+# https://developer.hashicorp.com/packer/integrations/hashicorp/qemu/latest/components/builder/qemu
+#qemu_binary: /usr/bin/qemu-system-x86_64
 qemu_binary: /usr/libexec/qemu-kvm
 qemu_args: '["-cpu", "host,+nx"]'
 qemu_accelerator: kvm
@@ -36,10 +37,10 @@ qemu_accelerator: kvm
 qemu_uefi_code: /usr/share/OVMF/OVMF_CODE.secboot.fd
 qemu_uefi_vars: /usr/share/OVMF/OVMF_VARS.secboot.fd
 
-output_directory: /tmp/packer_images
+output_directory: /var/tmp/packer_images
 
 ---
-# https://www.packer.io/docs/builders/vsphere/vsphere-iso
+# https://developer.hashicorp.com/packer/integrations/vmware/vsphere/latest/components/builder/vsphere-iso
 # These should come from vault
 #vcenter_credentials:
 #  vcenter_server:
@@ -50,7 +51,7 @@ vcenter_insecure_connection: false
 vcenter_datacenter:
 vcenter_folder:
 
-# https://www.packer.io/docs/builders/vsphere/vsphere-iso#working-with-clusters-and-hosts
+# https://developer.hashicorp.com/packer/integrations/vmware/vsphere/latest/components/builder/vsphere-iso#working-with-clusters-and-hosts
 #vcenter_host:
 vcenter_cluster:
 
@@ -61,7 +62,7 @@ vcenter_network:
 
 vm_guest_os_type: "{{ __apc_base_target.split('-')[0] + __apc_base_version }}_64Guest"
 
-# https://www.packer.io/plugins/builders/vsphere/vsphere-iso#content-library-import-configuration
+# https://developer.hashicorp.com/packer/integrations/vmware/vsphere/latest/components/builder/vsphere-iso#location-configuration
 vcenter_convert_to_template: true
 #vcenter_content_library:
 #  library:
@@ -85,7 +86,7 @@ iso:
     checksum: "none"
 
 ---
-# https://www.packer.io/plugins/builders/qemu#boot-configuration
+# https://developer.hashicorp.com/packer/integrations/hashicorp/qemu/latest/components/builder/qemu#boot-configuration
 boot_wait: 10s
 
 # The OS installer boot_command will be appended by boot_parameters and boot_start
@@ -225,7 +226,7 @@ vm_memory: 4096
 vm_disk_size: "{{ disk_size | default(30720) }}"
 
 ---
-# https://www.packer.io/plugins/builders/qemu#boot-configuration
+# https://developer.hashicorp.com/packer/integrations/hashicorp/qemu/latest/components/builder/qemu#boot-configuration
 win_boot_wait: 3s
 # Must be set when using UEFI, use '<enter>' on BIOS
 win_boot_command: <enter>FS1:<enter>EFI\\BOOT\\bootx64.efi<enter>
@@ -297,10 +298,13 @@ win_locale_input: 0409:00000409
 #win_customize_script: |
 
 ---
+# Packer Ansible command or wrapper
+win_ansible_command: ansible-playbook
+
 # Additional Packer Ansible parameters
 # These are arguments to use with WinRM
 # NB. These will be visible in ps(1) output
-win_ansible_arguments: >
+win_ansible_arguments: >-
   "--extra-vars", "ansible_winrm_scheme=https",
   "--extra-vars", "ansible_winrm_transport=basic",
   "--extra-vars", "ansible_winrm_server_cert_validation=ignore",
@@ -309,7 +313,7 @@ win_ansible_arguments: >
 # These are arguments to use with SSH/key
 # NB. These will be visible in ps(1) output
 # NB. Removing SSH host keys will not work using SSH
-#win_ansible_arguments: >
+#win_ansible_arguments: >-
 #  "--extra-vars", "ansible_shell_type=powershell",
 #  "--extra-vars", "ansible_become_method=runas"
 
@@ -319,7 +323,7 @@ win_ansible_arguments: >
 # These are arguments to use with SSH/password
 # NB. These will be visible in ps(1) output
 # NB. Removing SSH host keys will not work using SSH
-#win_ansible_arguments: >
+#win_ansible_arguments: >-
 #  "--extra-vars", "ansible_ssh_pass={% raw %}{{ user `win_admin_password` }}{% endraw %}",
 #  "--extra-vars", "ansible_shell_type=powershell",
 #  "--extra-vars", "ansible_become_method=runas"
@@ -329,22 +333,24 @@ win_ansible_arguments: >
 # See packer_windows.yml for complete example
 #win_provisioner_role_path: /src/git/windows-ansible-roles.git/roles
 win_provisioner_playbook: |2
-    #gather_facts: false
+    gather_facts: false
     #vars:
-    #  system_update_retry_count: 3
-    #  system_update_retry_delay: 30
+    #  system_update_retry_count: 5
+    #  system_update_retry_delay: 300
     #  system_update_retry_after_install: true
     #  system_update_categories: '*'
-    #  system_update_skip_optional: true
+    #  system_update_skip_optional: false
     #  system_update_state: installed
     #  system_update_display_results: true
     #  system_update_display_results_full: false
     #  system_update_reboot: true
-    #  system_update_reboot_timeout: 1200
+    #  system_update_reboot_always: false
+    #  system_update_reboot_timeout: 1800
     #  system_update_compile_assemblies: true
     #  system_update_compile_filter: '.*'
     tasks:
-      - ansible.windows.win_ping:
+      - name: Check host access
+        ansible.windows.win_ping:
     #roles:
     #  - system_update
 
@@ -471,7 +477,6 @@ win_remote_setup_winrm: |
 # By default both SSH and WinRM are enabled
 win_remote_setup: |
   {{ win_remote_setup_ssh }}
-
   {{ win_remote_setup_winrm }}
 </pre>
 

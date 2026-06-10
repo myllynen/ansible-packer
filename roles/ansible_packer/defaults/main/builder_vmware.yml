@@ -1,5 +1,5 @@
 ---
-# https://www.packer.io/docs/builders/vsphere/vsphere-iso
+# https://developer.hashicorp.com/packer/integrations/vmware/vsphere/latest/components/builder/vsphere-iso
 # These should come from vault
 #vcenter_credentials:
 #  vcenter_server:
@@ -10,7 +10,7 @@ vcenter_insecure_connection: false
 vcenter_datacenter:
 vcenter_folder:
 
-# https://www.packer.io/docs/builders/vsphere/vsphere-iso#working-with-clusters-and-hosts
+# https://developer.hashicorp.com/packer/integrations/vmware/vsphere/latest/components/builder/vsphere-iso#working-with-clusters-and-hosts
 #vcenter_host:
 vcenter_cluster:
 
@@ -21,7 +21,7 @@ vcenter_network:
 
 vm_guest_os_type: "{{ __apc_base_target.split('-')[0] + __apc_base_version }}_64Guest"
 
-# https://www.packer.io/plugins/builders/vsphere/vsphere-iso#content-library-import-configuration
+# https://developer.hashicorp.com/packer/integrations/vmware/vsphere/latest/components/builder/vsphere-iso#location-configuration
 vcenter_convert_to_template: true
 #vcenter_content_library:
 #  library:

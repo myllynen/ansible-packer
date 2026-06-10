@@ -1,5 +1,5 @@
 ---
-# https://www.packer.io/plugins/builders/qemu#boot-configuration
+# https://developer.hashicorp.com/packer/integrations/hashicorp/qemu/latest/components/builder/qemu#boot-configuration
 win_boot_wait: 3s
 # Must be set when using UEFI, use '<enter>' on BIOS
 win_boot_command: <enter>FS1:<enter>EFI\\BOOT\\bootx64.efi<enter>

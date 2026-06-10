@@ -1,6 +1,8 @@
 ---
 - name: Build custom ISO
   hosts: all
+  become: false
+  gather_facts: true
   vars:
     #
     # Base configuration
@@ -66,7 +68,7 @@
     # Set ip= to create fully automated ISO for one particular server only
     # Use 'ip=' for generic ISO and require typing IP info on boot from ISO
     iso_boot_parameters: inst.geoloc=0 ip=192.168.122.123::192.168.122.1:255.255.255.0:server.example.com:net0:none
-    output_directory: /tmp/iso_images
+    output_directory: /var/tmp/iso_images
 
     # Apply boot config fix needed on UEFI with RHEL ISO
     # images booting from USB sticks. This requires sudo.
@@ -76,8 +78,8 @@
     # OS installer configuration
     #
     iso:
-      rhel_10_0:
-        url: file:///VirtualMachines/boot/rhel-10-x86_64-dvd.iso
+      rhel_10:
+        url: file:///VirtualMachines/boot/rhel-10.2-x86_64-dvd.iso
         checksum: "none"
 
   roles:

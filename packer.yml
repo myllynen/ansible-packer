@@ -5,7 +5,7 @@
     #
     # Base configuration
     #
-    packer_binary: packer.io
+    packer_binary: packer
     packer_builder: qemu
     packer_target: rhel_10
     image_name: packer_image.qcow2
@@ -15,6 +15,9 @@
     vm_cpus: 4
     vm_memory: 8192
     disk_size: 30720
+
+    # Packer VM installation timeout
+    shutdown_period: 15m
 
     # Build options
     do_cleanup: true
@@ -94,12 +97,13 @@
     #
 
     # Builder: qemu
-    # https://www.packer.io/docs/builders/qemu
+    # https://developer.hashicorp.com/packer/integrations/hashicorp/qemu/latest/components/builder/qemu
+    #qemu_binary: /usr/bin/qemu-system-x86_64
     qemu_binary: /usr/libexec/qemu-kvm
-    output_directory: /tmp/packer_images
+    output_directory: /var/tmp/packer_images
 
     # Builder: vmware
-    # https://www.packer.io/docs/builders/vsphere/vsphere-iso
+    # https://developer.hashicorp.com/packer/integrations/vmware/vsphere/latest/components/builder/vsphere-iso
     # These should come from vault
     #vcenter_credentials:
     #  vcenter_server: vcenter.example.com
@@ -108,14 +112,14 @@
     vcenter_insecure_connection: true
     vcenter_datacenter: DC1
     vcenter_folder: Linux/templates
-    # https://www.packer.io/docs/builders/vsphere/vsphere-iso#working-with-clusters-and-hosts
+    # https://developer.hashicorp.com/packer/integrations/vmware/vsphere/latest/components/builder/vsphere-iso#working-with-clusters-and-hosts
     #vcenter_host: vcenter-host1.example.com
     vcenter_cluster: DC1-C1
     #vcenter_resource_pool: DC1-RP1
     vcenter_datastore: DC1-C1-LUN-1
     vcenter_network: DC1-C1-VLAN-123
     #vm_guest_os_type: rhel9_64Guest
-    # https://www.packer.io/plugins/builders/vsphere/vsphere-iso#content-library-import-configuration
+    # https://developer.hashicorp.com/packer/integrations/vmware/vsphere/latest/components/builder/vsphere-iso#location-configuration
     vcenter_convert_to_template: true
     #vcenter_content_library:
     #  library: DC1-CL
@@ -128,13 +132,13 @@
     #
     iso:
       rhel_9:
-        url: file:///VirtualMachines/boot/rhel-9.7-x86_64-dvd.iso
+        url: file:///VirtualMachines/boot/rhel-9.8-x86_64-dvd.iso
         checksum: "none"
       rhel_10:
-        url: file:///VirtualMachines/boot/rhel-10.1-x86_64-dvd.iso
+        url: file:///VirtualMachines/boot/rhel-10.2-x86_64-dvd.iso
         checksum: "none"
-      rhel_10_1:
-        url: file:///VirtualMachines/boot/rhel-10.1-x86_64-dvd.iso
+      rhel_10_2:
+        url: file:///VirtualMachines/boot/rhel-10.2-x86_64-dvd.iso
         checksum: "none"
 
     # The OS installer boot_command will be appended by boot_parameters and boot_start

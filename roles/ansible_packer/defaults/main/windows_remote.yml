@@ -121,5 +121,4 @@ win_remote_setup_winrm: |
 # By default both SSH and WinRM are enabled
 win_remote_setup: |
   {{ win_remote_setup_ssh }}
-
   {{ win_remote_setup_winrm }}

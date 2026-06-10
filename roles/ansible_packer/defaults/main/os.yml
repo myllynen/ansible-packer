@@ -1,5 +1,5 @@
 ---
-# https://www.packer.io/plugins/builders/qemu#boot-configuration
+# https://developer.hashicorp.com/packer/integrations/hashicorp/qemu/latest/components/builder/qemu#boot-configuration
 boot_wait: 10s
 
 # The OS installer boot_command will be appended by boot_parameters and boot_start

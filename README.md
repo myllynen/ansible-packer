@@ -19,7 +19,7 @@ See [this example](packer.yml) how a playbook could look like.
 Currently (2025-06) tested Packer builders (platforms) are:
 
 * [QEMU](https://developer.hashicorp.com/packer/integrations/hashicorp/qemu/latest/components/builder/qemu) (for KVM/libvirt/RHV/etc)
-* [VMware vSphere](https://developer.hashicorp.com/packer/integrations/hashicorp/vsphere/latest/components/builder/vsphere-iso)
+* [VMware vSphere](https://developer.hashicorp.com/packer/integrations/vmware/vsphere/latest/components/builder/vsphere-iso)
 
 Currently (2025-06) tested OS variants and versions are:
 
@@ -86,9 +86,10 @@ This is a basic playbook for building an image with Qemu:
     keyboard: fi
 
     # Builder: qemu
-    # https://www.packer.io/docs/builders/qemu
+    # https://developer.hashicorp.com/packer/integrations/hashicorp/qemu/latest/components/builder/qemu
+    #qemu_binary: /usr/bin/qemu-system-x86_64
     qemu_binary: /usr/libexec/qemu-kvm
-    output_directory: /tmp/packer_images
+    output_directory: /var/tmp/packer_images
 
     #
     # OS installer configuration
@@ -163,7 +164,7 @@ This is a more complete playbook for building an image on VMware:
       cloud-utils-growpart
 
     # Builder: vmware
-    # https://www.packer.io/docs/builders/vsphere/vsphere-iso
+    # https://developer.hashicorp.com/packer/integrations/vmware/vsphere/latest/components/builder/vsphere-iso
     # These should come from vault
     vcenter_credentials:
       vcenter_server: vcenter.example.com
@@ -254,7 +255,7 @@ the above playbooks used to build VM images with Packer:
 
     # Builder: ISO (not a Packer builder)
     iso_boot_parameters: inst.geoloc=0 ip=dhcp
-    output_directory: /tmp/iso_images
+    output_directory: /var/tmp/iso_images
 
     iso:
       rhel_10:
@@ -280,7 +281,7 @@ ansible-playbook -c local -i localhost, build_iso.yml \
 of RHEL, Windows, and other OS images with
 [Packer](https://developer.hashicorp.com/packer) using either
 [Qemu](https://developer.hashicorp.com/packer/integrations/hashicorp/qemu/latest/components/builder/qemu) or
-[VMware vSphere](https://developer.hashicorp.com/packer/integrations/hashicorp/vsphere/latest/components/builder/vsphere-iso)
+[VMware vSphere](https://developer.hashicorp.com/packer/integrations/vmware/vsphere/latest/components/builder/vsphere-iso)
 as builders.
 
 Linux builds do not save unencrypted passwords on disk at any point,

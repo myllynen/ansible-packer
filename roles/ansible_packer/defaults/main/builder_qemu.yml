@@ -1,5 +1,6 @@
 ---
-# https://www.packer.io/docs/builders/qemu
+# https://developer.hashicorp.com/packer/integrations/hashicorp/qemu/latest/components/builder/qemu
+#qemu_binary: /usr/bin/qemu-system-x86_64
 qemu_binary: /usr/libexec/qemu-kvm
 qemu_args: '["-cpu", "host,+nx"]'
 qemu_accelerator: kvm
@@ -8,4 +9,4 @@ qemu_accelerator: kvm
 qemu_uefi_code: /usr/share/OVMF/OVMF_CODE.secboot.fd
 qemu_uefi_vars: /usr/share/OVMF/OVMF_VARS.secboot.fd
 
-output_directory: /tmp/packer_images
+output_directory: /var/tmp/packer_images
