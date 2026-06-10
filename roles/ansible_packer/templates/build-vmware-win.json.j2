@@ -112,13 +112,14 @@
       "ssh_disable_agent_forwarding": true,
 {% endif %}
 
-      "shutdown_command": "\\Windows\\System32\\Sysprep\\sysprep /oobe /generalize /mode:vm /shutdown /quiet /unattend:{{ win_src_disk }}\\sysprep.xml",
+      "shutdown_command": "\\Windows\\System32\\Sysprep\\sysprep.exe /oobe /generalize /mode:vm /shutdown /quiet /unattend:{{ win_src_disk }}\\sysprep.xml",
       "shutdown_timeout": "10m"
     }
   ],
   "provisioners": [
     {
       "type": "ansible",
+      "command": "{{ win_ansible_command }}",
       "use_proxy": false,
       "playbook_file": "./win_packer.yml",
       "user": "{{ win_remote_user }}",

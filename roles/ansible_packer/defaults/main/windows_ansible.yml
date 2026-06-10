@@ -1,8 +1,11 @@
 ---
+# Packer Ansible command or wrapper
+win_ansible_command: ansible-playbook
+
 # Additional Packer Ansible parameters
 # These are arguments to use with WinRM
 # NB. These will be visible in ps(1) output
-win_ansible_arguments: >
+win_ansible_arguments: >-
   "--extra-vars", "ansible_winrm_scheme=https",
   "--extra-vars", "ansible_winrm_transport=basic",
   "--extra-vars", "ansible_winrm_server_cert_validation=ignore",
@@ -11,7 +14,7 @@ win_ansible_arguments: >
 # These are arguments to use with SSH/key
 # NB. These will be visible in ps(1) output
 # NB. Removing SSH host keys will not work using SSH
-#win_ansible_arguments: >
+#win_ansible_arguments: >-
 #  "--extra-vars", "ansible_shell_type=powershell",
 #  "--extra-vars", "ansible_become_method=runas"
 
@@ -21,7 +24,7 @@ win_ansible_arguments: >
 # These are arguments to use with SSH/password
 # NB. These will be visible in ps(1) output
 # NB. Removing SSH host keys will not work using SSH
-#win_ansible_arguments: >
+#win_ansible_arguments: >-
 #  "--extra-vars", "ansible_ssh_pass={% raw %}{{ user `win_admin_password` }}{% endraw %}",
 #  "--extra-vars", "ansible_shell_type=powershell",
 #  "--extra-vars", "ansible_become_method=runas"
@@ -31,21 +34,23 @@ win_ansible_arguments: >
 # See packer_windows.yml for complete example
 #win_provisioner_role_path: /src/git/windows-ansible-roles.git/roles
 win_provisioner_playbook: |2
-    #gather_facts: false
+    gather_facts: false
     #vars:
-    #  system_update_retry_count: 3
-    #  system_update_retry_delay: 30
+    #  system_update_retry_count: 5
+    #  system_update_retry_delay: 300
     #  system_update_retry_after_install: true
     #  system_update_categories: '*'
-    #  system_update_skip_optional: true
+    #  system_update_skip_optional: false
     #  system_update_state: installed
     #  system_update_display_results: true
     #  system_update_display_results_full: false
     #  system_update_reboot: true
-    #  system_update_reboot_timeout: 1200
+    #  system_update_reboot_always: false
+    #  system_update_reboot_timeout: 1800
     #  system_update_compile_assemblies: true
     #  system_update_compile_filter: '.*'
     tasks:
-      - ansible.windows.win_ping:
+      - name: Check host access
+        ansible.windows.win_ping:
     #roles:
     #  - system_update
