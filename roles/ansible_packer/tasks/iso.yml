@@ -89,10 +89,10 @@
     dest: "{{ __apc_iso_build_dir.path + '/' + item }}"
     mode: '0600'
   loop:
-    - autounattend.xml
-    - sysprep.xml
-    - custom.ps1
-    - remote.ps1
+    - "{{ win_autounattend_file | default('autounattend.xml') }}"
+    - "{{ win_sysprep_file | default('sysprep.xml') }}"
+    - "{{ win_customization_file | default('custom.ps1') }}"
+    - "{{ win_remote_setup_file | default('remote.ps1') }}"
   when: win_admin_password is defined
 
 - name: Copy Windows drivers directory

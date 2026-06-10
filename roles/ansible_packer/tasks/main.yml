@@ -40,11 +40,11 @@
     dest: "{{ __apc_tempdir.path + '/' + item }}"
     mode: '0600'
   loop:
-    - autounattend.xml
-    - sysprep.xml
-    - custom.ps1
-    - remote.ps1
-    - win_packer.yml
+    - "{{ win_autounattend_file | default('autounattend.xml') }}"
+    - "{{ win_sysprep_file | default('sysprep.xml') }}"
+    - "{{ win_customization_file | default('custom.ps1') }}"
+    - "{{ win_remote_setup_file | default('remote.ps1') }}"
+    - "{{ win_playbook_file | default('win_packer.yml') }}"
   when: win_admin_password is defined
 
 - name: Include ISO tasks
