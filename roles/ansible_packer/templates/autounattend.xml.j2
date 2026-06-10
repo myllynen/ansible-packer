@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- https://docs.microsoft.com/en-us/windows-hardware/customize/desktop/unattend/ -->
-<unattend xmlns="urn:schemas-microsoft-com:unattend" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State">
+<!-- https://learn.microsoft.com/en-us/windows-hardware/customize/desktop/unattend/ -->
+<unattend xmlns="urn:schemas-microsoft-com:unattend" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <settings pass="windowsPE">
         <component name="Microsoft-Windows-PnpCustomizationsWinPE" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <DriverPaths>
@@ -191,41 +191,41 @@
             </AutoLogon>
             <OOBE>
                 <HideEULAPage>true</HideEULAPage>
+                <HideLocalAccountScreen>true</HideLocalAccountScreen>
                 <HideOEMRegistrationScreen>true</HideOEMRegistrationScreen>
                 <HideOnlineAccountScreens>true</HideOnlineAccountScreens>
                 <HideWirelessSetupInOOBE>true</HideWirelessSetupInOOBE>
-                <HideLocalAccountScreen>true</HideLocalAccountScreen>
                 <NetworkLocation>Work</NetworkLocation>
                 <ProtectYourPC>3</ProtectYourPC>
                 <VMModeOptimizations>
-                    <SkipAdministratorProfileRemoval>true</SkipAdministratorProfileRemoval>
+                    <SkipAdministratorProfileRemoval>false</SkipAdministratorProfileRemoval>
                     <SkipNotifyUILanguageChange>true</SkipNotifyUILanguageChange>
                     <SkipWinREInitialization>true</SkipWinREInitialization>
                 </VMModeOptimizations>
             </OOBE>
             <FirstLogonCommands>
                 <SynchronousCommand wcm:action="add">
-                    <CommandLine>cmd.exe /c powershell -Command Stop-Service -Name wuauserv -Force</CommandLine>
+                    <CommandLine>net.exe stop wuauserv</CommandLine>
                     <Description>Stop wuauserv service temporarily</Description>
                     <Order>1</Order>
                 </SynchronousCommand>
                 <SynchronousCommand wcm:action="add">
-                    <CommandLine>cmd.exe /c powershell -Command New-Item -Path HKLM:\SYSTEM\CurrentControlSet\Control\Network\NewNetworkWindowOff -Force</CommandLine>
+                    <CommandLine>reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Network\NewNetworkWindowOff" /f</CommandLine>
                     <Description>Disable network location wizard</Description>
                     <Order>2</Order>
                 </SynchronousCommand>
                 <SynchronousCommand wcm:action="add">
-                    <CommandLine>cmd.exe /c powershell -Command Set-LocalUser -Name {{ win_remote_user }} -PasswordNeverExpires $true</CommandLine>
+                    <CommandLine>powershell.exe -NoProfile -Command "Set-LocalUser -Name '{{ win_remote_user }}' -PasswordNeverExpires $true"</CommandLine>
                     <Description>Disable password expiration for Remote Admin user</Description>
                     <Order>3</Order>
                 </SynchronousCommand>
                 <SynchronousCommand wcm:action="add">
-                    <CommandLine>cmd.exe /c powershell -Command "New-Item -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\SpecialAccounts\UserList' -Force | New-ItemProperty -Name {{ win_remote_user }} -PropertyType DWord -Value 0 -Force"</CommandLine>
+                    <CommandLine>reg.exe add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\SpecialAccounts\UserList" /v "{{ win_remote_user }}" /t REG_DWORD /d 0 /f</CommandLine>
                     <Description>Hide Remote Admin user</Description>
                     <Order>4</Order>
                 </SynchronousCommand>
                 <SynchronousCommand wcm:action="add">
-                    <CommandLine>cmd.exe /c powershell -Command "New-Item -Path HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System -Force | New-ItemProperty -Name DontDisplayLastUserName -PropertyType DWord -Value 1 -Force"</CommandLine>
+                    <CommandLine>reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v DontDisplayLastUserName /t REG_DWORD /d 1 /f</CommandLine>
                     <Description>Hide last user in Welcome Screen</Description>
                     <Order>5</Order>
                 </SynchronousCommand>
@@ -244,25 +244,25 @@
                 </SynchronousCommand>
 {% endif %}
                 <SynchronousCommand wcm:action="add">
-                    <CommandLine>cmd.exe /c powershell -ExecutionPolicy Bypass -File {{ win_src_disk }}\custom.ps1</CommandLine>
+                    <CommandLine>powershell.exe -NoProfile -ExecutionPolicy Bypass -File {{ win_src_disk }}\custom.ps1</CommandLine>
                     <Description>Customize system</Description>
                     <Order>7</Order>
                 </SynchronousCommand>
                 <SynchronousCommand wcm:action="add">
-                    <CommandLine>cmd.exe /c powershell -ExecutionPolicy Bypass -File {{ win_src_disk }}\remote.ps1</CommandLine>
+                    <CommandLine>powershell.exe -NoProfile -ExecutionPolicy Bypass -File {{ win_src_disk }}\remote.ps1</CommandLine>
                     <Description>Configure remote access</Description>
                     <Order>8</Order>
                 </SynchronousCommand>
 {% if packer_builder != 'iso' %}
                 <!-- Finalize VM installation with Ansible -->
                 <SynchronousCommand wcm:action="add">
-                    <CommandLine>cmd.exe /c logoff</CommandLine>
+                    <CommandLine>logoff.exe</CommandLine>
                     <Description>Logoff</Description>
                     <Order>9</Order>
                 </SynchronousCommand>
 {% else %}
                 <SynchronousCommand wcm:action="add">
-                    <CommandLine>cmd.exe /c powershell Restart-Computer</CommandLine>
+                    <CommandLine>shutdown.exe /r /f /t 0 /d p:2:4 /c "Finalize OS installation"</CommandLine>
                     <Description>Reboot</Description>
                     <Order>9</Order>
                 </SynchronousCommand>
