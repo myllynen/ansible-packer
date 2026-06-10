@@ -1,11 +1,13 @@
 ---
 - name: Build Windows image with Packer
   hosts: all
+  become: false
+  gather_facts: false
   vars:
     #
     # Base configuration
     #
-    packer_binary: packer.io
+    packer_binary: packer
     packer_builder: qemu
     packer_target: win_2k25
     image_name: w2k25_image.qcow2
@@ -16,16 +18,19 @@
     vm_memory: 16384
     disk_size: 40960
 
+    # Packer VM installation timeout
+    shutdown_timeout: 180m
+
     # Windows OS edition to install from the ISO
     # Interactive installation will show editions
     # The index reference should be either INDEX or NAME
     win_os_index: INDEX
-    win_os_edition: 1
+    win_os_edition: 2
 
     # Full path for additional drivers for the target Windows version
     # For QEMU/KVM example, see the virtio-win-drivers-prepare script
     # https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/stable-virtio/virtio-win.iso
-    win_drivers_path: /tmp/drivers
+    win_drivers_path: /var/tmp/drivers
 
     # Build options
     do_cleanup: true
@@ -54,19 +59,32 @@
     win_locale_user: en-US
     # Input locale (language and keyboard) setting, see
     # https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/default-input-locales-for-windows-language-packs
-    win_locale_input: 0409:0000040B
+    win_locale_input: en-US;0409:0000040B
 
     #win_product_key:
     win_registered_owner: Ansible Packer
-    win_registered_organization: Test Department
+    win_registered_organization: Example Org
 
     #win_admin_ssh_key: ssh-ed25519 ... id_ed25519.pub
 
     # Customization script, runs before enabling remote access
-    #win_customize_script: |
+    win_customize_script: |
       # Set system location
-      # https://docs.microsoft.com/windows/win32/intl/table-of-geographical-locations
-      #Set-WinHomeLocation -GeoId 77
+      # https://learn.microsoft.com/en-us/windows/win32/intl/table-of-geographical-locations
+      Set-WinHomeLocation -GeoId 77
+
+      # Install an update requiring logged in user to complete its installation,
+      # this runs as part of the AutoLogon/FirstLogonCommands in autounattend.xml
+      $s = New-Object -ComObject Microsoft.Update.Session
+      $t = $s.CreateUpdateSearcher().Search("IsInstalled=0 and Type='Software'").Updates | ? Title -like '*KB5007651*'
+      if ($t) {
+          $c = New-Object -ComObject Microsoft.Update.UpdateColl; $c.Add($t)
+          $d = $s.CreateUpdateDownloader(); $d.Updates = $c; $d.Download()
+          $i = $s.CreateUpdateInstaller(); $i.Updates = $c; $i.Install()
+      }
+
+    # Packer Ansible command or wrapper
+    win_ansible_command: ansible-playbook
 
     # List of tasks or roles to run on the VM
     # See https://github.com/myllynen/windows-ansible-roles
@@ -74,7 +92,7 @@
     win_provisioner_playbook: |2
         gather_facts: false
         vars:
-          accounts_local_administrator_enable: true
+          accounts_local_administrator_enable: false
           accounts_local_ansible_user_password_expires: false
           accounts_local_ansible_user_show_on_welcome: false
           disk_cleanup_windows_update_files: true
@@ -85,47 +103,117 @@
               dns_servers:
                 - 1.1.1.1
                 - 8.8.8.8
+          hibernation: false
           network_configuration_ipv6_enable: false
           network_configuration_lmhosts_enable: false
           network_configuration_netbios_enable: false
           network_configuration_reboot: false
           ntfs_last_access_time_update: false
           power_scheme: high_performance
-          hibernation: false
           sshd_configuration_enable: true
-          sshd_configuration_install: true
           sshd_configuration_start_mode: auto
           sshd_configuration_shell: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
           sshd_configuration_admins_keys:
-            present:
-              - ssh-ed25519 ... id_ed25519.pub
+          #  present:
+          #    - ssh-ed25519 ... id_ed25519.pub
           sshd_configuration_firewall_profiles:
-            - domain
             - private
-            - public
           # Not possible before initial sshd start
           sshd_configuration_config_validate: false
-          sshd_configuration_config_file: files/default_config
+          sshd_configuration_config_file: default_config
           system_init_file: C:\Windows\init_info_image.txt
-          system_init_msg_file: "This image was created on {{ '%Y-%m-%d %H:%M:%S %Z' | strftime }}.\r\n"
+          system_init_msg_file: >-
+            "{% raw %}This image was created on {{ '%Y-%m-%d %H:%M:%S %Z' | strftime }}.\r\n{% endraw %}"
           system_time_ntp_servers:
             - time.windows.com
           system_time_timezone: FLE Standard Time
-          system_update_retry_count: 3
-          system_update_retry_delay: 30
+          system_update_retry_count: 5
+          system_update_retry_delay: 300
           system_update_retry_after_install: true
           system_update_categories: '*'
-          system_update_skip_optional: true
+          system_update_skip_optional: false
           system_update_state: installed
+          system_update_background_task: true
           system_update_display_results: true
           system_update_display_results_full: false
           system_update_reboot: true
-          system_update_reboot_timeout: 1200
+          system_update_reboot_always: false
+          system_update_reboot_timeout: 1800
           system_update_compile_assemblies: true
           system_update_compile_filter: '.*'
+          task_scheduling_create:
+            - name: Change public NICs private
+              description: Set all public NICs private
+              enabled: true
+              actions:
+                - path: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+                  arguments: >-
+                    -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command
+                      "while (-not (Get-NetConnectionProfile -ErrorAction SilentlyContinue)) {
+                         Start-Sleep -Seconds 2
+                       } ;
+                       Get-NetConnectionProfile |
+                         ? NetworkCategory -eq 'Public' |
+                           Set-NetConnectionProfile -NetworkCategory Private -ErrorAction SilentlyContinue"
+              triggers:
+                - type: boot
+              username: SYSTEM
           user_experience_server_manager_at_logon: false
           user_experience_network_location_wizard: false
           user_experience_show_last_user_name: false
+          win_features_remove:
+            - System-DataArchiver
+            - Telnet-Client
+            - WindowsAdminCenterSetup
+            - Wireless-Networking
+          win_features_remove_ignore_unknown: true
+          win_features_install: []
+          win_features_reboot: true
+          win_capabilities_remove:
+            - Language.Speech~~~en-US~0.0.1.0
+            - App.StepsRecorder
+            - AzureArcSetup
+            - Browser.InternetExplorer
+            - DirectX.Configuration.Database
+            - Language.Handwriting~~~en-US~0.0.1.0
+            - Language.OCR~~~en-US~0.0.1.0
+            - MathRecognizer
+            - Media.WindowsMediaPlayer
+            - Microsoft.Windows.MSPaint
+            - Microsoft.Windows.SnippingTool
+            - OneCoreUAP.OneSync
+            - VBSCRIPT
+            - XPS.Viewer
+            - Language.TextToSpeech~~~en-US~0.0.1.0
+          win_capabilities_remove_ignore_unknown: true
+          win_capabilities_install:
+            - OpenSSH.Client
+            - OpenSSH.Server
+          win_capabilities_reboot: true
+          win_capabilities_log_level: 0
+          win_optional_features_remove:
+            - Internet-Explorer-Optional-amd64
+            - WindowsMediaPlayer
+            - MediaPlayback
+            #- Microsoft-RemoteDesktopConnection
+            # NB. This typically fails to uninstall
+            #- Microsoft-Windows-Printing-PremiumTools
+            - Printing-Client
+            - Printing-Client-Gui
+            - Printing-PrintToPDFServices-Features
+            - Printing-XPSServices-Features
+            - SearchEngine-Client-Package
+            - Server-Drivers-Printers
+            - Server-Gui-Mgmt
+            - SmbDirect
+            - TelnetClient
+            - WindowsServerBackupSnapin
+            - WorkFolders-Client
+            - Xps-Foundation-Xps-Viewer
+          win_optional_features_remove_ignore_unknown: true
+          win_optional_features_install:
+            - Windows-Defender
+          win_optional_features_reboot: true
           windows_recovery_enable: false
           winrm_configuration_enable: true
           winrm_configuration_start_mode: auto
@@ -145,28 +233,46 @@
           winrm_configuration_firewall_profiles:
             - domain
             - private
-            - public
           winrm_configuration_display_config: false
         #tasks:
-        #  - ansible.windows.win_ping:
+        #  - name: Check host access
+        #    ansible.windows.win_ping:
         roles:
           - dotnet_optimize
-          #- etc_hosts
+          - etc_hosts
           #- dns_client
           - system_time
-          #- system_update
+          - system_reboot
+          # Hopefully make applying patches a bit more
+          # reliable by installing updates in batches
+          - role: system_update
+            vars:
+              system_update_accept_list:
+                - '.*Antivirus antimalware platform.*'
+                - '.*Malicious Software Removal Tool.*'
+                - '.*Security Intelligence Update.*'
+              system_update_compile_assemblies: false
+          - role: system_update
+            vars:
+              system_update_accept_list:
+                - '\d{4}-\d{2} Cumulative Update.*'
+                - '\d{4}-\d{2} Security Update.*'
+              system_update_compile_assemblies: false
+          - system_update
           - accounts_local
-          #- boot_configuration
-          #- audit_configuration
-          #- firewall_configuration
+          - boot_configuration
+          - audit_configuration
+          - firewall_configuration
           - network_configuration
           - winrm_configuration
           - sshd_configuration
           - rdp_configuration
-          #- wsl_configuration
           - windows_recovery
-          #- dsc_settings
-          #- dsc3_settings
+          - win_features
+          - win_capabilities
+          - win_optional_features
+          - dsc_settings
+          - dsc3_settings
           - registry_settings
           - environment_settings
           #- packages_chocolatey
@@ -179,10 +285,29 @@
           - disk_cleanup
           - system_init
         post_tasks:
+          - name: Clear possible dirty shutdown events
+            ansible.windows.win_powershell:
+              error_action: silently_continue
+              script: |
+                $Ansible.Changed = $false
+                $Path = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Reliability'
+                $Keys = Get-ItemProperty -Path $Path -ErrorAction SilentlyContinue
+                if ($Keys.DirtyShutdown -ne $null -or $Keys.DirtyShutdownTime -ne $null) {
+                  $Ansible.Changed = $true
+                  Remove-ItemProperty -Path $Path -Name DirtyShutdown,DirtyShutdownTime `
+                    -ErrorAction SilentlyContinue
+                }
+
           - name: Remove all SSH host keys
             ansible.windows.win_powershell:
+              error_action: silently_continue
               script: |
-                Remove-Item -Path C:\ProgramData\ssh\ssh_host_* -Force
+                $Ansible.Changed = $false
+                $Path = 'C:\ProgramData\ssh\ssh_host_*'
+                if (Test-Path $Path) {
+                  $Ansible.Changed = $true
+                  Remove-Item -Path $Path -Force -ErrorAction SilentlyContinue
+                }
             when: ansible_connection != 'ssh'
 
     #win_custom_partitioning_create: |
@@ -209,12 +334,13 @@
     #
 
     # Builder: qemu
-    # https://www.packer.io/docs/builders/qemu
+    # https://developer.hashicorp.com/packer/integrations/hashicorp/qemu/latest/components/builder/qemu
+    #qemu_binary: /usr/bin/qemu-system-x86_64
     qemu_binary: /usr/libexec/qemu-kvm
-    output_directory: /tmp/packer_images
+    output_directory: /var/tmp/packer_images
 
     # Builder: vmware
-    # https://www.packer.io/docs/builders/vsphere/vsphere-iso
+    # https://developer.hashicorp.com/packer/integrations/vmware/vsphere/latest/components/builder/vsphere-iso
     # These should come from vault
     #vcenter_credentials:
     #  vcenter_server: vcenter.example.com
@@ -223,14 +349,14 @@
     vcenter_insecure_connection: true
     vcenter_datacenter: DC1
     vcenter_folder: Windows/templates
-    # https://www.packer.io/docs/builders/vsphere/vsphere-iso#working-with-clusters-and-hosts
+    # https://developer.hashicorp.com/packer/integrations/vmware/vsphere/latest/components/builder/vsphere-iso#working-with-clusters-and-hosts
     #vcenter_host: vcenter-host1.example.com
     vcenter_cluster: DC1-C1
     #vcenter_resource_pool: DC1-RP1
     vcenter_datastore: DC1-C1-LUN-1
     vcenter_network: DC1-C1-VLAN-123
     #vm_guest_os_type: windows9Server64Guest
-    # https://www.packer.io/plugins/builders/vsphere/vsphere-iso#content-library-import-configuration
+    # https://developer.hashicorp.com/packer/integrations/vmware/vsphere/latest/components/builder/vsphere-iso#location-configuration
     vcenter_convert_to_template: true
     #vcenter_content_library:
     #  library: DC1-CL
