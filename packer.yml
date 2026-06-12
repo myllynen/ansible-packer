@@ -14,7 +14,8 @@
     vm_tpm: true
     vm_cpus: 4
     vm_memory: 8192
-    disk_size: 30720
+    vm_disk_size: 30720
+    vm_disk_interface: virtio-scsi
 
     # Packer VM installation timeout
     shutdown_period: 15m
@@ -151,3 +152,22 @@
 
   roles:
     - myllynen.ansible_packer.ansible_packer
+
+  post_tasks:
+    - name: Trim VM image
+      vars:
+        actual_image: "{{ output_directory + '/' + image_name }}"
+      ansible.builtin.command: >
+        virt-sparsify --in-place --quiet {{ actual_image }}
+      changed_when: true
+      when: packer_builder == 'qemu'
+
+    - name: Rebase VM image
+      vars:
+        actual_image: "{{ output_directory + '/' + image_name }}"
+        rebase_image: "{{ output_directory + '/rebase-' + image_name }}"
+      ansible.builtin.shell: >
+        qemu-img convert -O qcow2 {{ actual_image }} {{ rebase_image }} &&
+          mv {{ rebase_image }} {{ actual_image }}
+      changed_when: true
+      when: packer_builder == 'qemu'
