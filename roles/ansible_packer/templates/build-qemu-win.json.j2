@@ -9,6 +9,9 @@
 
       "qemu_binary": "{{ qemu_binary }}",
       "qemuargs": [{{ qemu_args }}],
+      "qemu_img_args": {
+        "create": ["-o", "nocow=on"]
+      },
       "accelerator": "{{ qemu_accelerator }}",
       "headless": true,
       "output_directory": "{{ output_directory }}",
