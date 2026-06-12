@@ -224,6 +224,7 @@ vm_tpm: true
 vm_cpus: 2
 vm_memory: 4096
 vm_disk_size: "{{ disk_size | default(30720) }}"
+vm_disk_interface: "{{ disk_interface | default('virtio') }}"
 
 ---
 # https://developer.hashicorp.com/packer/integrations/hashicorp/qemu/latest/components/builder/qemu#boot-configuration

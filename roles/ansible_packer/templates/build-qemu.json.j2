@@ -21,8 +21,9 @@
       "cpus": {{ vm_cpus }},
       "memory": {{ vm_memory }},
 
-      "disk_interface": "virtio",
+      "disk_interface": "{{ vm_disk_interface }}",
       "disk_size": "{{ vm_disk_size }}",
+      "disk_discard": "unmap",
       "disk_cache": "none",
       "format": "qcow2",
 

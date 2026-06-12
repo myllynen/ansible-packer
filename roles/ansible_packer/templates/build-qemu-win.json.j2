@@ -25,8 +25,9 @@
       "cpus": {{ vm_cpus }},
       "memory": {{ vm_memory }},
 
-      "disk_interface": "virtio",
+      "disk_interface": "{{ vm_disk_interface }}",
       "disk_size": "{{ vm_disk_size }}",
+      "disk_discard": "unmap",
       "disk_cache": "none",
       "format": "qcow2",
 
@@ -76,7 +77,7 @@
       "ssh_disable_agent_forwarding": true,
 {% endif %}
 
-      "shutdown_command": "\\Windows\\System32\\Sysprep\\sysprep.exe /oobe /generalize /mode:vm /shutdown /quiet /unattend:{{ win_src_disk }}\\sysprep.xml",
+      "shutdown_command": "\\Windows\\System32\\Sysprep\\sysprep.exe /generalize /oobe /mode:vm /shutdown /quiet /unattend:{{ win_src_disk }}\\sysprep.xml",
       "shutdown_timeout": "10m"
     }
   ],
