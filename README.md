@@ -37,7 +37,7 @@ VM images (templates) can also be further customized and updated
 automatically at the end of the installation either by using custom
 installer directives or by using the Packer
 [Ansible provisioner](https://developer.hashicorp.com/packer/integrations/hashicorp/ansible/latest/components/provisioner/ansible).
-Guest tools for both KVM/Qemu and VMware VM images will be installed
+Guest tools for both KVM/QEMU and VMware VM images will be installed
 automatically during the installation process.
 
 Both RHEL and Windows custom ISO installer images embed and load the
@@ -63,18 +63,18 @@ ansible-galaxy collection install git+https://github.com/myllynen/ansible-packer
 
 Then, create a [playbook](packer.yml) to use this role.
 
-This is a basic playbook for building an image with Qemu:
+This is a basic playbook for building an image with QEMU:
 
 ```
 ---
-- name: Build image with Packer on Qemu
+- name: Build image with Packer on QEMU
   hosts: all
   vars:
     packer_binary: packer.io
     packer_builder: qemu
     packer_target: rhel_10
 
-    disk_size: 8192
+    vm_disk_size: 8192
 
     root_password: "{{ image_password }}"
 
@@ -120,7 +120,7 @@ This is a more complete playbook for building an image on VMware:
 
     vm_type: uefi-secure
     vm_tpm: true
-    disk_size: 30720
+    vm_disk_size: 30720
 
     do_cleanup: true
     use_force: true
@@ -280,7 +280,7 @@ ansible-playbook -c local -i localhost, build_iso.yml \
 [Ansible](https://www.ansible.com/) role to allow for quickly building
 of RHEL, Windows, and other OS images with
 [Packer](https://developer.hashicorp.com/packer) using either
-[Qemu](https://developer.hashicorp.com/packer/integrations/hashicorp/qemu/latest/components/builder/qemu) or
+[QEMU](https://developer.hashicorp.com/packer/integrations/hashicorp/qemu/latest/components/builder/qemu) or
 [VMware vSphere](https://developer.hashicorp.com/packer/integrations/vmware/vsphere/latest/components/builder/vsphere-iso)
 as builders.
 
