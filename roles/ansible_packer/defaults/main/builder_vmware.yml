@@ -25,6 +25,6 @@ vm_guest_os_type: "{{ __apc_base_target.split('-')[0] + __apc_base_version }}_64
 vcenter_convert_to_template: true
 #vcenter_content_library:
 #  library:
-#  #name:
+#  # name:
 #  ovf:
 #  destroy:

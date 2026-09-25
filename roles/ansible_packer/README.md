@@ -20,8 +20,6 @@ iso_boot_parameters: inst.geoloc=0 ip=
 # images booting from USB sticks. This requires sudo.
 iso_boot_usb_fix: false
 
-output_directory: /var/tmp/iso_images
-
 image_checksum_file: "{{ image_name | default(__apc_target_fullname + '.iso', true) + '.sha256' }}"
 
 iso_volume_id: "{{ packer_target | upper | replace('_', '-') + '-0-BaseOS-' + ansible_facts.architecture }}"
@@ -66,23 +64,23 @@ vm_guest_os_type: "{{ __apc_base_target.split('-')[0] + __apc_base_version }}_64
 vcenter_convert_to_template: true
 #vcenter_content_library:
 #  library:
-#  #name:
+#  # name:
 #  ovf:
 #  destroy:
 
 ---
 # Set checksum to "none" to skip installation media checksum check by Packer
 iso:
-  centos_9:
-    url: file:///VirtualMachines/boot/CentOS-Stream-9-latest-x86_64-dvd1.iso
-    checksum: "none"
-
   rhel_8:
     url: file:///VirtualMachines/boot/rhel-8-x86_64-dvd.iso
     checksum: "none"
 
   rhel_9:
     url: file:///VirtualMachines/boot/rhel-9-x86_64-dvd.iso
+    checksum: "none"
+
+  rhel_10:
+    url: file:///VirtualMachines/boot/rhel-10-x86_64-dvd.iso
     checksum: "none"
 
 ---
@@ -140,6 +138,7 @@ create_admin: false
 #  name: admin
 #  group: admin
 #  groups: wheel
+#  home: /home/admin
 #  gecos: Admin User
 #  ssh_key: ssh-ed25519 ... admin@image
 #  passwordless_sudo: false

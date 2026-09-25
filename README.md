@@ -221,7 +221,7 @@ on the boot prompt if not using DHCP (Windows). For the RHEL installer
 (Anaconda) the static network boot parameter format is
 ip=_ip::gateway:netmask:hostname:interface:none_, see
 [RHEL documentation](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10/html/automatically_installing_rhel/boot-options-reference#network-boot-options)
-for more details. Note that the double-semicolon is required.
+for more details. Note that the double-colon is required.
 
 Root privileges are not needed for building ISOs with this role except
 when RHEL ISOs are to be booted from USB on UEFI, see the role defaults

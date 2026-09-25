@@ -18,7 +18,7 @@
     vm_disk_interface: virtio-scsi
 
     # Packer VM installation timeout
-    shutdown_period: 15m
+    shutdown_timeout: 15m
 
     # Build options
     do_cleanup: true

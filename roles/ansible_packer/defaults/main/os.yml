@@ -53,6 +53,7 @@ create_admin: false
 #  name: admin
 #  group: admin
 #  groups: wheel
+#  home: /home/admin
 #  gecos: Admin User
 #  ssh_key: ssh-ed25519 ... admin@image
 #  passwordless_sudo: false
