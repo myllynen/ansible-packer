@@ -1,0 +1,839 @@
+---
+argument_specs:
+  main:
+    short_description: Build RHEL/CentOS/Windows images using Packer or ISO builder
+    description:
+      - Build VM images using Packer with QEMU or VMware vSphere builders.
+      - Build custom ISO images with the ISO builder.
+      - Supports RHEL, CentOS, and Windows targets.
+    options:
+      # Required variables
+      packer_builder:
+        description:
+          - The builder to use for image creation.
+          - Use C(iso) for custom ISO building without Packer.
+          - Use C(qemu) for QEMU/KVM builds with Packer.
+          - Use C(vmware) for VMware vSphere builds with Packer.
+        type: str
+        required: true
+        choices:
+          - iso
+          - qemu
+          - vmware
+
+      packer_target:
+        description:
+          - The target OS identifier.
+          - Must match a key in the O(iso) dictionary, and a
+            kickstart template in the role for RHEL VMs
+          - "Examples: C(rhel_9), C(rhel_10), C(centos_9)."
+        type: str
+        required: true
+
+      # Packer configuration (defaults/main/packer.yml)
+      do_cleanup:
+        description:
+          - Remove old output files before building.
+        type: bool
+        default: true
+
+      use_force:
+        description:
+          - Allow overwriting existing output files.
+        type: bool
+        default: false
+
+      packer_binary:
+        description:
+          - Path or name of the Packer binary.
+        type: str
+        default: packer.io
+
+      packer_build_no_log:
+        description:
+          - Suppress Packer output in Ansible logs.
+          - Should be enabled when using passwords for vCenter or WinRM.
+        type: bool
+        default: false
+
+      communicator:
+        description:
+          - Packer communicator to use.
+          - Set to C(none) for no communication, C(ssh) for SSH.
+          - For Windows builds, the communicator is determined automatically
+            based on O(win_remote_setup) content.
+        type: str
+        default: "none"
+
+      shutdown_timeout:
+        description:
+          - Timeout for Packer VM installation.
+        type: str
+        default: 15m
+
+      ssh_private_key_file:
+        description:
+          - Private SSH key file to use during VM installation.
+        type: str
+
+      custom_json_builder_section:
+        description:
+          - Custom JSON to insert into the Packer builder section.
+          - Can be used to add SSH communicator configuration.
+        type: str
+
+      custom_json_provisioner:
+        description:
+          - Custom JSON provisioner definition for the Packer build file.
+        type: str
+
+      # VM configuration (defaults/main/vm.yml)
+      vm_name:
+        description:
+          - Name of the output VM image file.
+          - Defaults to C(<target_fullname>_image.qcow2).
+        type: str
+
+      image_name:
+        description:
+          - Alternative way to set the output image name.
+          - Used in O(vm_name) and O(image_checksum_file) defaults.
+        type: str
+
+      vm_type:
+        description:
+          - VM firmware type.
+        type: str
+        default: uefi-secure
+        choices:
+          - bios
+          - uefi
+          - uefi-secure
+
+      vm_tpm:
+        description:
+          - Enable TPM for the VM.
+        type: bool
+        default: true
+
+      vm_cpus:
+        description:
+          - Number of CPUs for the VM.
+        type: int
+        default: 2
+
+      vm_memory:
+        description:
+          - Amount of memory in MB for the VM.
+        type: int
+        default: 4096
+
+      vm_disk_size:
+        description:
+          - Disk size in MB for the VM.
+        type: int
+        default: 30720
+
+      vm_disk_interface:
+        description:
+          - Disk interface type for the VM.
+          - Can also be set via O(disk_interface).
+        type: str
+
+      disk_interface:
+        description:
+          - Convenience alias for O(vm_disk_interface).
+        type: str
+
+      # ISO builder configuration (defaults/main/builder_iso.yml)
+      packer_target_pretty:
+        description:
+          - Pretty name for the target used in ISO boot menus.
+        type: str
+
+      iso_boot_parameters:
+        description:
+          - Additional boot parameters for custom ISO boot loaders.
+        type: str
+        default: "inst.geoloc=0 ip="
+
+      iso_boot_usb_fix:
+        description:
+          - Apply boot config fix needed on UEFI with RHEL ISO images
+            booting from USB sticks.
+          - This requires sudo.
+        type: bool
+        default: false
+
+      output_directory:
+        description:
+          - Output directory for built images.
+          - For ISO builds, consider setting to C(/var/tmp/iso_images).
+        type: str
+        default: /var/tmp/packer_images
+
+      image_checksum_file:
+        description:
+          - Filename for the SHA256 checksum file of the built ISO.
+        type: str
+
+      iso_volume_id:
+        description:
+          - Volume ID for the custom ISO image.
+        type: str
+
+      # QEMU builder configuration (defaults/main/builder_qemu.yml)
+      qemu_binary:
+        description:
+          - Path to the QEMU binary.
+        type: str
+        default: /usr/libexec/qemu-kvm
+
+      qemu_args:
+        description:
+          - Additional QEMU arguments as a JSON array string.
+        type: str
+        default: '["-cpu", "host,+nx"]'
+
+      qemu_accelerator:
+        description:
+          - QEMU accelerator to use.
+        type: str
+        default: kvm
+
+      qemu_uefi_code:
+        description:
+          - Path to UEFI firmware code file.
+          - Used when O(vm_type) is C(uefi) or C(uefi-secure).
+        type: str
+        default: /usr/share/OVMF/OVMF_CODE.secboot.fd
+
+      qemu_uefi_vars:
+        description:
+          - Path to UEFI firmware variables file.
+          - Used when O(vm_type) is C(uefi) or C(uefi-secure).
+        type: str
+        default: /usr/share/OVMF/OVMF_VARS.secboot.fd
+
+      # VMware builder configuration (defaults/main/builder_vmware.yml)
+      vcenter_credentials:
+        description:
+          - vCenter credentials dictionary.
+          - Required when O(packer_builder) is C(vmware).
+          - Should come from vault.
+        type: dict
+        options:
+          vcenter_server:
+            description:
+              - vCenter server hostname.
+            type: str
+            required: true
+          vcenter_username:
+            description:
+              - vCenter username.
+            type: str
+            required: true
+          vcenter_password:
+            description:
+              - vCenter password.
+            type: str
+            required: true
+            no_log: true
+
+      vcenter_insecure_connection:
+        description:
+          - Allow insecure connection to vCenter.
+        type: bool
+        default: false
+
+      vcenter_datacenter:
+        description:
+          - vCenter datacenter name.
+          - Required when O(packer_builder) is C(vmware).
+        type: str
+
+      vcenter_folder:
+        description:
+          - vCenter folder for the template.
+          - Required when O(packer_builder) is C(vmware).
+        type: str
+
+      vcenter_host:
+        description:
+          - vCenter ESXi host.
+          - Either O(vcenter_cluster) or O(vcenter_host) should be set.
+        type: str
+
+      vcenter_cluster:
+        description:
+          - vCenter cluster name.
+          - Either O(vcenter_cluster) or O(vcenter_host) should be set.
+        type: str
+
+      vcenter_resource_pool:
+        description:
+          - vCenter resource pool.
+        type: str
+
+      vcenter_datastore:
+        description:
+          - vCenter datastore name.
+          - Required when O(packer_builder) is C(vmware).
+        type: str
+
+      vcenter_network:
+        description:
+          - vCenter network name.
+          - Required when O(packer_builder) is C(vmware).
+        type: str
+
+      vm_guest_os_type:
+        description:
+          - VMware guest OS type identifier.
+          - Automatically derived from O(packer_target) by default.
+        type: str
+
+      vcenter_convert_to_template:
+        description:
+          - Convert the VM to a template after building.
+        type: bool
+        default: true
+
+      vcenter_content_library:
+        description:
+          - vCenter content library destination configuration.
+        type: dict
+        options:
+          library:
+            description:
+              - Content library name.
+            type: str
+            required: true
+          name:
+            description:
+              - Template name in the content library.
+            type: str
+          ovf:
+            description:
+              - Store as OVF.
+            type: bool
+            required: true
+          destroy:
+            description:
+              - Destroy the VM after uploading to the content library.
+            type: bool
+            required: true
+
+      # ISO content configuration (defaults/main/content_iso.yml)
+      iso:
+        description:
+          - Dictionary of OS ISO sources keyed by target name.
+          - Each entry must have C(url) and C(checksum) keys.
+          - Set checksum to C(none) to skip checksum verification.
+        type: dict
+
+      # OS configuration (defaults/main/os.yml)
+      boot_wait:
+        description:
+          - Time to wait before sending boot command.
+        type: str
+        default: 10s
+
+      boot_command:
+        description:
+          - Boot command to type in the VM console.
+          - Will be appended by O(boot_parameters) and O(boot_start).
+        type: str
+
+      boot_parameters:
+        description:
+          - Custom boot parameters to append to the boot command.
+        type: str
+        default: net.ifnames.prefix=net quiet
+
+      boot_start:
+        description:
+          - Key sequence to start the boot after the boot command.
+        type: str
+
+      boot_password:
+        description:
+          - GRUB boot loader password.
+          - Leave empty to not set a boot password.
+        type: str
+        no_log: true
+
+      root_password:
+        description:
+          - Root password for the RHEL/CentOS installation.
+          - Required for RHEL/CentOS builds.
+        type: str
+        no_log: true
+
+      bios_uefi_boot:
+        description:
+          - Create BIOS/UEFI-compatible images with dual boot support.
+          - Not supported with autopartitioning.
+          - Not applicable on RHEL 10+.
+        type: bool
+        default: true
+
+      partitioning:
+        description:
+          - Partitioning scheme for the OS installation.
+          - C(auto) uses installer autopartitioning.
+          - C(custom) uses O(custom_partitioning).
+          - C(default) uses the role default LVM layout.
+          - C(single) creates a single root partition.
+        type: str
+        choices:
+          - auto
+          - custom
+          - default
+          - single
+
+      disable_ipv6:
+        description:
+          - Disable IPv6 in the image.
+        type: bool
+        default: false
+
+      selinux:
+        description:
+          - SELinux mode for the image.
+        type: str
+        default: enforcing
+        choices:
+          - enforcing
+          - permissive
+          - disabled
+
+      fips_enable:
+        description:
+          - Enable FIPS mode.
+        type: bool
+        default: false
+
+      security_profile:
+        description:
+          - SCAP security profile to apply during installation.
+          - Not supported on RHEL 10+.
+          - "Example: C(cis), C(stig)."
+        type: str
+
+      serial_console_setup:
+        description:
+          - Enable serial console setup.
+        type: bool
+        default: false
+
+      kdump_update_disable:
+        description:
+          - Disable kdump initramfs rebuild during installation.
+        type: bool
+        default: false
+
+      network_setup_dhcp:
+        description:
+          - Configure DHCP networking for the image.
+        type: bool
+        default: true
+
+      network_setup_purge:
+        description:
+          - Remove static network configuration set by the installer.
+        type: bool
+        default: true
+
+      hostname:
+        description:
+          - Hostname for the image.
+        type: str
+        default: localhost.localdomain
+
+      ntp_servers:
+        description:
+          - Comma-separated list of NTP servers.
+        type: str
+        default: time.cloudflare.com
+
+      timezone:
+        description:
+          - Timezone for the image.
+        type: str
+        default: UTC
+
+      keyboard:
+        description:
+          - Keyboard layout for the image.
+        type: str
+        default: us
+
+      install_single_lang:
+        description:
+          - Install only a single language to reduce image size.
+        type: bool
+        default: true
+
+      install_exclude_docs:
+        description:
+          - Exclude documentation from installed packages.
+        type: bool
+        default: false
+
+      install_exclude_weak_deps:
+        description:
+          - Exclude weak dependencies from installed packages.
+        type: bool
+        default: false
+
+      create_admin:
+        description:
+          - Create an admin user in the image.
+          - Requires O(admin_user) to be defined.
+        type: bool
+        default: false
+
+      admin_user:
+        description:
+          - Admin user configuration dictionary.
+          - Required when O(create_admin) is C(true).
+        type: dict
+        options:
+          uid:
+            description:
+              - User ID.
+            type: int
+            required: true
+          gid:
+            description:
+              - Group ID.
+            type: int
+            required: true
+          name:
+            description:
+              - Username.
+            type: str
+            required: true
+          group:
+            description:
+              - Primary group name.
+            type: str
+            required: true
+          groups:
+            description:
+              - Supplementary groups.
+            type: str
+            required: true
+          home:
+            description:
+              - Home directory path.
+            type: str
+            required: true
+          gecos:
+            description:
+              - GECOS field for the user.
+            type: str
+            required: true
+          ssh_key:
+            description:
+              - SSH public key to install for the user.
+            type: str
+          passwordless_sudo:
+            description:
+              - Enable passwordless sudo for the user.
+            type: bool
+            default: false
+
+      root_permit_local:
+        description:
+          - Allow local root login.
+          - Only applies when O(create_admin) is C(true).
+          - On RHEL 9 and older, the root account is locked when set to C(false)
+            and O(root_permit_override_security_policy) is C(true).
+          - On RHEL 10+, the root account is locked when set to C(false).
+        type: bool
+        default: true
+
+      root_permit_ssh:
+        description:
+          - SSH PermitRootLogin setting for the image.
+        type: str
+        default: prohibit-password
+
+      root_permit_override_security_policy:
+        description:
+          - Override security policy settings for root access.
+          - Not supported on RHEL 10+.
+        type: bool
+        default: false
+
+      root_ssh_key:
+        description:
+          - SSH public key to install for root.
+        type: str
+
+      rh_register_command:
+        description:
+          - Command to temporarily register the system with Red Hat
+            for package updates during installation.
+        type: str
+
+      rh_satellite_tools_install:
+        description:
+          - Install Satellite tools when updating packages.
+        type: bool
+        default: true
+
+      custom_partitioning:
+        description:
+          - Custom partitioning commands for the kickstart file.
+          - Used when O(partitioning) is C(custom).
+        type: str
+
+      custom_packages:
+        description:
+          - Additional packages to install.
+          - Included in the kickstart packages section.
+        type: str
+
+      custom_section_early:
+        description:
+          - Custom kickstart section to include early in the post-install.
+        type: str
+
+      custom_section_late:
+        description:
+          - Custom kickstart section to include at the end of the post-install.
+        type: str
+
+      # Windows configuration (defaults/main/windows.yml)
+      win_admin_password:
+        description:
+          - Password for Windows Administrator and remote management account.
+          - Setting this variable switches the role to Windows build mode.
+          - Must be undefined for RHEL/CentOS builds.
+        type: str
+        no_log: true
+
+      win_boot_wait:
+        description:
+          - Time to wait before sending boot command for Windows.
+        type: str
+        default: 3s
+
+      win_boot_command:
+        description:
+          - Boot command for the Windows installer.
+          - Must be set when using UEFI, use C(<enter>) on BIOS.
+        type: str
+
+      win_drivers_path:
+        description:
+          - Full path to additional drivers directory for the target Windows version.
+        type: str
+
+      win_os_index:
+        description:
+          - Windows OS edition index reference type.
+          - Should be either C(INDEX) or C(NAME).
+        type: str
+        default: INDEX
+        choices:
+          - INDEX
+          - NAME
+
+      win_os_edition:
+        description:
+          - Windows OS edition to install from the ISO.
+          - The value is either an index number or an edition name
+            depending on O(win_os_index).
+        type: raw
+        default: 1
+
+      win_iso_volume_id:
+        description:
+          - Volume ID label for the Windows ISO.
+        type: str
+        default: WINDOWS_ISO
+
+      win_pss_disk:
+        description:
+          - Drive letter for PowerShell scripts disk.
+          - Automatically set based on O(packer_builder).
+        type: str
+
+      win_src_disk:
+        description:
+          - Drive letter for Windows installer source disk.
+          - Automatically set based on O(packer_builder).
+        type: str
+
+      win_vm_tools_disk:
+        description:
+          - Drive letter for VM tools disk.
+          - Automatically set based on O(packer_builder).
+        type: str
+
+      win_partitioning:
+        description:
+          - Windows disk partitioning scheme.
+          - Use C(custom) with O(win_custom_partitioning_create) and
+            O(win_custom_partitioning_modify).
+        type: str
+        default: uefi
+        choices:
+          - bios
+          - uefi
+          - custom
+
+      win_timezone:
+        description:
+          - Windows timezone setting.
+        type: str
+        default: UTC
+
+      win_locale_system:
+        description:
+          - Windows system locale.
+        type: str
+        default: en-US
+
+      win_locale_ui:
+        description:
+          - Windows UI locale.
+        type: str
+        default: en-US
+
+      win_locale_user:
+        description:
+          - Windows user locale.
+        type: str
+        default: en-US
+
+      win_locale_input:
+        description:
+          - Windows input locale (language and keyboard).
+        type: str
+        default: "0409:00000409"
+
+      win_product_key:
+        description:
+          - Windows product key.
+        type: str
+
+      win_registered_owner:
+        description:
+          - Windows registered owner name.
+        type: str
+
+      win_registered_organization:
+        description:
+          - Windows registered organization name.
+        type: str
+
+      win_custom_partitioning_create:
+        description:
+          - Custom Windows partition creation XML.
+          - Used when O(win_partitioning) is C(custom).
+        type: str
+
+      win_custom_partitioning_modify:
+        description:
+          - Custom Windows partition modification XML.
+          - Used when O(win_partitioning) is C(custom).
+        type: str
+
+      win_custom_partitioning_install_to:
+        description:
+          - Partition ID to install Windows to.
+          - Used when O(win_partitioning) is C(custom).
+        type: int
+
+      win_customize_script:
+        description:
+          - PowerShell customization script to run before enabling
+            remote access.
+        type: str
+
+      win_autounattend_file:
+        description:
+          - Custom autounattend template filename.
+        type: str
+        default: autounattend.xml
+
+      win_sysprep_file:
+        description:
+          - Custom sysprep template filename.
+        type: str
+        default: sysprep.xml
+
+      win_customization_file:
+        description:
+          - Custom customization script template filename.
+        type: str
+        default: custom.ps1
+
+      win_remote_setup_file:
+        description:
+          - Custom remote setup script template filename.
+        type: str
+        default: remote.ps1
+
+      win_playbook_file:
+        description:
+          - Custom Ansible playbook template filename for Windows provisioning.
+        type: str
+        default: win_packer.yml
+
+      # Windows Ansible configuration (defaults/main/windows_ansible.yml)
+      win_ansible_command:
+        description:
+          - Ansible command or wrapper to use with the Packer Ansible provisioner.
+        type: str
+        default: ansible-playbook
+
+      win_ansible_arguments:
+        description:
+          - Additional Packer Ansible provisioner arguments.
+          - These will be visible in ps(1) output.
+        type: str
+
+      win_provisioner_role_path:
+        description:
+          - Path to Ansible roles for the Windows provisioner.
+        type: str
+
+      win_provisioner_playbook:
+        description:
+          - Ansible playbook content for the Windows provisioner.
+          - Defines tasks and roles to run on the Windows VM.
+        type: str
+
+      # Windows remote access (defaults/main/windows_remote.yml)
+      win_remote_user:
+        description:
+          - Remote management account username for Windows.
+        type: str
+        default: winrm
+
+      win_admin_ssh_key:
+        description:
+          - SSH public key to install for the Windows administrators.
+        type: str
+
+      win_remote_setup_ssh:
+        description:
+          - PowerShell script to setup SSH remote access on Windows.
+        type: str
+
+      win_remote_setup_winrm:
+        description:
+          - PowerShell script to setup WinRM remote access on Windows.
+        type: str
+
+      win_remote_setup:
+        description:
+          - Combined PowerShell script for remote access setup on Windows.
+          - By default includes both SSH and WinRM setup.
+        type: str
