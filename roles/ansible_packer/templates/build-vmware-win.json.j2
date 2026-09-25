@@ -34,8 +34,8 @@
 {% if vcenter_content_library.name is defined %}
         "name": "{{ vcenter_content_library.name }}",
 {% endif %}
-        "ovf": "{{ vcenter_content_library.ovf }}",
-        "destroy": "{{ vcenter_content_library.destroy }}"
+        "ovf": {{ vcenter_content_library.ovf | string | lower }},
+        "destroy": {{ vcenter_content_library.destroy | string | lower }}
         },
 {% endif %}
       "remote_cache_cleanup": true,
