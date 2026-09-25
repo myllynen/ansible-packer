@@ -15,8 +15,8 @@
     export CHECKPOINT_DISABLE=1
     export TMPDIR="{{ __apc_tempdir.path }}"
     export ANSIBLE_ROLES_PATH="{{ win_provisioner_role_path | default('roles', true) }}"
-    export VCENTER_PASSWORD='{{ vcenter_credentials.vcenter_password | default("", true) }}'
-    export WIN_ADMIN_PASSWORD='{{ win_admin_password | default("", true) }}'
+    export VCENTER_PASSWORD={{ vcenter_credentials.vcenter_password | default('', true) | quote }}
+    export WIN_ADMIN_PASSWORD={{ win_admin_password | default('', true) | quote }}
     {{ packer_binary }} build -color=false {{ '-force' if use_force | bool else '' }} build.json
   register: __apc_packer_result
   failed_when: "'successful build' not in __apc_packer_result.stdout"
