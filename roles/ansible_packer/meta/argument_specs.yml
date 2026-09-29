@@ -30,6 +30,14 @@ argument_specs:
         type: str
         required: true
 
+      # Common configuration directives
+      output_directory:
+        description:
+          - Output directory for built images.
+          - For ISO builds, consider setting to C(/var/tmp/iso_images).
+        type: str
+        default: /var/tmp/packer_images
+
       # Packer configuration (defaults/main/packer.yml)
       do_cleanup:
         description:
@@ -137,13 +145,8 @@ argument_specs:
       vm_disk_interface:
         description:
           - Disk interface type for the VM.
-          - Can also be set via O(disk_interface).
         type: str
-
-      disk_interface:
-        description:
-          - Convenience alias for O(vm_disk_interface).
-        type: str
+        default: "virtio"
 
       # ISO builder configuration (defaults/main/builder_iso.yml)
       packer_target_pretty:
@@ -164,13 +167,6 @@ argument_specs:
           - This requires sudo.
         type: bool
         default: false
-
-      output_directory:
-        description:
-          - Output directory for built images.
-          - For ISO builds, consider setting to C(/var/tmp/iso_images).
-        type: str
-        default: /var/tmp/packer_images
 
       image_checksum_file:
         description:
