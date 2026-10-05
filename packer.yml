@@ -1,6 +1,8 @@
 ---
 - name: Build image with Packer
   hosts: all
+  become: false
+  gather_facts: false
   vars:
     #
     # Base configuration
@@ -158,7 +160,7 @@
       vars:
         actual_image: "{{ output_directory + '/' + image_name }}"
       ansible.builtin.command: >
-        virt-sparsify --in-place --quiet {{ actual_image }}
+        virt-sparsify --in-place --quiet "{{ actual_image }}"
       changed_when: true
       when: packer_builder == 'qemu'
 
@@ -167,7 +169,7 @@
         actual_image: "{{ output_directory + '/' + image_name }}"
         rebase_image: "{{ output_directory + '/rebase-' + image_name }}"
       ansible.builtin.shell: >
-        qemu-img convert -O qcow2 {{ actual_image }} {{ rebase_image }} &&
-          mv {{ rebase_image }} {{ actual_image }}
+        qemu-img convert -O qcow2 "{{ actual_image }}" "{{ rebase_image }}" &&
+          mv "{{ rebase_image }}" "{{ actual_image }}"
       changed_when: true
       when: packer_builder == 'qemu'
