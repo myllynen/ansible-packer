@@ -16,12 +16,12 @@ images and unattended BIOS/UEFI-compatible ISO installer images.
 
 See [this example](packer.yml) how a playbook could look like.
 
-Currently (2025-06) tested Packer builders (platforms) are:
+Tested Packer builders (platforms) are:
 
 * [QEMU](https://developer.hashicorp.com/packer/integrations/hashicorp/qemu/latest/components/builder/qemu) (for KVM/libvirt/RHV/etc)
 * [VMware vSphere](https://developer.hashicorp.com/packer/integrations/vmware/vsphere/latest/components/builder/vsphere-iso)
 
-Currently (2025-06) tested OS variants and versions are:
+Tested OS variants and versions are:
 
 * [RHEL](https://www.redhat.com/en/technologies/linux-platforms/enterprise-linux) 8, 9, 10
 * [Windows Server](https://www.microsoft.com/en-us/windows-server) 2019, 2022, 2025
@@ -289,7 +289,7 @@ however Windows unattend files do have obscured passwords in them. This
 is unavoidable as the Windows installer does not support encrypted
 passwords.
 
-Three paramaters, _packer\_builder_, _packer\_target_ and
+Three parameters, _packer\_builder_, _packer\_target_ and
 _root\_password_ for Linux or _win\_admin\_password_ for Windows are
 mandatory, the rest are optional. See
 [roles/ansible_packer/defaults/main](roles/ansible_packer/defaults/main)

@@ -4,7 +4,7 @@ galaxy_info:
   author: Marko Myllynen <myllynen@redhat.com>
   company: Red Hat, Inc.
   description: ansible_packer role
-  license: GPLv3+
+  license: GPL-3.0-or-later
   min_ansible_version: "2.14"
   platforms:
     - name: EL
