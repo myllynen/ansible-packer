@@ -8,7 +8,7 @@ if [ "$VIRTIO_DRIVERS" = "" ]; then
   VIRTIO_DRIVERS=./drivers
   echo "VIRTIO_DRIVERS not set, using driver directory './drivers'."
 fi
-if [ ! -f $VIRTIO_ISO -a "$VIRTIO_URL" = "" ]; then
+if [ ! -f "$VIRTIO_ISO" ] && [ "$VIRTIO_URL" = "" ]; then
   VIRTIO_URL=https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/stable-virtio/virtio-win.iso
   echo "VIRTIO_URL not set, defaulting to:"
   echo $VIRTIO_URL
@@ -18,43 +18,43 @@ if [ "$WIN_VER" = "" ]; then
   echo "WIN_VER not set, defaulting to '2k25'."
 fi
 
-if [ ! -f $VIRTIO_ISO ]; then
+if [ ! -f "$VIRTIO_ISO" ]; then
   echo "Downloading latest stable virtio-win.iso..."
-  if [ "$(which curl 2> /dev/null)" != "" ]; then
-    curl -L https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/stable-virtio/virtio-win.iso -o $VIRTIO_ISO
-  elif [ "$(which wget 2> /dev/null)" != "" ]; then
-    wget https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/stable-virtio/virtio-win.iso -O $VIRTIO_ISO
+  if [ "$(command -v curl 2> /dev/null)" != "" ]; then
+    curl -L "$VIRTIO_URL" -o "$VIRTIO_ISO"
+  elif [ "$(command -v wget 2> /dev/null)" != "" ]; then
+    wget "$VIRTIO_URL" -O "$VIRTIO_ISO"
   else
     echo "No curl/wget available, can't download virtio-win.iso automatically" 1>&2
     exit 1
   fi
 fi
 
-if [ ! -f $VIRTIO_ISO ]; then
+if [ ! -f "$VIRTIO_ISO" ]; then
   echo "Failed to download virtio-win.iso" 1>&2
   exit 1
 fi
 
-rm -rf $VIRTIO_DRIVERS
+rm -rf "$VIRTIO_DRIVERS"
 
-if [ "$(which 7z 2> /dev/null)" != "" ]; then
-  7z x -o$VIRTIO_DRIVERS $VIRTIO_ISO > /dev/null || exit 2
-elif [ "$(which bsdtar 2> /dev/null)" != "" ]; then
-  mkdir -p $VIRTIO_DRIVERS
-  bsdtar -C $VIRTIO_DRIVERS -xf $VIRTIO_ISO || exit 3
-elif [ "$(which guestfish 2> /dev/null)" != "" ]; then
-  mkdir -p $VIRTIO_DRIVERS
-  guestfish --ro -a $VIRTIO_ISO -m /dev/sda tar-out / - | tar -C $VIRTIO_DRIVERS -xf - || exit 4
+if [ "$(command -v 7z 2> /dev/null)" != "" ]; then
+  7z x -o"$VIRTIO_DRIVERS" "$VIRTIO_ISO" > /dev/null || exit 2
+elif [ "$(command -v bsdtar 2> /dev/null)" != "" ]; then
+  mkdir -p "$VIRTIO_DRIVERS"
+  bsdtar -C "$VIRTIO_DRIVERS" -xf "$VIRTIO_ISO" || exit 3
+elif [ "$(command -v guestfish 2> /dev/null)" != "" ]; then
+  mkdir -p "$VIRTIO_DRIVERS"
+  guestfish --ro -a "$VIRTIO_ISO" -m /dev/sda tar-out / - | tar -C "$VIRTIO_DRIVERS" -xf - || exit 4
 else
   echo "No 7z/bsdtar/guestfish available, can't extract virtio-win.iso automatically" 1>&2
   exit 1
 fi
 
-find $VIRTIO_DRIVERS -type d -exec chmod 0755 {} +
-find $VIRTIO_DRIVERS -type f -exec chmod 0644 {} +
-find $VIRTIO_DRIVERS -maxdepth 1 -type f \! -name virtio-win-guest-tools.exe -exec rm -r {} +
-find $VIRTIO_DRIVERS -mindepth 1 -maxdepth 1 -type d \! \( -name Balloon -o -name NetKVM -o -name qemufwcfg -o -name vioscsi -o -name vioserial -o -name viostor \) -exec rm -r {} +
-find $VIRTIO_DRIVERS -mindepth 2 -maxdepth 2 -type d \! -name $WIN_VER -exec rm -r {} +
+find "$VIRTIO_DRIVERS" -type d -exec chmod 0755 {} +
+find "$VIRTIO_DRIVERS" -type f -exec chmod 0644 {} +
+find "$VIRTIO_DRIVERS" -maxdepth 1 -type f \! -name virtio-win-guest-tools.exe -exec rm -r {} +
+find "$VIRTIO_DRIVERS" -mindepth 1 -maxdepth 1 -type d \! \( -name Balloon -o -name NetKVM -o -name qemufwcfg -o -name vioscsi -o -name vioserial -o -name viostor \) -exec rm -r {} +
+find "$VIRTIO_DRIVERS" -mindepth 2 -maxdepth 2 -type d \! -name "$WIN_VER" -exec rm -r {} +
 
 echo
 echo "KVM/QEMU/VirtIO drivers for Windows $WIN_VER now ready in directory '$VIRTIO_DRIVERS'."
